@@ -132,8 +132,6 @@ box-shadow:0 0 10px rgba(0,0,0,0.2);
 .main-content{
 flex:1;
 padding:30px;
-background:#f5f6fb;
-min-height:calc(100vh - 80px);
 }
 
 /* STEP SECTION */
@@ -176,7 +174,7 @@ cursor:pointer;
 .map-container{
 display:flex;
 gap:20px;
-flex-wrap:wrap;
+height: 300px;
 }
 
 .map{
@@ -189,12 +187,16 @@ border-radius:10px;
 
 .bus-info{
 width:250px;
-background:white;
+background:rgb(99, 64, 205);
 padding:20px;
 border-radius:12px;
 box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
-
+.right-bar{
+    display: flex;
+    flex-direction: column;
+    margin: 40px 40px auto 0;  
+}
 .bus-info h4{
 margin-bottom:15px;
 }
@@ -203,6 +205,9 @@ margin-bottom:15px;
 display:flex;
 justify-content:space-between;
 margin-bottom:10px;
+background-color: white;
+padding: 12px 20px;
+border-radius: 10px;
 }
 
 .alert{
