@@ -1,175 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<title>Uni Shuttle Tracker</title>
+<title>University Shuttle Tracking</title>
+
 <link rel="stylesheet" href="style.css">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
 </head>
 
 <body>
 
-<header class="header">
+<div class="dashboard">
 
-  <div class="logo-section">
-    <img src="images/BUS-removebg-preview (1).png" class="logo">
-    <h2>Uni Shuttle Tracker</h2>
-  </div>
-
-  <div class="user-section">
-
-    <div class="user">
-      <img src="user.jpg" class="user-img">
-      <span>Ali Raza</span>
-    </div>
-
-    <div class="notification">
-      <i class="fa-solid fa-bell"></i>
-      <span class="badge">2</span>
-    </div>
-
-  </div>
-
-</header>
-
-
-<!-- Layout Start -->
-<div class="layout">
-
-<!----------------------side bar--------------------------->
+<!-- SIDEBAR -->
 
 <div class="sidebar">
 
-    <div class="menu">
-
-        <div class="menu-item active">
-            <i class="fa-solid fa-house"></i>
-            <span>Dashboard</span>
-        </div>
-
-        <div class="menu-item">
-            <i class="fa-solid fa-location-dot"></i>
-            <span>Select Route</span>
-        </div>
-
-        <div class="menu-item">
-            <i class="fa-solid fa-map-location-dot"></i>
-            <span>Live Tracking</span>
-        </div>
-
-        <div class="menu-item">
-            <i class="fa-solid fa-calendar-days"></i>
-            <span>Schedule</span>
-        </div>
-
-        <div class="menu-item">
-            <i class="fa-solid fa-gear"></i>
-            <span>Settings</span>
-        </div>
-
-    </div>
+<i class="fa fa-bus"></i>
+<i class="fa fa-map"></i>
+<i class="fa fa-route"></i>
+<i class="fa fa-clock"></i>
+<i class="fa fa-cog"></i>
 
 </div>
 
 
-<!-- Main Content -->
+<!-- MAIN -->
 
-<div class="main-content">
+<div class="main">
 
-  <!-- Step 1 -->
-  <div class="step-box">
-    <h3> Select Your Route</h3>
+<!-- TOPBAR -->
 
-    <div class="route-select">
-      <select>
-        <option>Route B</option>
-        <option>Route A</option>
-        <option>Route C</option>
-      </select>
+<div class="topbar">
 
-      <button class="select-btn">Select</button>
-    </div>
-  </div>
+<h2>University Shuttle Tracking</h2>
 
+<input type="text" placeholder="Search Route">
 
-  <!-- Step 2 -->
-  <div class="step-box">
-    <h3>Live Bus Location</h3>
+<div class="user">
 
-    <div id="map">
-
-      <img src="" class="map">
-
-      
-    </div>
-  </div>
-
-
-  <!-- Step 3 -->
-  <div class="step-box">
-    <h3>Step 3 : Track Your Bus</h3>
-
-    <div class="track-cards">
-
-      <div class="card">
-        <p>Current Location</p>
-        <h4>Ferozepur Road</h4>
-      </div>
-
-      <div class="card">
-        <p>Speed</p>
-        <h4>45 km/h</h4>
-      </div>
-
-      <div class="card">
-        <p>Arrival In</p>
-        <h4>5 Min</h4>
-      </div>
-
-    </div>
-
-  </div>
+<img src="https://i.pravatar.cc/40">
 
 </div>
-<div class="right-bar">
-<div class="bus-info">
 
-        <h4>Bus Info</h4>
-
-        <div class="info">
-          <span>Bus Number:</span>
-          <b>B12</b>
-        </div>
-
-        <div class="info">
-          <span>Capacity:</span>
-          <b>30 / 40</b>
-        </div>
-
-        <div class="info">
-          <span>ETA:</span>
-          <b>5 min</b>
-        </div>
-
-        <div class="info">
-          <span>Last Stop:</span>
-          <b>Johar Town</b>
-        </div>
-
-        
-
-      </div>
-      <div class="alert">
-          ⚠ Traffic Delay : 10 Min Late
-        </div>
-      </div>
 </div>
-<!-- Layout End -->
+
+
+<!-- CONTENT -->
+
+<div class="content">
+
+<!-- MAP AREA -->
+
+<div class="map-area">
+
+<div id="map"></div>
+
+
+<div class="vehicle-panel">
+
+<h4>Active Shuttle Buses</h4>
+
+<div class="vehicle">
+
+<b>Bus B12</b>
+
+<p>Driver: Ahmed Ali</p>
+
+<p>Route: City → University</p>
+
+<p>Speed: 40 km/h</p>
+
+</div>
+
+
+<div class="vehicle">
+
+<b>Bus B07</b>
+
+<p>Driver: Usman Khan</p>
+
+<p>Route: Johar Town → Campus</p>
+
+<p>Speed: 35 km/h</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- RIGHT STATS -->
+
+<div class="stats">
+
+<div class="card green">
+
+<h3>12</h3>
+<p>Active Buses</p>
+
+</div>
+
+<div class="card blue">
+
+<h3>94%</h3>
+<p>On Time Arrival</p>
+
+</div>
+
+<div class="card orange">
+
+<h3>320</h3>
+<p>Students Transported</p>
+
+</div>
+
+<div class="card purple">
+
+<h3>8</h3>
+<p>Routes Available</p>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- BOTTOM SECTION -->
+
+<div class="bottom">
+
+<div class="bottom-card">
+
+<h4>Route Information</h4>
+
+<p>Route A : City → University</p>
+
+<p>Route B : Johar Town → Campus</p>
+
+<p>Route C : DHA → University</p>
+
+</div>
+
+
+<div class="bottom-card">
+
+<h4>Recent Shuttle Updates</h4>
+
+<ul>
+
+<li>Bus B12 arrived at University Gate</li>
+
+<li>Bus B07 delayed by 5 minutes</li>
+
+<li>Route A bus departed from City Stop</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+var map = L.map('map').setView([31.5204,74.3587],13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+attribution:'© OpenStreetMap'
+}).addTo(map);
+
+
+var busIcon = L.icon({
+
+iconUrl:'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+
+iconSize:[35,35]
+
+});
+
+
+L.marker([31.5204,74.3587],{icon:busIcon}).addTo(map);
+
+L.marker([31.5300,74.3400],{icon:busIcon}).addTo(map);
+
+</script>
+
 </body>
-<script src="script.js"></script>
+
 </html>
