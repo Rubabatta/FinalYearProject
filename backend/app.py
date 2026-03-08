@@ -138,6 +138,32 @@ def login():
         })
 
     return jsonify({"status": "invalid"}), 401
+# ==============================
+# SIGN-UP ROUTE
+# ==============================
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    name = data.get("name")      # Full Name
+    email = data.get("email")    # Email as username
+    password = data.get("password")
+
+    if not name or not email or not password:
+        return jsonify({"status":"error","message":"Missing data"}), 400
+
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            "INSERT INTO users (username,password,role) VALUES (?,?,?)",
+            (email, password, "student")  # Role fixed as student
+        )
+        conn.commit()
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({"status":"error","message":"Email already registered"}), 400
+
+    conn.close()
+    return jsonify({"status":"success"})
 
 # ==============================
 # ADD TEST LOCATION (Optional)
@@ -159,3 +185,4 @@ def add_test_location():
 if __name__ == '__main__':
     init_db()
     app.run(debug=False)
+    

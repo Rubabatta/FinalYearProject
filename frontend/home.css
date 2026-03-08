@@ -1,0 +1,122 @@
+/* Reset & Font */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body, html{
+    height: 100%;
+}
+
+/* Professional gradient background */
+body{
+    background: linear-gradient(135deg, #f0f4f8, #d9e2ec); 
+    position: relative;
+}
+
+/* Header */
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+    position: relative;
+}
+
+.logo{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #1f3a93; /* professional navy accent */
+}
+
+.logo h1{
+    font-size: 28px;
+    font-weight: 600;
+    color: #1f3a93;
+}
+
+.logo img{
+    width: 45px;
+    height: 45px;
+}
+
+nav a{
+    color: #1f3a93;
+    text-decoration: none;
+    margin-left: 15px;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    border: 2px solid #1f3a93;
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+nav a:hover{
+    background: #1f3a93;
+    color: #fff;
+}
+
+/* Hero Section */
+.hero{
+    position: relative;
+    z-index: 2;
+    height: calc(100% - 80px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.hero h1{
+    font-size: 50px;
+    margin-bottom: 20px;
+    color: #1f3a93;
+}
+
+.hero p{
+    font-size: 20px;
+    margin-bottom: 40px;
+    color: #4a4a4a;
+    max-width: 600px;
+}
+
+/* Buttons */
+.hero .buttons a{
+    text-decoration: none;
+    color: #fff;
+    background: linear-gradient(135deg, #1f3a93, #3a6073);
+    padding: 14px 35px;
+    margin: 10px;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 500;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.hero .buttons a:hover{
+    background: #fff;
+    color: #1f3a93;
+    transform: translateY(-3px);
+}
+
+/* Responsive */
+@media(max-width:768px){
+    .hero h1{
+        font-size: 36px;
+    }
+    .hero p{
+        font-size: 16px;
+    }
+    nav a{
+        margin-left: 10px;
+        font-size: 14px;
+        padding: 6px 14px;
+    }
+}

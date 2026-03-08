@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Student Sign-Up - Shuttle Tracker</title>
+<link rel="stylesheet" href="student-login.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="student-signup.css">
+</head>
+<body>
+
+<div class="login-container">
+  <div class="login-card">
+    <div class="logo">
+      <i class="fa-solid fa-bus"></i>
+      <h2>University Shuttle Tracker</h2>
+    </div>
+
+    <h3>Student Sign-Up</h3>
+    <form id="signupForm">
+      <div class="input-box">
+        <i class="fa fa-user"></i>
+        <input type="text" placeholder="Full Name" required>
+      </div>
+      <div class="input-box">
+        <i class="fa fa-envelope"></i>
+        <input type="email" placeholder="Email" required>
+      </div>
+      <div class="input-box">
+        <i class="fa fa-lock"></i>
+        <input type="password" placeholder="Password" required>
+      </div>
+      <button class="login-btn">Sign Up</button>
+    </form>
+
+    <p class="footer-text">Already have an account? <a href="student-login.html">Login</a></p>
+  </div>
+</div>
+
+<script>
+const signupForm = document.getElementById('signupForm');
+
+signupForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const name = signupForm.querySelector('input[placeholder="Full Name"]').value;
+  const email = signupForm.querySelector('input[placeholder="Email"]').value;
+  const password = signupForm.querySelector('input[placeholder="Password"]').value;
+
+  const res = await fetch('http://127.0.0.1:5000/signup', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({name, email, password})
+  });
+
+  const data = await res.json();
+
+  if(data.status === "success"){
+    alert("Sign-Up Successful! Please Login.");
+    window.location.href = 'student-login.html';
+  } else {
+    alert("Error: " + data.message);
+  }
+});
+</script>
+
+</body>
+</html>

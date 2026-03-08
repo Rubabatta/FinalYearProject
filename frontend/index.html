@@ -199,6 +199,39 @@ iconSize:[35,35]
 L.marker([31.5204,74.3587],{icon:busIcon}).addTo(map);
 
 L.marker([31.5300,74.3400],{icon:busIcon}).addTo(map);
+// Initialize Map
+var map = L.map('map').setView([31.5204, 74.3587], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap'
+}).addTo(map);
+
+// Bus Icon
+var busIcon = L.icon({
+    iconUrl:'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+    iconSize:[35,35]
+});
+
+// Function to fetch latest shuttle location
+async function fetchShuttleLocation(){
+    try {
+        const res = await fetch('http://127.0.0.1:5000/get_location');
+        const data = await res.json();
+
+        if(data.latitude && data.longitude){
+            L.marker([data.latitude, data.longitude], {icon: busIcon})
+            .addTo(map)
+            .bindPopup(`<b>Shuttle</b><br>Last Update: ${data.timestamp}`)
+            .openPopup();
+        }
+    } catch(err){
+        console.error("Error fetching shuttle location:", err);
+    }
+}
+
+// Fetch location every 5 seconds
+fetchShuttleLocation();
+setInterval(fetchShuttleLocation, 5000);
 
 </script>
 
