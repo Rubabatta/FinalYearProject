@@ -122,7 +122,7 @@ box-shadow:0 5px 20px rgba(0,0,0,0.1);
 <li><i class="fa fa-route"></i> Route</li>
 <li><i class="fa fa-location-dot"></i> Track Bus</li>
 <li><i class="fa fa-user"></i> Profile</li>
-<li><i class="fa fa-right-from-bracket"></i> Logout</li>
+<li id="logoutBtn"><i class="fa fa-right-from-bracket"></i> Logout</li>
 </ul>
 </div>
 
@@ -130,15 +130,13 @@ box-shadow:0 5px 20px rgba(0,0,0,0.1);
 
 <div class="topbar">
 <h1>Bus Tracker</h1>
-<div class="profile">Ali Khan</div>
+<div class="profile" id="studentName">Loading...</div>
 </div>
 
 <div class="bus-select">
 <label for="bus">Select Bus / Route:</label>
 <select id="bus">
-<option value="bus1">Bus 01 - City Route</option>
-<option value="bus2">Bus 02 - University Road</option>
-<option value="bus3">Bus 03 - Station Road</option>
+<!-- Options will be loaded dynamically -->
 </select>
 </div>
 
@@ -149,40 +147,59 @@ box-shadow:0 5px 20px rgba(0,0,0,0.1);
 <!-- GOOGLE MAPS API -->
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
 <script>
+// --------- Demo backend data ---------
 let map;
 let marker;
 
-// Bus locations demo (latitude, longitude)
+// Replace this with backend fetch for dynamic buses
 const busLocations = {
-bus1: {lat:31.5204, lng:74.3587}, // Lahore City
-bus2: {lat:31.4504, lng:74.3500}, // University Road
-bus3: {lat:31.5000, lng:74.3200}  // Station Road
+    bus1: {lat:31.5204, lng:74.3587, name: "Bus 01 - City Route"},
+    bus2: {lat:31.4504, lng:74.3500, name: "Bus 02 - University Road"},
+    bus3: {lat:31.5000, lng:74.3200, name: "Bus 03 - Station Road"}
 };
 
-function initMap(){
-map = new google.maps.Map(document.getElementById("map"), {
-zoom:13,
-center:busLocations.bus1
-});
+// Load student name from login (localStorage for demo)
+document.getElementById("studentName").innerText = localStorage.getItem("studentName") || "Student";
 
-marker = new google.maps.Marker({
-position: busLocations.bus1,
-map: map,
-title: "Bus 01"
-});
+// Populate bus select dynamically
+const busSelect = document.getElementById("bus");
+for(let key in busLocations){
+    let opt = document.createElement("option");
+    opt.value = key;
+    opt.text = busLocations[key].name;
+    busSelect.add(opt);
 }
 
-// Update marker when bus changes
-document.getElementById("bus").addEventListener("change", function(){
-const selectedBus = this.value;
-marker.setPosition(busLocations[selectedBus]);
-map.setCenter(busLocations[selectedBus]);
-marker.setTitle(selectedBus);
+// Initialize Google Map
+function initMap(){
+    map = new google.maps.Map(document.getElementById("map"), {
+        zoom:13,
+        center:busLocations.bus1
+    });
+
+    marker = new google.maps.Marker({
+        position: busLocations.bus1,
+        map: map,
+        title: busLocations.bus1.name
+    });
+}
+
+// Change bus location on select
+busSelect.addEventListener("change", function(){
+    const selected = this.value;
+    marker.setPosition(busLocations[selected]);
+    map.setCenter(busLocations[selected]);
+    marker.setTitle(busLocations[selected].name);
+});
+
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", function(){
+    localStorage.removeItem("studentName");
+    window.location.href = "student-login.html";
 });
 
 // Initialize map
 initMap();
-
 </script>
 
 </body>

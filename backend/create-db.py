@@ -1,0 +1,105 @@
+import sqlite3
+import hashlib
+
+# Database name
+db_name = "database.db"
+
+# Connect to SQLite DB (create if not exists)
+conn = sqlite3.connect(db_name)
+cursor = conn.cursor()
+
+# -----------------------------
+# Students Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS students (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    center TEXT NOT NULL,
+    address TEXT,
+    fees REAL
+)
+''')
+
+# -----------------------------
+# Admins Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL
+)
+''')
+
+# Admin table me default admin
+admin_username = "admin"
+admin_password = hashlib.sha256("123".encode()).hexdigest()
+
+cursor.execute("""
+INSERT OR IGNORE INTO admins (username, password) VALUES (?, ?)
+""", (admin_username, admin_password))
+
+
+# -----------------------------
+# Drivers Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS drivers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    password TEXT,
+    contact TEXT,
+    assigned_bus_id INTEGER
+)
+''')
+
+# -----------------------------
+# Routes Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS routes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    start_point TEXT NOT NULL,
+    end_point TEXT NOT NULL,
+    stops TEXT
+)
+''')
+
+# -----------------------------
+# Buses Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS buses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bus_number TEXT NOT NULL,
+    driver_id INTEGER,
+    capacity INTEGER,
+    route_id INTEGER,
+    FOREIGN KEY (driver_id) REFERENCES drivers(id),
+    FOREIGN KEY (route_id) REFERENCES routes(id)
+)
+''')
+
+# -----------------------------
+# Bus Locations Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS bus_locations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bus_id INTEGER NOT NULL,
+    latitude REAL,
+    longitude REAL,
+    last_updated TEXT,
+    FOREIGN KEY (bus_id) REFERENCES buses(id)
+)
+''')
+
+# Commit changes
+conn.commit()
+conn.close()
+
+print("✅ Database and all tables created successfully!")

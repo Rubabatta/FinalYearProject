@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+/* --- Existing CSS remains the same --- */
 *{
     margin:0;
     padding:0;
@@ -23,9 +24,8 @@ body{
     background: url("images/uni-bus2.jpeg") no-repeat center center/cover;
 }
 
-/* SIGNUP CARD */
 .signup-card{
-    background: rgba(255,255,255,0.2); /* transparent */
+    background: rgba(255,255,255,0.2);
     backdrop-filter: blur(3px);
     padding:40px;
     width:500px;
@@ -34,13 +34,11 @@ body{
     text-align:center;
 }
 
-/* LOGO */
 .logo img{
     width:120px;
     margin-bottom:15px;
 }
 
-/* TITLE */
 .signup-card h2{
     color:white;
     font-size:28px;
@@ -48,7 +46,6 @@ body{
     text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
 }
 
-/* FORM GRID */
 .form-row{
     display:flex;
     gap:10px;
@@ -78,7 +75,6 @@ body{
     color:#888;
 }
 
-/* BUTTON */
 button{
     width:100%;
     padding:12px;
@@ -96,7 +92,6 @@ button:hover{
     background:#1e40af;
 }
 
-/* MESSAGE */
 #message{
     margin-top:10px;
     font-size:14px;
@@ -105,7 +100,6 @@ button:hover{
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
-/* LOGIN LINK */
 .login{
     margin-top:15px;
     font-size:14px;
@@ -118,7 +112,6 @@ button:hover{
     font-weight:500;
 }
 
-/* RESPONSIVE */
 @media(max-width:520px){
     .signup-card{
         width:90%;
@@ -146,22 +139,22 @@ button:hover{
 <div class="form-row">
 <div class="input-group">
 <i class="fa fa-user"></i>
-<input type="text" placeholder="First Name" required>
+<input type="text" id="firstName" placeholder="First Name" required>
 </div>
 <div class="input-group">
 <i class="fa fa-user"></i>
-<input type="text" placeholder="Last Name" required>
+<input type="text" id="lastName" placeholder="Last Name" required>
 </div>
 </div>
 
 <div class="form-row">
 <div class="input-group">
 <i class="fa fa-envelope"></i>
-<input type="email" placeholder="Email" required>
+<input type="email" id="email" placeholder="Email" required>
 </div>
 <div class="input-group">
 <i class="fa fa-id-card"></i>
-<input type="text" placeholder="Student ID" required>
+<input type="text" id="studentID" placeholder="Student ID" required>
 </div>
 </div>
 
@@ -181,7 +174,7 @@ button:hover{
 </form>
 
 <div class="login">
-Already have an account? <a href="login_selection.html">Login</a>
+Already have an account? <a href="student-login.html">Login</a>
 </div>
 
 </div>
@@ -191,19 +184,49 @@ const form = document.getElementById("signupForm");
 
 form.addEventListener("submit", function(e){
     e.preventDefault();
-    let pass = document.getElementById("password").value;
-    let confirm = document.getElementById("confirm").value;
+    let firstName = document.getElementById("firstName").value.trim();
+    let lastName = document.getElementById("lastName").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let studentID = document.getElementById("studentID").value.trim();
+    let password = document.getElementById("password").value.trim();
+    let confirm = document.getElementById("confirm").value.trim();
     let message = document.getElementById("message");
 
-    if(pass !== confirm){
+    if(password !== confirm){
         message.style.color="red";
         message.innerText="❌ Passwords do not match";
+        return;
     }
-    else{
-        message.style.color="green";
-        message.innerText="✅ Registration Successful";
-        setTimeout(()=>{window.location.href="login_selection.html"}, 1000);
-    }
+
+    // Send data to backend
+    fetch('http://127.0.0.1:5000/student_signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: firstName + " " + lastName,
+            email: email,
+            password: password,
+            center: "Default Center",  // Agar frontend me center input nahi hai
+            address: studentID,        // Student ID ko address column me store kar sakte ho
+            fees: 0                     // Default fees 0, ya frontend me add kar sakte ho
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.message === "Student registered successfully!"){
+            message.style.color = "green";
+            message.innerText = "✅ Registration Successful";
+            setTimeout(()=>{ window.location.href="student-login.html" }, 1000);
+        } else {
+            message.style.color = "red";
+            message.innerText = "❌ " + data.message;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        message.style.color = "red";
+        message.innerText = "❌ Server error, try again!";
+    });
 });
 </script>
 

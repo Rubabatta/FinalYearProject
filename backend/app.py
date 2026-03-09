@@ -1,188 +1,103 @@
-from flask import Flask, jsonify, request
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
-import os
+import hashlib
 
 app = Flask(__name__)
-CORS(app)  # Frontend se cross-origin requests allow karne ke liye
+CORS(app)  # Allow frontend requests
 
-# ==============================
-# DATABASE CONNECTION
-# ==============================
+DB_NAME = "database.db"
+
+# Helper function to connect DB
 def get_db_connection():
-    conn = sqlite3.connect('database.db')  # database.db automatically backend folder me banegi
+    conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     return conn
 
-# ==============================
-# DATABASE INITIALIZATION
-# ==============================
-def init_db():
-    conn = get_db_connection()
-
-    # Shuttle Location Table
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS shuttle_location (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            latitude REAL NOT NULL,
-            longitude REAL NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-
-    # Users Table
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE,
-            password TEXT,
-            role TEXT
-        )
-    ''')
-
-    conn.commit()
-    conn.close()
-    print("✅ Database & tables ready!")
-
-# ==============================
-# HOME ROUTE
-# ==============================
-@app.route('/')
-def home():
-    return "✅ Shuttle Tracking Backend Running"
-
-# ==============================
-# GET SHUTTLE LOCATION (Student)
-# ==============================
-@app.route('/get_location')
-def get_location():
-    conn = get_db_connection()
-    shuttle = conn.execute(
-        'SELECT * FROM shuttle_location ORDER BY id DESC LIMIT 1'
-    ).fetchone()
-    conn.close()
-
-    if shuttle:
-        return jsonify({
-            "latitude": shuttle["latitude"],
-            "longitude": shuttle["longitude"],
-            "timestamp": shuttle["timestamp"]
-        })
-    return jsonify({"error": "No data available"})
-
-# ==============================
-# UPDATE LOCATION (Driver)
-# ==============================
-@app.route('/update_location', methods=['POST'])
-def update_location():
+# -----------------------------
+# Student Signup
+# -----------------------------
+@app.route('/student_signup', methods=['POST'])
+def student_signup():
     data = request.get_json()
-    latitude = data.get("latitude")
-    longitude = data.get("longitude")
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    center = data.get('center')
+    address = data.get('address')
+    fees = data.get('fees')
 
-    if latitude is None or longitude is None:
-        return jsonify({"error": "Missing data"}), 400
-
-    conn = get_db_connection()
-    conn.execute(
-        "INSERT INTO shuttle_location (latitude, longitude) VALUES (?,?)",
-        (latitude, longitude)
-    )
-    conn.commit()
-    conn.close()
-
-    return jsonify({"status": "Location Updated"})
-
-# ==============================
-# CREATE TEST USERS
-# ==============================
-@app.route('/create_test_users')
-def create_users():
-    conn = get_db_connection()
-    users = [
-        ("driver", "123", "driver"),
-        ("student", "123", "student"),
-        ("admin", "123", "admin")
-    ]
-    for user in users:
-        try:
-            conn.execute(
-                "INSERT INTO users (username,password,role) VALUES (?,?,?)",
-                user
-            )
-        except:
-            pass  # avoid duplicate error
-    conn.commit()
-    conn.close()
-    return "✅ Test Users Created"
-
-# ==============================
-# LOGIN ROUTE
-# ==============================
-@app.route('/login', methods=['POST'])
-def login():
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()  # Hash password
 
     conn = get_db_connection()
-    user = conn.execute(
-        "SELECT * FROM users WHERE username=? AND password=?",
-        (username, password)
-    ).fetchone()
-    conn.close()
-
-    if user:
-        return jsonify({
-            "status": "success",
-            "role": user["role"]
-        })
-
-    return jsonify({"status": "invalid"}), 401
-# ==============================
-# SIGN-UP ROUTE
-# ==============================
-@app.route('/signup', methods=['POST'])
-def signup():
-    data = request.get_json()
-    name = data.get("name")      # Full Name
-    email = data.get("email")    # Email as username
-    password = data.get("password")
-
-    if not name or not email or not password:
-        return jsonify({"status":"error","message":"Missing data"}), 400
-
-    conn = get_db_connection()
+    cursor = conn.cursor()
     try:
-        conn.execute(
-            "INSERT INTO users (username,password,role) VALUES (?,?,?)",
-            (email, password, "student")  # Role fixed as student
-        )
+        cursor.execute('''
+            INSERT INTO students (name, email, password, center, address, fees)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (name, email, hashed_password, center, address, fees))
         conn.commit()
+        return jsonify({'message': 'Student registered successfully!'}), 201
     except sqlite3.IntegrityError:
+        return jsonify({'message': 'Email already exists!'}), 400
+    finally:
         conn.close()
-        return jsonify({"status":"error","message":"Email already registered"}), 400
 
-    conn.close()
-    return jsonify({"status":"success"})
+# -----------------------------
+# Student Login
+# -----------------------------
+@app.route('/student_login', methods=['POST'])
+def student_login():
+    data = request.get_json()
+    email = data.get('email')
+    password = data.get('password')
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
-# ==============================
-# ADD TEST LOCATION (Optional)
-# ==============================
-@app.route('/add_test_location')
-def add_test_location():
     conn = get_db_connection()
-    conn.execute(
-        "INSERT INTO shuttle_location (latitude, longitude) VALUES (?,?)",
-        (24.8607, 67.0011)
-    )
-    conn.commit()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM students WHERE email = ? AND password = ?', (email, hashed_password))
+    student = cursor.fetchone()
     conn.close()
-    return "✅ Test Location Added"
 
-# ==============================
-# RUN SERVER
-# ==============================
+    if student:
+        return jsonify({'message': 'Login successful!', 'student': dict(student)}), 200
+    else:
+        return jsonify({'message': 'Invalid email or password!'}), 401
+
+# -----------------------------
+# Admin Login (Fixed)
+# -----------------------------
+@app.route('/admin_login', methods=['POST'])
+def admin_login():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM admins WHERE username = ? AND password = ?', (username, hashed_password))
+    admin = cursor.fetchone()
+    conn.close()
+
+    if admin:
+        return jsonify({'message': 'Admin login successful!', 'admin': dict(admin)}), 200
+    else:
+        return jsonify({'message': 'Invalid username or password!'}), 401
+
+# -----------------------------
+# Get all students (for admin)
+# -----------------------------
+@app.route('/get_students', methods=['GET'])
+def get_students():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, name, email, center, address, fees FROM students')
+    students = cursor.fetchall()
+    conn.close()
+    return jsonify([dict(s) for s in students]), 200
+
+# Run the Flask App
 if __name__ == '__main__':
-    init_db()
-    app.run(debug=False)
-    
+    app.run(debug=True)

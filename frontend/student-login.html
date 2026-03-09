@@ -6,7 +6,6 @@
 <title>Student Login | Uni Shuttle</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <style>
 *{
     margin:0;
@@ -14,7 +13,6 @@
     box-sizing:border-box;
     font-family:'Poppins',sans-serif;
 }
-
 body{
     min-height:100vh;
     display:flex;
@@ -22,38 +20,29 @@ body{
     align-items:center;
     background: url("images/uni-bus2.jpeg") no-repeat center center/cover;
 }
-
-/* LOGIN CARD */
 .login-card{
-    background: rgba(255,255,255,0.2); /* transparent */
-    backdrop-filter: blur(4px); /* subtle blur */
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(4px);
     padding:50px 40px;
     width:380px;
     border-radius:20px;
     box-shadow:0 15px 40px rgba(0,0,0,0.25);
     text-align:center;
 }
-
-/* LOGO */
 .logo img{
     width:100px;
     margin-bottom:15px;
 }
-
-/* TITLE */
 .login-card h2{
     color:white;
     margin-bottom:25px;
     font-size:26px;
     text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
 }
-
-/* INPUT GROUP */
 .input-group{
     position:relative;
     margin:15px 0;
 }
-
 .input-group input{
     width:100%;
     padding:12px 40px;
@@ -62,7 +51,6 @@ body{
     outline:none;
     font-size:14px;
 }
-
 .input-group i{
     position:absolute;
     left:12px;
@@ -70,8 +58,6 @@ body{
     transform:translateY(-50%);
     color:#888;
 }
-
-/* BUTTON */
 button{
     width:100%;
     padding:12px;
@@ -84,12 +70,9 @@ button{
     cursor:pointer;
     transition:0.3s;
 }
-
 button:hover{
     background:#1e40af;
 }
-
-/* MESSAGE */
 #message{
     margin-top:15px;
     font-size:14px;
@@ -97,21 +80,16 @@ button:hover{
     color:white;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
-
-/* REGISTER */
 .register{
     margin-top:18px;
     font-size:14px;
     color:white;
 }
-
 .register a{
     text-decoration:none;
     color:#3b82f6;
     font-weight:500;
 }
-
-/* RESPONSIVE */
 @media(max-width:500px){
     .login-card{
         width:90%;
@@ -132,12 +110,12 @@ button:hover{
 
 <div class="input-group">
 <i class="fa fa-user"></i>
-<input type="text" id="username" placeholder="Student Username">
+<input type="email" id="loginEmail" placeholder="Student Email">
 </div>
 
 <div class="input-group">
 <i class="fa fa-lock"></i>
-<input type="password" id="password" placeholder="Password">
+<input type="password" id="loginPassword" placeholder="Password">
 </div>
 
 <button id="loginBtn">Login</button>
@@ -152,20 +130,47 @@ Don't have an account? <a href="student_signup.html">Register</a>
 
 <script>
 document.getElementById("loginBtn").addEventListener("click", function(){
-    const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
     const message = document.getElementById("message");
 
-    if(username === "student" && password === "123"){
-        message.style.color = "green";
-        message.innerText = "✅ Login Successful";
-        setTimeout(() => {
-            window.location.href = "studen-dashborad.html";
-        }, 500);
-    } else {
+    if(email === "" || password === ""){
         message.style.color = "red";
-        message.innerText = "❌ Invalid Username or Password";
+        message.innerText = "❌ Please fill all fields";
+        return;
     }
+
+    fetch('http://127.0.0.1:5000/student_login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.student){
+            message.style.color = "green";
+            message.innerText = "✅ Login Successful!";
+
+            // Store student info in localStorage (optional, for dashboard usage)
+            localStorage.setItem("studentName", data.student.name);
+            localStorage.setItem("studentEmail", data.student.email);
+
+            // Redirect to index.html (student dashboard)
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 500);
+        } else {
+            message.style.color = "red";
+            message.innerText = "❌ " + data.message;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        message.style.color = "red";
+        message.innerText = "❌ Server error, try again!";
+    });
 });
 </script>
 
