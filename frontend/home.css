@@ -1,122 +1,200 @@
-/* Reset & Font */
 *{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins;
 }
 
-body, html{
-    height: 100%;
-}
-
-/* Professional gradient background */
 body{
-    background: linear-gradient(135deg, #f0f4f8, #d9e2ec); 
-    position: relative;
+background:#f5f7fb;
 }
 
-/* Header */
+/* NAVBAR */
+
 header{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 50px;
-    position: relative;
+width:100%;
+padding:18px 70px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+position:fixed;
+top:0;
+left:0;
+background:transparent;
+transition:0.3s;
+z-index:100;
 }
 
-.logo{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #1f3a93; /* professional navy accent */
+header nav a{
+color:white;
+margin:0 15px;
+text-decoration:none;
 }
 
-.logo h1{
-    font-size: 28px;
-    font-weight: 600;
-    color: #1f3a93;
+.nav-btn button{
+margin-left:10px;
+padding:8px 16px;
+border:none;
+border-radius:6px;
+cursor:pointer;
 }
 
-.logo img{
-    width: 45px;
-    height: 45px;
+.login{
+background:#2563eb;
+color:white;
 }
 
-nav a{
-    color: #1f3a93;
-    text-decoration: none;
-    margin-left: 15px;
-    font-size: 16px;
-    padding: 10px 20px;
-    border-radius: 25px;
-    border: 2px solid #1f3a93;
-    transition: all 0.3s ease;
-    background-color: #fff;
+.register{
+background:white;
 }
 
-nav a:hover{
-    background: #1f3a93;
-    color: #fff;
-}
+/* HERO */
 
-/* Hero Section */
 .hero{
-    position: relative;
-    z-index: 2;
-    height: calc(100% - 80px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 0 20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:90px 90px;
+background:
+linear-gradient(rgba(0,0,0,0.4),rgba(0,0,0,0.4)),
+url("images/shattle-img\ bg\ \(1\).jpeg");
+background-size:cover;
+background-position:center;
+color:white;
 }
 
-.hero h1{
-    font-size: 50px;
-    margin-bottom: 20px;
-    color: #1f3a93;
+.hero-text h1{
+font-size:40px;
 }
 
-.hero p{
-    font-size: 20px;
-    margin-bottom: 40px;
-    color: #4a4a4a;
-    max-width: 600px;
+.hero-buttons{
+margin-top:20px;
 }
 
-/* Buttons */
-.hero .buttons a{
-    text-decoration: none;
-    color: #fff;
-    background: linear-gradient(135deg, #1f3a93, #3a6073);
-    padding: 14px 35px;
-    margin: 10px;
-    border-radius: 30px;
-    font-size: 18px;
-    font-weight: 500;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    transition: all 0.3s ease;
+.track{
+background:#f59e0b;
+border:none;
+padding:12px 22px;
+margin-right:10px;
+border-radius:6px;
 }
 
-.hero .buttons a:hover{
-    background: #fff;
-    color: #1f3a93;
-    transform: translateY(-3px);
+.view{
+background:white;
+border:none;
+padding:12px 22px;
+border-radius:6px;
 }
 
-/* Responsive */
-@media(max-width:768px){
-    .hero h1{
-        font-size: 36px;
-    }
-    .hero p{
-        font-size: 16px;
-    }
-    nav a{
-        margin-left: 10px;
-        font-size: 14px;
-        padding: 6px 14px;
-    }
+.hero-img img{
+width:260px;
+}
+
+/* FEATURES */
+
+.features{
+display:flex;
+justify-content:center;
+gap:30px;
+padding:40px;
+}
+
+.feature{
+background:white;
+padding:25px;
+border-radius:10px;
+width:250px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+text-align:center;
+}
+
+/* MAP */
+
+.map{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:60px;
+}
+
+.map button{
+margin-top:10px;
+padding:10px 20px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:6px;
+}
+
+/* ROUTES */
+
+.routes{
+padding:60px;
+text-align:center;
+}
+
+.route-cards{
+display:flex;
+justify-content:center;
+gap:30px;
+margin-top:30px;
+}
+
+.route{
+background:white;
+padding:20px;
+border-radius:10px;
+width:180px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.route img{
+width:70px;
+}
+
+/* WHY */
+
+.why{
+padding:60px;
+text-align:center;
+background:#eef2ff;
+}
+
+.why-cards{
+display:flex;
+justify-content:center;
+gap:30px;
+margin-top:30px;
+}
+
+/* TESTIMONIALS */
+
+.testimonials{
+padding:60px;
+text-align:center;
+}
+
+.test-box{
+display:flex;
+justify-content:center;
+gap:30px;
+margin-top:30px;
+}
+
+.test{
+background:white;
+padding:20px;
+border-radius:10px;
+width:300px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+/* FOOTER */
+
+footer{
+display:flex;
+justify-content:space-around;
+background:#1e3a8a;
+color:white;
+padding:40px;
 }

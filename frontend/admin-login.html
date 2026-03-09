@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Login | Uni Shuttle</title>
+<title>Admin Login | Uni Shuttle</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -35,8 +35,9 @@ body{
 }
 
 /* LOGO */
-.logo img{
-    width:100px;
+.logo i{
+    font-size:60px;
+    color:#3b82f6;
     margin-bottom:15px;
 }
 
@@ -98,19 +99,6 @@ button:hover{
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
 
-/* REGISTER */
-.register{
-    margin-top:18px;
-    font-size:14px;
-    color:white;
-}
-
-.register a{
-    text-decoration:none;
-    color:#3b82f6;
-    font-weight:500;
-}
-
 /* RESPONSIVE */
 @media(max-width:500px){
     .login-card{
@@ -125,21 +113,21 @@ button:hover{
 <div class="login-card">
 
 <div class="logo">
-<img src="images/BUS-removebg-preview (1).png" alt="logo">
+<i class="fa fa-user-shield"></i>
 </div>
 
-<h2>Student Login</h2>
+<h2>Admin Login</h2>
 
-<form id="loginForm">
+<form id="adminLogin">
 
 <div class="input-group">
 <i class="fa fa-user"></i>
-<input type="text" id="username" placeholder="Student ID or Email" required>
+<input type="text" id="adminUser" placeholder="Admin Username" required>
 </div>
 
 <div class="input-group">
 <i class="fa fa-lock"></i>
-<input type="password" id="password" placeholder="Password" required>
+<input type="password" id="adminPass" placeholder="Password" required>
 </div>
 
 <button type="submit">Login</button>
@@ -148,36 +136,28 @@ button:hover{
 
 </form>
 
-<div class="register">
-Don't have an account? <a href="student_signup.html">Register</a>
-</div>
-
 </div>
 
 <script>
-const form = document.getElementById("loginForm");
-
-form.addEventListener("submit", function(e){
+document.getElementById("adminLogin").addEventListener("submit",function(e){
     e.preventDefault();
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
-    let message = document.getElementById("message");
+    let user=document.getElementById("adminUser").value;
+    let pass=document.getElementById("adminPass").value;
+    let message=document.getElementById("message");
 
-    let correctUser = "student123";
-    let correctPass = "12345";
+    // Demo admin credentials
+    let adminUser="admin";
+    let adminPass="12345";
 
-    if(username !== correctUser){
-        message.innerText="❌ Username is incorrect";
-        message.style.color="red";
-    } else if(password !== correctPass){
-        message.innerText="❌ Password is incorrect";
-        message.style.color="red";
-    } else {
-        message.innerText="✅ Login Successful";
+    if(user===adminUser && pass===adminPass){
         message.style.color="green";
+        message.innerText="✅ Login Successful";
         setTimeout(() => {
-            window.location.href="student-dashboard.html";
+            window.location.href="admin_dashboard.html";
         }, 1000);
+    } else {
+        message.style.color="red";
+        message.innerText="❌ Invalid Admin Username or Password";
     }
 });
 </script>

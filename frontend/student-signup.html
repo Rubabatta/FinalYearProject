@@ -2,65 +2,208 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Student Sign-Up - Shuttle Tracker</title>
-<link rel="stylesheet" href="student-login.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>University Shuttle Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="student-signup.css">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: url("images/uni-bus2.jpeg") no-repeat center center/cover;
+}
+
+/* SIGNUP CARD */
+.signup-card{
+    background: rgba(255,255,255,0.2); /* transparent */
+    backdrop-filter: blur(3px);
+    padding:40px;
+    width:500px;
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+/* LOGO */
+.logo img{
+    width:120px;
+    margin-bottom:15px;
+}
+
+/* TITLE */
+.signup-card h2{
+    color:white;
+    font-size:28px;
+    margin-bottom:25px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+/* FORM GRID */
+.form-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.input-group{
+    position:relative;
+    margin:10px 0;
+    flex:1;
+}
+
+.input-group input{
+    width:100%;
+    padding:12px 40px;
+    border-radius:8px;
+    border:none;
+    outline:none;
+    font-size:14px;
+}
+
+.input-group i{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#888;
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    background:#3b82f6;
+    color:white;
+    font-weight:500;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#1e40af;
+}
+
+/* MESSAGE */
+#message{
+    margin-top:10px;
+    font-size:14px;
+    font-weight:500;
+    color:white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+/* LOGIN LINK */
+.login{
+    margin-top:15px;
+    font-size:14px;
+    color:white;
+}
+
+.login a{
+    text-decoration:none;
+    color:#3b82f6;
+    font-weight:500;
+}
+
+/* RESPONSIVE */
+@media(max-width:520px){
+    .signup-card{
+        width:90%;
+        padding:30px;
+    }
+    .form-row{
+        flex-direction:column;
+    }
+}
+</style>
 </head>
+
 <body>
 
-<div class="login-container">
-  <div class="login-card">
-    <div class="logo">
-      <i class="fa-solid fa-bus"></i>
-      <h2>University Shuttle Tracker</h2>
-    </div>
+<div class="signup-card">
 
-    <h3>Student Sign-Up</h3>
-    <form id="signupForm">
-      <div class="input-box">
-        <i class="fa fa-user"></i>
-        <input type="text" placeholder="Full Name" required>
-      </div>
-      <div class="input-box">
-        <i class="fa fa-envelope"></i>
-        <input type="email" placeholder="Email" required>
-      </div>
-      <div class="input-box">
-        <i class="fa fa-lock"></i>
-        <input type="password" placeholder="Password" required>
-      </div>
-      <button class="login-btn">Sign Up</button>
-    </form>
+<div class="logo">
+<img src="images/BUS-removebg-preview (1).png" alt="logo">
+</div>
 
-    <p class="footer-text">Already have an account? <a href="student-login.html">Login</a></p>
-  </div>
+<h2>Create Account</h2>
+
+<form id="signupForm">
+
+<div class="form-row">
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" placeholder="First Name" required>
+</div>
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" placeholder="Last Name" required>
+</div>
+</div>
+
+<div class="form-row">
+<div class="input-group">
+<i class="fa fa-envelope"></i>
+<input type="email" placeholder="Email" required>
+</div>
+<div class="input-group">
+<i class="fa fa-id-card"></i>
+<input type="text" placeholder="Student ID" required>
+</div>
+</div>
+
+<div class="form-row">
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="password" placeholder="Password" required>
+</div>
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="confirm" placeholder="Confirm Password" required>
+</div>
+</div>
+
+<button type="submit">Register</button>
+<p id="message"></p>
+</form>
+
+<div class="login">
+Already have an account? <a href="login_selection.html">Login</a>
+</div>
+
 </div>
 
 <script>
-const signupForm = document.getElementById('signupForm');
+const form = document.getElementById("signupForm");
 
-signupForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+    let pass = document.getElementById("password").value;
+    let confirm = document.getElementById("confirm").value;
+    let message = document.getElementById("message");
 
-  const name = signupForm.querySelector('input[placeholder="Full Name"]').value;
-  const email = signupForm.querySelector('input[placeholder="Email"]').value;
-  const password = signupForm.querySelector('input[placeholder="Password"]').value;
-
-  const res = await fetch('http://127.0.0.1:5000/signup', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({name, email, password})
-  });
-
-  const data = await res.json();
-
-  if(data.status === "success"){
-    alert("Sign-Up Successful! Please Login.");
-    window.location.href = 'student-login.html';
-  } else {
-    alert("Error: " + data.message);
-  }
+    if(pass !== confirm){
+        message.style.color="red";
+        message.innerText="❌ Passwords do not match";
+    }
+    else{
+        message.style.color="green";
+        message.innerText="✅ Registration Successful";
+        setTimeout(()=>{window.location.href="login_selection.html"}, 1000);
+    }
 });
 </script>
 

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard - Bus Tracking</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+display:flex;
+background:#f4f6fb;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:230px;
+height:100vh;
+background:#2563eb;
+color:white;
+padding:25px;
+position:fixed;
+}
+
+.sidebar h2{
+text-align:center;
+margin-bottom:30px;
+}
+
+.sidebar ul{
+list-style:none;
+}
+
+.sidebar ul li{
+padding:12px;
+margin:10px 0;
+border-radius:6px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.sidebar ul li i{
+margin-right:10px;
+}
+
+.sidebar ul li:hover{
+background:#1e40af;
+}
+
+/* MAIN */
+
+.main{
+margin-left:230px;
+width:100%;
+padding:20px;
+}
+
+/* TOPBAR */
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.topbar h1{
+color:#1e3a8a;
+}
+
+.profile{
+background:white;
+padding:8px 15px;
+border-radius:30px;
+box-shadow:0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* SELECT BUS */
+
+.bus-select{
+margin-bottom:20px;
+}
+
+.bus-select select{
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+outline:none;
+font-size:14px;
+width:250px;
+}
+
+/* MAP */
+
+#map{
+width:100%;
+height:450px;
+border-radius:12px;
+box-shadow:0 5px 20px rgba(0,0,0,0.1);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<h2>Student</h2>
+<ul>
+<li><i class="fa fa-home"></i> Dashboard</li>
+<li><i class="fa fa-bus"></i> My Bus</li>
+<li><i class="fa fa-route"></i> Route</li>
+<li><i class="fa fa-location-dot"></i> Track Bus</li>
+<li><i class="fa fa-user"></i> Profile</li>
+<li><i class="fa fa-right-from-bracket"></i> Logout</li>
+</ul>
+</div>
+
+<div class="main">
+
+<div class="topbar">
+<h1>Bus Tracker</h1>
+<div class="profile">Ali Khan</div>
+</div>
+
+<div class="bus-select">
+<label for="bus">Select Bus / Route:</label>
+<select id="bus">
+<option value="bus1">Bus 01 - City Route</option>
+<option value="bus2">Bus 02 - University Road</option>
+<option value="bus3">Bus 03 - Station Road</option>
+</select>
+</div>
+
+<div id="map"></div>
+
+</div>
+
+<!-- GOOGLE MAPS API -->
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+<script>
+let map;
+let marker;
+
+// Bus locations demo (latitude, longitude)
+const busLocations = {
+bus1: {lat:31.5204, lng:74.3587}, // Lahore City
+bus2: {lat:31.4504, lng:74.3500}, // University Road
+bus3: {lat:31.5000, lng:74.3200}  // Station Road
+};
+
+function initMap(){
+map = new google.maps.Map(document.getElementById("map"), {
+zoom:13,
+center:busLocations.bus1
+});
+
+marker = new google.maps.Marker({
+position: busLocations.bus1,
+map: map,
+title: "Bus 01"
+});
+}
+
+// Update marker when bus changes
+document.getElementById("bus").addEventListener("change", function(){
+const selectedBus = this.value;
+marker.setPosition(busLocations[selectedBus]);
+map.setCenter(busLocations[selectedBus]);
+marker.setTitle(selectedBus);
+});
+
+// Initialize map
+initMap();
+
+</script>
+
+</body>
+</html>
