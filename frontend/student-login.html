@@ -26,11 +26,11 @@ body{
 /* LOGIN CARD */
 .login-card{
     background: rgba(255,255,255,0.2); /* transparent */
-    backdrop-filter: blur(3px); /* subtle blur */
-    padding:45px;
+    backdrop-filter: blur(4px); /* subtle blur */
+    padding:50px 40px;
     width:380px;
     border-radius:20px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
     text-align:center;
 }
 
@@ -130,23 +130,19 @@ button:hover{
 
 <h2>Student Login</h2>
 
-<form id="loginForm">
-
 <div class="input-group">
 <i class="fa fa-user"></i>
-<input type="text" id="username" placeholder="Student ID or Email" required>
+<input type="text" id="username" placeholder="Student Username">
 </div>
 
 <div class="input-group">
 <i class="fa fa-lock"></i>
-<input type="password" id="password" placeholder="Password" required>
+<input type="password" id="password" placeholder="Password">
 </div>
 
-<button type="submit">Login</button>
+<button id="loginBtn">Login</button>
 
 <p id="message"></p>
-
-</form>
 
 <div class="register">
 Don't have an account? <a href="student_signup.html">Register</a>
@@ -155,29 +151,20 @@ Don't have an account? <a href="student_signup.html">Register</a>
 </div>
 
 <script>
-const form = document.getElementById("loginForm");
+document.getElementById("loginBtn").addEventListener("click", function(){
+    const username = document.getElementById("username").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const message = document.getElementById("message");
 
-form.addEventListener("submit", function(e){
-    e.preventDefault();
-    let username = document.getElementById("username").value;
-    let password = document.getElementById("password").value;
-    let message = document.getElementById("message");
-
-    let correctUser = "student123";
-    let correctPass = "12345";
-
-    if(username !== correctUser){
-        message.innerText="❌ Username is incorrect";
-        message.style.color="red";
-    } else if(password !== correctPass){
-        message.innerText="❌ Password is incorrect";
-        message.style.color="red";
-    } else {
-        message.innerText="✅ Login Successful";
-        message.style.color="green";
+    if(username === "student" && password === "123"){
+        message.style.color = "green";
+        message.innerText = "✅ Login Successful";
         setTimeout(() => {
-            window.location.href="student-dashboard.html";
-        }, 1000);
+            window.location.href = "studen-dashborad.html";
+        }, 500);
+    } else {
+        message.style.color = "red";
+        message.innerText = "❌ Invalid Username or Password";
     }
 });
 </script>

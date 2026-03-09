@@ -26,11 +26,11 @@ body{
 /* LOGIN CARD */
 .login-card{
     background: rgba(255,255,255,0.2); /* transparent */
-    backdrop-filter: blur(3px); /* subtle blur */
-    padding:45px;
+    backdrop-filter: blur(4px); /* subtle blur */
+    padding:50px 40px;
     width:380px;
     border-radius:20px;
-    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    box-shadow:0 15px 40px rgba(0,0,0,0.25);
     text-align:center;
 }
 
@@ -44,8 +44,8 @@ body{
 /* TITLE */
 .login-card h2{
     color:white;
-    margin-bottom:25px;
-    font-size:26px;
+    margin-bottom:30px;
+    font-size:28px;
     text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
 }
 
@@ -83,6 +83,7 @@ button{
     color:white;
     font-weight:500;
     cursor:pointer;
+    font-size:15px;
     transition:0.3s;
 }
 
@@ -103,7 +104,7 @@ button:hover{
 @media(max-width:500px){
     .login-card{
         width:90%;
-        padding:30px;
+        padding:30px 20px;
     }
 }
 </style>
@@ -118,46 +119,38 @@ button:hover{
 
 <h2>Admin Login</h2>
 
-<form id="adminLogin">
-
 <div class="input-group">
 <i class="fa fa-user"></i>
-<input type="text" id="adminUser" placeholder="Admin Username" required>
+<input type="text" id="adminUser" placeholder="Admin Username">
 </div>
 
 <div class="input-group">
 <i class="fa fa-lock"></i>
-<input type="password" id="adminPass" placeholder="Password" required>
+<input type="password" id="adminPass" placeholder="Password">
 </div>
 
-<button type="submit">Login</button>
+<button id="loginBtn">Login</button>
 
 <p id="message"></p>
-
-</form>
 
 </div>
 
 <script>
-document.getElementById("adminLogin").addEventListener("submit",function(e){
-    e.preventDefault();
-    let user=document.getElementById("adminUser").value;
-    let pass=document.getElementById("adminPass").value;
-    let message=document.getElementById("message");
+document.getElementById("loginBtn").addEventListener("click", function(){
+    const user = document.getElementById("adminUser").value.trim();
+    const pass = document.getElementById("adminPass").value.trim();
+    const message = document.getElementById("message");
 
-    // Demo admin credentials
-    let adminUser="admin";
-    let adminPass="12345";
-
-    if(user===adminUser && pass===adminPass){
-        message.style.color="green";
-        message.innerText="✅ Login Successful";
+    if(user === "admin" && pass === "123"){
+        message.style.color = "green";
+        message.innerText = "✅ Login Successful";
+        // redirect after 0.5s
         setTimeout(() => {
-            window.location.href="admin_dashboard.html";
-        }, 1000);
+            window.location.href = "admin.html";
+        }, 500);
     } else {
-        message.style.color="red";
-        message.innerText="❌ Invalid Admin Username or Password";
+        message.style.color = "red";
+        message.innerText = "❌ Invalid Username or Password";
     }
 });
 </script>
