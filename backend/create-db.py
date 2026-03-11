@@ -37,11 +37,9 @@ CREATE TABLE IF NOT EXISTS admins (
 # Admin table me default admin
 admin_username = "admin"
 admin_password = hashlib.sha256("123".encode()).hexdigest()
-
 cursor.execute("""
 INSERT OR IGNORE INTO admins (username, password) VALUES (?, ?)
 """, (admin_username, admin_password))
-
 
 # -----------------------------
 # Drivers Table
@@ -98,7 +96,19 @@ CREATE TABLE IF NOT EXISTS bus_locations (
 )
 ''')
 
-# Commit changes
+# -----------------------------
+# Stops Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS stops (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    route_id INTEGER,
+    stop_name TEXT,
+    FOREIGN KEY(route_id) REFERENCES routes(id)
+)
+''')
+
+# Commit changes and close connection
 conn.commit()
 conn.close()
 

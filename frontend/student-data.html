@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students Details</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* Main content styles */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{display:flex;background:#f4f6fb;}
+.main{margin-left:240px;width:100%;padding:30px;}
+h1{color:#1e3a8a;margin-bottom:20px;}
+.table-box{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+table{width:100%;border-collapse:collapse;}
+table th{background:#3b82f6;color:white;padding:10px;text-align:left;}
+table td{padding:10px;border-bottom:1px solid #eee;}
+table tr:hover{background:#f1f5ff;}
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar placeholder -->
+<div id="sidebar-placeholder"></div>
+
+<!-- Main content -->
+<div class="main">
+<h1>Students Details</h1>
+
+<div class="table-box">
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody id="studentsTable"></tbody>
+</table>
+</div>
+</div>
+
+<script>
+// Load sidebar dynamically
+fetch('sidebar.html')
+.then(res => res.text())
+.then(html => {
+    document.getElementById('sidebar-placeholder').innerHTML = html;
+});
+
+// Load students from backend
+function loadStudents(){
+    fetch('http://127.0.0.1:5000/get_students')
+    .then(res => res.json())
+    .then(data => {
+        let rows="";
+        data.forEach(student => {
+            rows += `
+            <tr>
+                <td>${student.id}</td>
+                <td>${student.name}</td>
+                <td>${student.email}</td>
+                <td>${student.route}</td>
+            </tr>`;
+        });
+        document.getElementById("studentsTable").innerHTML = rows;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadStudents);
+
+// Logout function (for sidebar)
+function logout(){
+    window.location.href="admin-login.html";
+}
+</script>
+
+</body>
+</html>
