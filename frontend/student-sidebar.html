@@ -1,0 +1,96 @@
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="sidebar">
+
+<h2 class="logo">🚍 Shuttle System</h2>
+
+<ul>
+
+<li onclick="window.location.href='student-dashborad.html'"><i class="fas fa-home"></i> Dashboard</li>
+
+<li onclick="window.location.href='track-bus.html'"><i class="fas fa-map-marker-alt"></i> Track Bus</li>
+
+<li onclick="window.location.href='schedule.html'"><i class="fas fa-clock"></i> Schedule</li>
+
+<li onclick="window.location.href='student-routes.html'"><i class="fas fa-route"></i> Routes</li>
+
+<li onclick="window.location.href='announcements.html'"><i class="fas fa-bullhorn"></i> Announcements</li>
+
+<li onclick="window.location.href='student-profile.html'"><i class="fas fa-user"></i> Profile</li>
+
+<li class="logout" onclick="window.location.href='student-login.html'"><i class="fas fa-sign-out-alt"></i> Logout</li>
+
+</ul>
+
+</div>
+
+<style>
+
+.sidebar{
+width:240px;
+height:100vh;
+background:linear-gradient(180deg,#2563eb,#1e3a8a);
+color:white;
+padding:25px 20px;
+position:fixed;
+font-family:'Poppins',sans-serif;
+box-shadow:4px 0 10px rgba(0,0,0,0.1);
+}
+
+/* Logo */
+
+.logo{
+margin-bottom:35px;
+font-size:18px;
+font-weight:600;
+letter-spacing:1px;
+}
+
+/* List */
+
+.sidebar ul{
+list-style:none;
+padding:0;
+}
+
+/* Menu Item */
+
+.sidebar ul li{
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px 14px;
+margin-bottom:12px;
+cursor:pointer;
+border-radius:8px;
+font-size:15px;
+transition:all 0.3s ease;
+}
+
+/* Icons */
+
+.sidebar ul li i{
+font-size:16px;
+}
+
+/* Hover Effect */
+
+.sidebar ul li:hover{
+background:rgba(255,255,255,0.15);
+transform:translateX(5px);
+}
+
+/* Logout Button */
+
+.logout{
+margin-top:25px;
+background:rgba(255,255,255,0.1);
+}
+
+.logout:hover{
+background:#ef4444;
+transform:translateX(5px);
+}
+
+</style>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+/* Dashboard main styles */
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+display:flex;
+background:#f4f6fb;
+}
+
+.main{
+margin-left:240px; /* matches sidebar width */
+width:100%;
+padding:30px;
+}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.card i{
+font-size:30px;
+color:#3b82f6;
+}
+
+.card p{
+font-size:24px;
+font-weight:600;
+color:#1e3a8a;
+}
+</style>
+
+</head>
+<body>
+
+<!-- Sidebar will load here -->
+<div id="sidebar-placeholder"></div>
+
+<div class="main">
+<div class="topbar">
+<h1>Dashboard</h1>
+</div>
+
+<div class="cards">
+    <div class="card">
+        <div>
+            <h3>Total Students</h3>
+            <p id="totalStudents">0</p>
+        </div>
+        <i class="fa fa-user-graduate"></i>
+    </div>
+
+    <div class="card">
+        <div>
+            <h3>Total Buses</h3>
+            <p id="totalBuses">0</p>
+        </div>
+        <i class="fa fa-bus"></i>
+    </div>
+
+    <div class="card">
+        <div>
+            <h3>Total Routes</h3>
+            <p id="totalRoutes">0</p>
+        </div>
+        <i class="fa fa-route"></i>
+    </div>
+</div>
+</div>
+
+<script>
+// Load sidebar from external file
+fetch('sidebar.html')
+.then(res => res.text())
+.then(html => {
+    document.getElementById('sidebar-placeholder').innerHTML = html;
+});
+
+// Fetch total students
+fetch('http://127.0.0.1:5000/get_students')
+.then(res=>res.json())
+.then(data=>{
+    document.getElementById("totalStudents").innerText=data.length;
+});
+
+// Fetch total buses
+fetch('http://127.0.0.1:5000/get_buses')
+.then(res=>res.json())
+.then(data=>{
+    document.getElementById("totalBuses").innerText=data.length;
+});
+
+// Fetch total routes
+fetch('http://127.0.0.1:5000/get_routes')
+.then(res=>res.json())
+.then(data=>{
+    document.getElementById("totalRoutes").innerText=data.length;
+});
+</script>
+
+</body>
+</html>

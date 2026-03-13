@@ -1,0 +1,134 @@
+body{
+margin:0;
+font-family:Segoe UI;
+background:#f4f6fb;
+}
+
+.dashboard{
+display:flex;
+height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:70px;
+background:#0f172a;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding-top:25px;
+gap:30px;
+font-size:20px;
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+/* TOPBAR */
+
+.topbar{
+height:60px;
+background:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 25px;
+box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.topbar input{
+padding:8px;
+width:200px;
+border-radius:20px;
+border:1px solid #ddd;
+}
+
+/* CONTENT */
+
+.content{
+display:flex;
+padding:25px;
+gap:25px;
+}
+
+/* MAP */
+
+.map-area{
+flex:3;
+position:relative;
+height:520px;
+}
+
+#map{
+width:100%;
+height:100%;
+border-radius:12px;
+box-shadow:0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* BUS PANEL */
+
+.vehicle-panel{
+position:absolute;
+top:25px;
+left:25px;
+background:white;
+padding:18px;
+border-radius:12px;
+width:260px;
+box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.vehicle{
+margin-top:12px;
+background:#f8fafc;
+padding:10px;
+border-radius:8px;
+}
+
+/* STATS */
+
+.stats{
+flex:1;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.card{
+color:white;
+padding:20px;
+border-radius:12px;
+}
+
+.green{background:#22c55e;}
+.blue{background:#6366f1;}
+.orange{background:#f97316;}
+.purple{background:#a855f7;}
+
+/* BOTTOM */
+
+.bottom{
+display:flex;
+gap:25px;
+padding:25px;
+}
+
+.bottom-card{
+flex:1;
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 6px 18px rgba(0,0,0,0.1);
+}
+
+.bottom-card ul{
+padding-left:18px;
+}

@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>University Shuttle Signup</title>
-
+<title>University Shuttle Register</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+/* --- Existing CSS remains the same --- */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
 body{
     min-height:100vh;
     display:flex;
@@ -17,36 +23,42 @@ body{
     align-items:center;
     background: url("images/uni-bus2.jpeg") no-repeat center center/cover;
 }
+
 .signup-card{
     background: rgba(255,255,255,0.2);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(3px);
     padding:40px;
     width:500px;
     border-radius:20px;
     box-shadow:0 15px 40px rgba(0,0,0,0.2);
     text-align:center;
 }
+
 .logo img{
     width:120px;
     margin-bottom:15px;
 }
+
 .signup-card h2{
     color:white;
     font-size:28px;
     margin-bottom:25px;
     text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
 }
+
 .form-row{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
 }
+
 .input-group{
     position:relative;
     margin:10px 0;
     flex:1;
 }
-.input-group input, .input-group select{
+
+.input-group input{
     width:100%;
     padding:12px 40px;
     border-radius:8px;
@@ -54,6 +66,7 @@ body{
     outline:none;
     font-size:14px;
 }
+
 .input-group i{
     position:absolute;
     left:12px;
@@ -61,6 +74,7 @@ body{
     transform:translateY(-50%);
     color:#888;
 }
+
 button{
     width:100%;
     padding:12px;
@@ -73,9 +87,11 @@ button{
     cursor:pointer;
     transition:0.3s;
 }
+
 button:hover{
     background:#1e40af;
 }
+
 #message{
     margin-top:10px;
     font-size:14px;
@@ -83,16 +99,19 @@ button:hover{
     color:white;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
 }
+
 .login{
     margin-top:15px;
     font-size:14px;
     color:white;
 }
+
 .login a{
     text-decoration:none;
     color:#3b82f6;
     font-weight:500;
 }
+
 @media(max-width:520px){
     .signup-card{
         width:90%;
@@ -141,22 +160,6 @@ button:hover{
 
 <div class="form-row">
 <div class="input-group">
-<i class="fa fa-building"></i>
-<select id="center" required>
-<option value="">Select Center / Campus</option>
-<option value="Main Campus">Main Campus</option>
-<option value="City Campus">City Campus</option>
-<option value="North Campus">North Campus</option>
-</select>
-</div>
-<div class="input-group">
-<i class="fa fa-phone"></i>
-<input type="text" id="contact" placeholder="Contact Number (Optional)">
-</div>
-</div>
-
-<div class="form-row">
-<div class="input-group">
 <i class="fa fa-lock"></i>
 <input type="password" id="password" placeholder="Password" required>
 </div>
@@ -181,25 +184,17 @@ const form = document.getElementById("signupForm");
 
 form.addEventListener("submit", function(e){
     e.preventDefault();
-    const firstName = document.getElementById("firstName").value.trim();
-    const lastName = document.getElementById("lastName").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const studentID = document.getElementById("studentID").value.trim();
-    const center = document.getElementById("center").value;
-    const contact = document.getElementById("contact").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const confirm = document.getElementById("confirm").value.trim();
-    const message = document.getElementById("message");
+    let firstName = document.getElementById("firstName").value.trim();
+    let lastName = document.getElementById("lastName").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let studentID = document.getElementById("studentID").value.trim();
+    let password = document.getElementById("password").value.trim();
+    let confirm = document.getElementById("confirm").value.trim();
+    let message = document.getElementById("message");
 
     if(password !== confirm){
         message.style.color="red";
         message.innerText="❌ Passwords do not match";
-        return;
-    }
-
-    if(center === ""){
-        message.style.color="red";
-        message.innerText="❌ Please select a center";
         return;
     }
 
@@ -211,10 +206,9 @@ form.addEventListener("submit", function(e){
             name: firstName + " " + lastName,
             email: email,
             password: password,
-            center: center,
-            address: studentID,
-            contact: contact,
-            fees: 0
+            center: "Default Center",  // Agar frontend me center input nahi hai
+            address: studentID,        // Student ID ko address column me store kar sakte ho
+            fees: 0                     // Default fees 0, ya frontend me add kar sakte ho
         })
     })
     .then(res => res.json())
@@ -222,7 +216,7 @@ form.addEventListener("submit", function(e){
         if(data.message === "Student registered successfully!"){
             message.style.color = "green";
             message.innerText = "✅ Registration Successful";
-            setTimeout(()=>{ window.location.href="student-login.html" }, 1200);
+            setTimeout(()=>{ window.location.href="student-login.html" }, 1000);
         } else {
             message.style.color = "red";
             message.innerText = "❌ " + data.message;

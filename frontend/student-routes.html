@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Shuttle Routes</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#f4f6fb;}
+.main{margin-left:240px;padding:30px;}
+
+/* Header */
+.header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:30px;
+}
+.header h1{color:#1e3a8a;}
+
+/* Routes Cards */
+.routes{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+}
+.route-card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+transition:0.3s;
+position:relative;
+}
+.route-card:hover{
+transform:translateY(-5px);
+box-shadow:0 6px 15px rgba(0,0,0,0.15);
+}
+.route-card h3{
+color:#2563eb;
+margin-bottom:8px;
+}
+.route-card p{
+color:#555;
+font-size:14px;
+margin-bottom:5px;
+}
+.icon{
+font-size:22px;
+color:#2563eb;
+margin-bottom:8px;
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+/* View Stops Button */
+.view-stops-btn{
+padding:6px 12px;
+background:#3b82f6;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+transition:0.3s;
+font-size:14px;
+}
+.view-stops-btn:hover{
+background:#1e40af;
+}
+
+/* Stops List */
+.stops-list{
+margin-top:10px;
+padding-left:15px;
+display:none;
+}
+.stops-list li{
+padding:3px 0;
+font-size:14px;
+color:#333;
+}
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar"></div>
+
+<div class="main">
+
+<div class="header">
+<i class="fas fa-route"></i>
+<h1>Shuttle Routes</h1>
+</div>
+
+<div class="routes" id="routesContainer">
+<!-- Routes will load here -->
+</div>
+
+</div>
+
+<script>
+// Load Sidebar
+fetch("student-sidebar.html")
+.then(res => res.text())
+.then(data =>{
+document.getElementById("sidebar").innerHTML=data;
+});
+
+// Load Routes and Stops
+function loadRoutes(){
+fetch("http://127.0.0.1:5000/get_routes")
+.then(res => res.json())
+.then(data => {
+const container = document.getElementById("routesContainer");
+container.innerHTML = "";
+data.forEach(route => {
+const card = document.createElement("div");
+card.className = "route-card";
+
+card.innerHTML = `
+<div class="icon"><i class="fas fa-bus"></i> Route #${route.id}</div>
+<h3>${route.start_point} → ${route.end_point}</h3>
+<button class="view-stops-btn" onclick="toggleStops(${route.id}, this)">View Stops</button>
+<ul class="stops-list" id="stops-${route.id}"></ul>
+`;
+
+container.appendChild(card);
+});
+})
+.catch(err => console.log("Error loading routes:", err));
+}
+
+// Toggle Stops List
+function toggleStops(routeId, btn){
+const listEl = document.getElementById(`stops-${routeId}`);
+if(listEl.style.display === "block"){
+listEl.style.display = "none";
+btn.textContent = "View Stops";
+return;
+}
+
+// Fetch stops for this route
+fetch(`http://127.0.0.1:5000/get_stops/${routeId}`)
+.then(res => res.json())
+.then(data => {
+listEl.innerHTML = "";
+if(data.length === 0){
+listEl.innerHTML = "<li>No stops added yet</li>";
+}else{
+data.forEach(stop => {
+const li = document.createElement("li");
+li.textContent = stop.stop_name;
+listEl.appendChild(li);
+});
+}
+listEl.style.display = "block";
+btn.textContent = "Hide Stops";
+})
+.catch(err => console.log("Error loading stops:", err));
+}
+
+// Load routes on page load
+document.addEventListener("DOMContentLoaded", loadRoutes);
+</script>
+
+</body>
+</html>

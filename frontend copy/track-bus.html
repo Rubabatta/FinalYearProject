@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Track Bus</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#f4f6fb;
+}
+
+/* MAIN CONTENT */
+
+.main{
+margin-left:240px;
+padding:30px;
+}
+
+/* HEADER */
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+
+.header h1{
+color:#1e3a8a;
+}
+
+/* INFO CARDS */
+
+.cards{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+margin-bottom:30px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.card i{
+font-size:25px;
+color:#2563eb;
+}
+
+.card h3{
+font-size:16px;
+color:#555;
+}
+
+.card p{
+font-size:18px;
+font-weight:500;
+}
+
+/* MAP SECTION */
+
+.map-section{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.map{
+height:350px;
+background:#dbeafe;
+border-radius:8px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+color:#333;
+margin-top:15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar Load -->
+<div id="sidebar"></div>
+
+
+<div class="main">
+
+<div class="header">
+<h1>Track Shuttle</h1>
+</div>
+
+
+<!-- Bus Info -->
+
+<div class="cards">
+
+<div class="card">
+<i class="fas fa-bus"></i>
+<div>
+<h3>Bus Number</h3>
+<p>Bus 02</p>
+</div>
+</div>
+
+<div class="card">
+<i class="fas fa-map-marker-alt"></i>
+<div>
+<h3>Current Location</h3>
+<p>City Mall</p>
+</div>
+</div>
+
+<div class="card">
+<i class="fas fa-clock"></i>
+<div>
+<h3>Arrival Time</h3>
+<p>10 Minutes</p>
+</div>
+</div>
+
+</div>
+
+
+<!-- Map -->
+
+<div class="map-section">
+
+<h2>Live Bus Location</h2>
+
+<div class="map">
+Map will appear here
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+fetch("student-sidebar.html")
+.then(res => res.text())
+.then(data =>{
+document.getElementById("sidebar").innerHTML=data;
+})
+
+</script>
+
+</body>
+</html>

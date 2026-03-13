@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile</title>
+</head>
+<body>
+<h1>Student Profile</h1>
+<p><strong>Name:</strong> <span id="name"></span></p>
+<p><strong>Email:</strong> <span id="email"></span></p>
+<p><strong>Student ID:</strong> <span id="studentID"></span></p>
+<p><strong>Center:</strong> <span id="center"></span></p>
+<p><strong>Contact:</strong> <span id="contact"></span></p>
+<p><strong>Fees:</strong> <span id="fees"></span></p>
+<a href="student-dashboard.html">Back to Dashboard</a> | <a href="#" onclick="logout()">Logout</a>
+<script>
+const student=JSON.parse(localStorage.getItem("student"));
+if(!student){alert("Login required!");window.location.href="student-login.html";}
+else{
+    document.getElementById("name").innerText=student.name;
+    document.getElementById("email").innerText=student.email;
+    document.getElementById("studentID").innerText=student.address;
+    document.getElementById("center").innerText=student.center;
+    document.getElementById("contact").innerText=student.contact||"-";
+    document.getElementById("fees").innerText=student.fees;
+}
+function logout(){localStorage.removeItem("student");window.location.href="student-login.html";}
+</script>
+</body>
+</html>

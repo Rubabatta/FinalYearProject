@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Shuttle Schedule</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#f4f6fb;
+}
+
+/* MAIN */
+
+.main{
+margin-left:240px;
+padding:30px;
+}
+
+/* HEADER */
+
+.header{
+display:flex;
+align-items:center;
+gap:10px;
+margin-bottom:30px;
+}
+
+.header h1{
+color:#1e3a8a;
+}
+
+/* TABLE CONTAINER */
+
+.schedule-box{
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+/* TABLE */
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+padding:14px;
+text-align:center;
+}
+
+th{
+background:#2563eb;
+color:white;
+font-weight:500;
+}
+
+tr:nth-child(even){
+background:#f1f5ff;
+}
+
+tr:hover{
+background:#e0e7ff;
+transition:0.3s;
+}
+
+/* BUS ICON */
+
+.bus{
+color:#2563eb;
+margin-right:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar"></div>
+
+<div class="main">
+
+<div class="header">
+<i class="fas fa-clock"></i>
+<h1>Shuttle Schedule</h1>
+</div>
+
+<div class="schedule-box">
+
+<table>
+
+<tr>
+<th>Bus</th>
+<th>Route</th>
+<th>Departure</th>
+<th>Arrival</th>
+</tr>
+
+<tr>
+<td><i class="fas fa-bus bus"></i>Bus 01</td>
+<td>City Center → University</td>
+<td>08:00 AM</td>
+<td>08:45 AM</td>
+</tr>
+
+<tr>
+<td><i class="fas fa-bus bus"></i>Bus 02</td>
+<td>Main Chowk → University</td>
+<td>09:00 AM</td>
+<td>09:40 AM</td>
+</tr>
+
+<tr>
+<td><i class="fas fa-bus bus"></i>Bus 03</td>
+<td>University → City Center</td>
+<td>02:00 PM</td>
+<td>02:45 PM</td>
+</tr>
+
+<tr>
+<td><i class="fas fa-bus bus"></i>Bus 04</td>
+<td>University → Main Chowk</td>
+<td>04:00 PM</td>
+<td>04:40 PM</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+fetch("student-sidebar.html")
+.then(res => res.text())
+.then(data =>{
+document.getElementById("sidebar").innerHTML=data;
+})
+
+</script>
+
+</body>
+</html>
