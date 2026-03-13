@@ -228,8 +228,24 @@ def delete_stop(stop_id):
     conn.close()
     return jsonify({"message":"Stop deleted successfully"})
 
+@app.route('/get_student/<int:student_id>', methods=['GET'])
+def get_student(student_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id,name,email,center,address,fees FROM students WHERE id=?", (student_id,))
+    student = cursor.fetchone()
+
+    conn.close()
+
+    if student:
+        return jsonify(dict(student))
+    else:
+        return jsonify({"message":"Student not found"})
+
 # -----------------------------
 # Run Server (last line)
 # -----------------------------
 if __name__ == '__main__':
     app.run(debug=True)
+

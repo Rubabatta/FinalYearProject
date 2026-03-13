@@ -6,6 +6,7 @@
 <title>Student Login | Uni Shuttle</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
 <style>
 *{
     margin:0;
@@ -98,6 +99,7 @@ button:hover{
 }
 </style>
 </head>
+
 <body>
 
 <div class="login-card">
@@ -130,6 +132,7 @@ Don't have an account? <a href="student-signup.html">Register</a>
 
 <script>
 document.getElementById("loginBtn").addEventListener("click", function(){
+
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
     const message = document.getElementById("message");
@@ -149,28 +152,36 @@ document.getElementById("loginBtn").addEventListener("click", function(){
     })
     .then(res => res.json())
     .then(data => {
+
         if(data.student){
+
             message.style.color = "green";
             message.innerText = "✅ Login Successful!";
 
-            // Store student info in localStorage (optional, for dashboard usage)
+            // Save student data
+            localStorage.setItem("student_id", data.student.id);
             localStorage.setItem("studentName", data.student.name);
             localStorage.setItem("studentEmail", data.student.email);
 
-            // Redirect to index.html (student dashboard)
+            // Redirect to dashboard
             setTimeout(() => {
                 window.location.href = "student-dashborad.html";
             }, 500);
+
         } else {
+
             message.style.color = "red";
             message.innerText = "❌ " + data.message;
+
         }
+
     })
     .catch(err => {
         console.error(err);
         message.style.color = "red";
         message.innerText = "❌ Server error, try again!";
     });
+
 });
 </script>
 

@@ -3,29 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile</title>
-</head>
-<body>
-<h1>Student Profile</h1>
-<p><strong>Name:</strong> <span id="name"></span></p>
-<p><strong>Email:</strong> <span id="email"></span></p>
-<p><strong>Student ID:</strong> <span id="studentID"></span></p>
-<p><strong>Center:</strong> <span id="center"></span></p>
-<p><strong>Contact:</strong> <span id="contact"></span></p>
-<p><strong>Fees:</strong> <span id="fees"></span></p>
-<a href="student-dashboard.html">Back to Dashboard</a> | <a href="#" onclick="logout()">Logout</a>
-<script>
-const student=JSON.parse(localStorage.getItem("student"));
-if(!student){alert("Login required!");window.location.href="student-login.html";}
-else{
-    document.getElementById("name").innerText=student.name;
-    document.getElementById("email").innerText=student.email;
-    document.getElementById("studentID").innerText=student.address;
-    document.getElementById("center").innerText=student.center;
-    document.getElementById("contact").innerText=student.contact||"-";
-    document.getElementById("fees").innerText=student.fees;
+<title>Student Profile | Uni Shuttle</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
 }
-function logout(){localStorage.removeItem("student");window.location.href="student-login.html";}
+
+body{
+background:#f1f5f9;
+display:flex;
+}
+
+/* Sidebar space */
+.content{
+margin-left:240px;
+padding:40px;
+width:100%;
+}
+
+/* Page title */
+
+.page-title{
+font-size:24px;
+font-weight:600;
+margin-bottom:25px;
+}
+
+/* Profile Card */
+
+.profile-card{
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+max-width:700px;
+}
+
+/* Avatar */
+
+.avatar{
+font-size:70px;
+color:#2563eb;
+margin-bottom:20px;
+}
+
+/* Info grid */
+
+.profile-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+margin-top:15px;
+}
+
+.info-box{
+background:#f8fafc;
+padding:15px;
+border-radius:8px;
+font-size:14px;
+}
+
+.info-box span{
+display:block;
+color:#777;
+font-size:12px;
+margin-bottom:3px;
+}
+
+.info-box strong{
+font-size:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- Sidebar -->
+<div id="sidebar"></div>
+
+<div class="content">
+
+<div class="page-title">
+<i class="fas fa-user"></i> Student Profile
+</div>
+
+<div class="profile-card">
+
+<div class="avatar">
+<i class="fas fa-user-circle"></i>
+</div>
+
+<div id="profileData">
+Loading profile...
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* Load sidebar */
+fetch("student-sidebar.html")
+.then(res => res.text())
+.then(data => {
+document.getElementById("sidebar").innerHTML = data;
+});
+
+
+const student_id = localStorage.getItem("student_id");
+
+if(!student_id){
+document.getElementById("profileData").innerHTML = "Student not logged in";
+}
+
+fetch(`http://127.0.0.1:5000/get_student/${student_id}`)
+.then(res => res.json())
+.then(data => {
+
+document.getElementById("profileData").innerHTML = `
+
+<div class="profile-grid">
+
+<div class="info-box">
+<span>Name</span>
+<strong>${data.name}</strong>
+</div>
+
+<div class="info-box">
+<span>Email</span>
+<strong>${data.email}</strong>
+</div>
+
+<div class="info-box">
+<span>Center</span>
+<strong>${data.center}</strong>
+</div>
+
+<div class="info-box">
+<span>Student ID</span>
+<strong>${data.address}</strong>
+</div>
+
+<div class="info-box">
+<span>Fees</span>
+<strong>${data.fees}</strong>
+</div>
+
+</div>
+
+`;
+
+})
+.catch(err=>{
+console.log(err);
+document.getElementById("profileData").innerHTML="Error loading profile";
+});
+
 </script>
+
 </body>
 </html>
