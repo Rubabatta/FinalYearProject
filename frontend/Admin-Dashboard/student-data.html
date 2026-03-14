@@ -9,76 +9,220 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* Main content styles */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{display:flex;background:#f4f6fb;}
 .main{margin-left:240px;width:100%;padding:30px;}
 h1{color:#1e3a8a;margin-bottom:20px;}
-.table-box{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+
+.table-box{
+background:white;
+padding:25px;
+border-radius:12px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+.top-bar{
+display:flex;
+justify-content:space-between;
+margin-bottom:15px;
+}
+
+.search-box input{
+padding:8px;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.search-box button{
+padding:8px 12px;
+background:#3b82f6;
+border:none;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.add-btn{
+padding:8px 14px;
+background:#10b981;
+border:none;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
 table{width:100%;border-collapse:collapse;}
 table th{background:#3b82f6;color:white;padding:10px;text-align:left;}
 table td{padding:10px;border-bottom:1px solid #eee;}
 table tr:hover{background:#f1f5ff;}
+
+/* small action buttons */
+.btn-action{
+padding:5px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-right:3px;
+font-size:14px;
+}
+.btn-update{background:#f59e0b;color:white;}
+.btn-delete{background:#ef4444;color:white;}
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar placeholder -->
 <div id="sidebar-placeholder"></div>
 
-<!-- Main content -->
 <div class="main">
+
 <h1>Students Details</h1>
 
 <div class="table-box">
+
+<div class="top-bar">
+
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Search student by ID or Name...">
+<button onclick="searchStudent()">Search</button>
+</div>
+
+<button class="add-btn" onclick="window.location.href='add-student.html'">
+<i class="fa fa-plus"></i> Add Student
+</button>
+
+</div>
+
 <table>
 <thead>
 <tr>
 <th>ID</th>
 <th>Name</th>
 <th>Email</th>
-<th>Route</th>
+<th>Password</th>
+<th>Student ID</th>
+<th>Center</th>
+<th>Contact</th>
+<th>Actions</th>
 </tr>
 </thead>
+
 <tbody id="studentsTable"></tbody>
+
 </table>
+
 </div>
 </div>
 
 <script>
-// Load sidebar dynamically
+
+// Load sidebar
 fetch('sidebar.html')
 .then(res => res.text())
-.then(html => {
-    document.getElementById('sidebar-placeholder').innerHTML = html;
+.then(html=>{
+document.getElementById('sidebar-placeholder').innerHTML = html;
 });
 
-// Load students from backend
+// Load students
+let studentsData=[];
+
 function loadStudents(){
-    fetch('http://127.0.0.1:5000/get_students')
-    .then(res => res.json())
-    .then(data => {
-        let rows="";
-        data.forEach(student => {
-            rows += `
-            <tr>
-                <td>${student.id}</td>
-                <td>${student.name}</td>
-                <td>${student.email}</td>
-                <td>${student.route}</td>
-            </tr>`;
-        });
-        document.getElementById("studentsTable").innerHTML = rows;
-    });
+fetch('http://127.0.0.1:5000/get_students')
+.then(res=>res.json())
+.then(data=>{
+
+studentsData=data;
+
+renderTable(data);
+
+});
 }
 
-document.addEventListener("DOMContentLoaded", loadStudents);
+function renderTable(data){
+let rows="";
 
-// Logout function (for sidebar)
+data.forEach((student,index)=>{
+
+rows+=`
+<tr>
+<td>${student.id}</td>
+<td>${student.name}</td>
+<td>${student.email}</td>
+<td>${student.password}</td>
+<td>${student.studentID || "-"}</td>
+<td>${student.center || "-"}</td>
+<td>${student.contact || "-"}</td>
+<td>
+<button class="btn-action btn-update" title="Update" onclick="updateStudent(${student.id})"><i class="fa fa-pencil"></i></button>
+<button class="btn-action btn-delete" title="Delete" onclick="deleteStudent(${student.id})"><i class="fa fa-trash"></i></button>
+</td>
+</tr>
+`;
+
+});
+
+document.getElementById("studentsTable").innerHTML=rows;
+}
+
+// Search student (FIXED)
+function searchStudent(){
+
+let keyword=document.getElementById("searchInput").value.toLowerCase().trim();
+
+if(keyword===""){
+renderTable(studentsData);
+return;
+}
+
+let filtered=studentsData.filter(s=>{
+
+let name = String(s.name || "").toLowerCase();
+let email = String(s.email || "").toLowerCase();
+let studentID = String(s.studentID || "").toLowerCase();
+let id = String(s.id || "").toLowerCase();
+
+return(
+name.includes(keyword) ||
+email.includes(keyword) ||
+studentID.includes(keyword) ||
+id.includes(keyword)
+);
+
+});
+
+renderTable(filtered);
+
+}
+
+// Enable Enter key search
+document.getElementById("searchInput").addEventListener("keypress", function(e){
+    if(e.key === "Enter") searchStudent();
+});
+
+// Delete student
+function deleteStudent(id){
+if(confirm("Are you sure you want to delete this student?")){
+fetch(`http://127.0.0.1:5000/delete_student/${id}`,{method:'DELETE'})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+loadStudents();
+});
+}
+}
+
+// Update student
+function updateStudent(id){
+window.location.href=`update-student.html?id=${id}`;
+}
+
+document.addEventListener("DOMContentLoaded",loadStudents);
+
+// Logout
 function logout(){
-    window.location.href="admin-login.html";
+window.location.href="admin-login.html";
 }
+
 </script>
 
 </body>

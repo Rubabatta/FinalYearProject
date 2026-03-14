@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Update Student</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+font-family:Poppins;
+background:#f4f6fb;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.form-box{
+background:white;
+padding:30px;
+border-radius:10px;
+width:400px;
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+
+h2{
+margin-bottom:20px;
+color:#1e3a8a;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+button{
+width:100%;
+padding:10px;
+background:#3b82f6;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="form-box">
+
+<h2>Update Student</h2>
+
+<input type="text" id="name" placeholder="Name">
+<input type="email" id="email" placeholder="Email">
+<input type="text" id="studentID" placeholder="Student ID">
+<input type="text" id="center" placeholder="Center">
+<input type="text" id="contact" placeholder="Contact">
+<input type="text" id="password" placeholder="Password">
+
+<button onclick="updateStudent()">Update Student</button>
+
+</div>
+
+<script>
+
+const urlParams = new URLSearchParams(window.location.search);
+const studentId = urlParams.get('id');
+
+function loadStudent(){
+
+fetch(`http://127.0.0.1:5000/get_student/${studentId}`)
+.then(res=>res.json())
+.then(data=>{
+
+document.getElementById("name").value=data.name;
+document.getElementById("email").value=data.email;
+document.getElementById("studentID").value=data.studentID;
+document.getElementById("center").value=data.center;
+document.getElementById("contact").value=data.contact;
+document.getElementById("password").value=data.password;
+
+});
+
+}
+
+function updateStudent(){
+
+let data={
+
+name:document.getElementById("name").value,
+email:document.getElementById("email").value,
+studentID:document.getElementById("studentID").value,
+center:document.getElementById("center").value,
+contact:document.getElementById("contact").value,
+password:document.getElementById("password").value
+
+};
+
+fetch(`http://127.0.0.1:5000/update_student/${studentId}`,{
+
+method:"PUT",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(data)
+
+})
+.then(res=>res.json())
+.then(data=>{
+
+alert(data.message);
+
+window.location.href="student-data.html";
+
+});
+
+}
+
+loadStudent();
+
+</script>
+
+</body>
+</html>

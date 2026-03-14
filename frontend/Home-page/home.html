@@ -153,18 +153,22 @@ header nav a{
     margin-bottom:10px;
     color:#1e3a8a;
 }
+
 .logo img{
 width:60px;
 }
+
 .logo{
     display: flex;
     align-items: center;
     gap: 5px;
 }
+
 .logo h1{
     font-size: 24px;
     color: #fff;
 }
+
 /* FOOTER */
 footer{
     background:#1e3a8a;
@@ -174,21 +178,22 @@ footer{
     margin-top:40px;
     font-size:14px;
 }
-
-/* SCROLL EFFECT FOR NAVBAR */
 </style>
 </head>
+
 <body>
 
 <header>
     <div class="logo">
         <img src="../images/BUS-removebg-preview (1).png"><h1>Uni Shuttle</h1>
     </div>
+
     <nav>
         <a href="#">Home</a>
         <a href="#">About</a>
         <a href="#">Contact</a>
     </nav>
+
     <div class="nav-btn">
         <button class="login" onclick="window.location.href='login.html'">Login</button>
         <button class="register" onclick="window.location.href='student-signup.html'">Register</button>
@@ -199,36 +204,46 @@ footer{
 <section class="hero">
     <h1>University Shuttle Tracking System</h1>
     <p>Track university buses in real time. Check routes, pickup locations, and shuttle schedules easily.</p>
+
     <div class="hero-buttons">
         <button class="track">Track Shuttle</button>
-        <button class="view" onclick="window.location.href='login_selection.html'">Login</button>
+
+        <!-- FIXED LOGIN BUTTON -->
+        <button class="view" onclick="window.location.href='login.html'">Login</button>
+
     </div>
 </section>
 
 <!-- FEATURES -->
 <section class="features">
     <h2>System Features</h2>
+
     <div class="feature-box">
+
         <div class="card">
             <i class="fa fa-map-location-dot"></i>
             <h3>Live Bus Tracking</h3>
             <p>Track the real time location of university buses.</p>
         </div>
+
         <div class="card">
             <i class="fa fa-route"></i>
             <h3>Route Information</h3>
             <p>View shuttle routes and pickup points easily.</p>
         </div>
+
         <div class="card">
             <i class="fa fa-clock"></i>
             <h3>Bus Schedule</h3>
             <p>Check bus arrival time and departure schedule.</p>
         </div>
+
         <div class="card">
             <i class="fa fa-shield-halved"></i>
             <h3>Admin Control</h3>
             <p>Admin can manage buses, routes and GPS system.</p>
         </div>
+
     </div>
 </section>
 
@@ -237,9 +252,9 @@ footer{
 </footer>
 
 <script>
-// Navbar scroll effect
 window.addEventListener("scroll", function(){
     let header = document.querySelector("header");
+
     if(window.scrollY > 50){
         header.style.background = "white";
         header.style.boxShadow = "0 3px 10px rgba(0,0,0,0.1)";

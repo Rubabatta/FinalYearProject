@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Student - Admin</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#f4f6fb;display:flex;justify-content:center;align-items:center;height:100vh;}
+.add-card{
+    background:white;
+    padding:30px;
+    width:500px;
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+.add-card h2{
+    color:#1e3a8a;
+    margin-bottom:20px;
+    text-align:center;
+}
+.input-group{margin-bottom:15px;position:relative;}
+.input-group input, .input-group select{
+    width:100%;
+    padding:12px 40px 12px 40px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    outline:none;
+}
+.input-group i{
+    position:absolute;
+    left:12px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#888;
+    pointer-events:none;
+}
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#3b82f6;
+    color:white;
+    font-weight:500;
+    cursor:pointer;
+    transition:0.3s;
+}
+button:hover{background:#1e40af;}
+#message{margin-top:10px;font-size:14px;font-weight:500;text-align:center;}
+</style>
+</head>
+
+<body>
+<div class="add-card">
+<h2>Add New Student</h2>
+
+<form id="addStudentForm">
+
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" id="firstName" placeholder="First Name" required>
+</div>
+
+<div class="input-group">
+<i class="fa fa-user"></i>
+<input type="text" id="lastName" placeholder="Last Name" required>
+</div>
+
+<div class="input-group">
+<i class="fa fa-envelope"></i>
+<input type="email" id="email" placeholder="Email" required>
+</div>
+
+<div class="input-group">
+<i class="fa fa-id-card"></i>
+<input type="text" id="studentID" placeholder="Student ID" required>
+</div>
+
+<div class="input-group">
+<i class="fa fa-building"></i>
+<select id="center" required>
+<option value="">Select Center / Campus</option>
+<option value="Main Campus">Main Campus</option>
+<option value="City Campus">City Campus</option>
+<option value="North Campus">North Campus</option>
+</select>
+</div>
+
+<div class="input-group">
+<i class="fa fa-phone"></i>
+<input type="text" id="contact" placeholder="Contact Number (Optional)">
+</div>
+
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="password" placeholder="Password" required>
+</div>
+
+<div class="input-group">
+<i class="fa fa-lock"></i>
+<input type="password" id="confirm" placeholder="Confirm Password" required>
+</div>
+
+<button type="submit">Add Student</button>
+<p id="message"></p>
+</form>
+</div>
+
+<script>
+const form = document.getElementById("addStudentForm");
+const message = document.getElementById("message");
+
+form.addEventListener("submit", function(e){
+    e.preventDefault();
+
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const studentID = document.getElementById("studentID").value.trim();
+    const center = document.getElementById("center").value;
+    const contact = document.getElementById("contact").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const confirm = document.getElementById("confirm").value.trim();
+
+    if(studentID === ""){
+        message.style.color="red";
+        message.innerText="❌ Student ID required";
+        return;
+    }
+
+    if(password !== confirm){
+        message.style.color="red";
+        message.innerText="❌ Passwords do not match";
+        return;
+    }
+
+    if(center === ""){
+        message.style.color="red";
+        message.innerText="❌ Please select a center";
+        return;
+    }
+
+    fetch('http://127.0.0.1:5000/student_signup', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+            name: firstName + " " + lastName,
+            email: email,
+            password: password,
+            center: center,
+            studentID: studentID,   // ✅ fixed
+            contact: contact,
+            fees: 0
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.message.includes("success")){
+            message.style.color="green";
+            message.innerText="✅ Student Added Successfully";
+            setTimeout(()=>{ window.location.href="student-data.html"; },1200);
+        }else{
+            message.style.color="red";
+            message.innerText="❌ " + data.message;
+        }
+    })
+    .catch(err=>{
+        console.error(err);
+        message.style.color="red";
+        message.innerText="❌ Server error!";
+    });
+});
+</script>
+
+</body>
+</html>
