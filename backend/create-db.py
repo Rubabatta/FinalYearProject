@@ -1,11 +1,12 @@
 import sqlite3
 import hashlib
+import os
 
 # Database name
-db_name = "database.db"
+DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
 
 # Connect to SQLite DB (create if not exists)
-conn = sqlite3.connect(db_name)
+conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
 
 # -----------------------------
@@ -18,7 +19,8 @@ CREATE TABLE IF NOT EXISTS students (
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     center TEXT NOT NULL,
-    address TEXT,
+    studentID TEXT UNIQUE,
+    contact TEXT,
     fees REAL
 )
 ''')
