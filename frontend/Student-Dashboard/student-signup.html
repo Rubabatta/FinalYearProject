@@ -15,7 +15,7 @@ body{
     display:flex;
     justify-content:center;
     align-items:center;
-    background: url("images/uni-bus2.jpeg") no-repeat center center/cover;
+    background: url("../images/uni-bus2.jpeg") no-repeat center center/cover;
 }
 .signup-card{
     background: rgba(255,255,255,0.2);
@@ -110,7 +110,7 @@ button:hover{
 <div class="signup-card">
 
 <div class="logo">
-<img src="images/BUS-removebg-preview (1).png" alt="logo">
+<img src="../images/BUS-removebg-preview (1).png" alt="logo">
 </div>
 
 <h2>Create Account</h2>
@@ -218,16 +218,22 @@ form.addEventListener("submit", function(e){
         })
     })
     .then(res => res.json())
-    .then(data => {
-        if(data.message === "Student registered successfully!"){
-            message.style.color = "green";
-            message.innerText = "✅ Registration Successful";
-            setTimeout(()=>{ window.location.href="student-login.html" }, 1200);
-        } else {
-            message.style.color = "red";
-            message.innerText = "❌ " + data.message;
-        }
-    })
+   .then(data => {
+
+    if(data.message.includes("success")){
+        message.style.color = "green";
+        message.innerText = "✅ Registration Successful";
+
+        setTimeout(()=>{
+            window.location.href="student-login.html";
+        },1200);
+
+    } else {
+        message.style.color = "red";
+        message.innerText = "❌ " + data.message;
+    }
+
+})
     .catch(err => {
         console.error(err);
         message.style.color = "red";
