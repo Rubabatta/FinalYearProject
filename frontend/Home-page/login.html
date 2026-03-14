@@ -17,7 +17,7 @@
 
 body{
     min-height:100vh;
-    background: url("images/uni-bus2.jpeg") no-repeat center center/cover;
+    background: url("../images/uni-bus2.jpeg") no-repeat center center/cover;
     display:flex;
     justify-content:center;
     align-items:center;
@@ -127,7 +127,7 @@ body{
             <p>Login to track shuttle and view routes</p>
         </div>
         <!-- ADMIN -->
-        <div class="card" onclick="goAdmin()">
+       <div class="card" onclick="window.location.href='../Admin-Dashboard/admin-login.html'">
             <i class="fa fa-user-shield"></i>
             <h3>Admin Login</h3>
             <p>Manage buses, routes and GPS tracking</p>
@@ -137,10 +137,10 @@ body{
 
 <script>
 function goStudent(){
-    window.location.href="student-login.html";
+    window.location.href="../Student-Dashboard/student-login.html";
 }
 function goAdmin(){
-    window.location.href="admin-login.html";
+    window.location.href="../Admin-Dashboard/admin-login.html";
 }
 function goHome(){
     window.location.href="index.html";

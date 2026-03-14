@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{min-height:100vh;display:flex;justify-content:center;align-items:center;background:url("images/uni-bus2.jpeg") no-repeat center center/cover;}
+body{min-height:100vh;display:flex;justify-content:center;align-items:center;background:url("../images/uni-bus2.jpeg") no-repeat center center/cover;}
 .login-card{background: rgba(255,255,255,0.2);backdrop-filter: blur(4px);padding:50px 40px;width:380px;border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.25);text-align:center;}
 .logo i{font-size:60px;color:#3b82f6;margin-bottom:15px;}
 .login-card h2{color:white;margin-bottom:30px;font-size:28px;text-shadow: 1px 1px 4px rgba(0,0,0,0.6);}
@@ -41,6 +41,47 @@ button:hover{background:#1e40af;}
 </form>
 </div>
 
-<script src="script.js"></script>
+<script >// -----------------------------
+// Admin Login (Fixed & Updated)
+// -----------------------------
+const adminLoginForm = document.getElementById('adminLoginForm');
+if(adminLoginForm){
+    adminLoginForm.addEventListener('submit', function(e){
+        e.preventDefault();
+
+        const username = document.getElementById('adminUsername').value.trim();
+        const password = document.getElementById('adminPassword').value.trim();
+        const message = document.getElementById('message');
+
+        if(username === "" || password === ""){
+            message.style.color = "red";
+            message.innerText = "❌ Fill all fields";
+            return;
+        }
+
+        fetch('http://127.0.0.1:5000/admin_login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.admin){ 
+                message.style.color = "green";
+                message.innerText = "✅ Login Successful";
+                localStorage.setItem("adminName", data.admin.username || "Admin");
+                setTimeout(()=>{ window.location.href="admin.html"; }, 500);
+            } else {
+                message.style.color = "red";
+                message.innerText = "❌ " + (data.message || "Login failed!");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            message.style.color = "red";
+            message.innerText = "❌ Server error, try again!";
+        });
+    });
+}</script>
 </body>
 </html>
