@@ -203,7 +203,6 @@ form.addEventListener("submit", function(e){
         return;
     }
 
-    // Send data to backend
     fetch('http://127.0.0.1:5000/student_signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -212,28 +211,28 @@ form.addEventListener("submit", function(e){
             email: email,
             password: password,
             center: center,
-            address: studentID,
+            studentID: studentID,
             contact: contact,
             fees: 0
         })
     })
     .then(res => res.json())
-   .then(data => {
+    .then(data => {
 
-    if(data.message.includes("success")){
-        message.style.color = "green";
-        message.innerText = "✅ Registration Successful";
+        if(data.message.includes("success")){
+            message.style.color = "green";
+            message.innerText = "✅ Registration Successful";
 
-        setTimeout(()=>{
-            window.location.href="student-login.html";
-        },1200);
+            setTimeout(()=>{
+                window.location.href="student-login.html";
+            },1200);
 
-    } else {
-        message.style.color = "red";
-        message.innerText = "❌ " + data.message;
-    }
+        } else {
+            message.style.color = "red";
+            message.innerText = "❌ " + data.message;
+        }
 
-})
+    })
     .catch(err => {
         console.error(err);
         message.style.color = "red";

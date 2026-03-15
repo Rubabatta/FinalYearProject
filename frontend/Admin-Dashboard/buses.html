@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buses Management</title>
 
-<!-- Fonts & Font Awesome -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"> 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -13,14 +12,13 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{display:flex;background:#f4f6fb;}
 .main{margin-left:240px;width:100%;padding:30px;}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-.topbar h1{color:#1e3a8a;}
-.button-group{margin-bottom:15px;}
-button{padding:10px 20px;margin-right:10px;border:none;border-radius:6px;cursor:pointer;background:#3b82f6;color:white;transition:0.3s;}
+h1{color:#1e3a8a;margin-bottom:20px;}
+.action-row{display:flex;align-items:center;margin-bottom:15px;gap:10px;flex-wrap:wrap;}
+.action-row input{padding:8px;border-radius:6px;border:1px solid #ccc;width:250px;}
+button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;background:#3b82f6;color:white;transition:0.3s;}
 button:hover{background:#1e40af;}
-#searchInput{padding:8px;width:250px;border-radius:6px;border:1px solid #ccc;}
-.table-box{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);margin-top:15px;}
-table{width:100%;border-collapse:collapse;}
+.table-box{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
 table th{background:#3b82f6;color:white;padding:10px;text-align:left;}
 table td{padding:10px;border-bottom:1px solid #eee;}
 table tr:hover{background:#f1f5ff;}
@@ -28,19 +26,18 @@ table tr:hover{background:#f1f5ff;}
 </head>
 <body>
 
-<!-- Sidebar placeholder -->
 <div id="sidebar-placeholder"></div>
 
-<!-- Main Content -->
 <div class="main">
-<div class="topbar">
-<h1>Buses Management</h1>
-<div><input type="text" id="searchInput" placeholder="Search Bus..."></div>
-</div>
 
-<div class="button-group">
+<h1>Buses Management</h1>
+
+<!-- Single row: Add/Delete + Search -->
+<div class="action-row">
 <button onclick="window.location.href='add-bus.html'">Add Bus</button>
 <button onclick="deleteSelectedBus()">Delete Selected</button>
+<input type="text" id="searchInput" placeholder="Type bus number or route...">
+<button onclick="searchBuses()">Search</button>
 </div>
 
 <div class="table-box">
@@ -48,55 +45,54 @@ table tr:hover{background:#f1f5ff;}
 <tr>
 <th>Select</th>
 <th>Bus Number</th>
-<th>Route Number</th>
-<th>Status</th>
+<th>Route</th>
+<th>Actions</th>
 </tr>
 <tbody id="busTable"></tbody>
 </table>
 </div>
+
 </div>
 
 <script>
 // Load sidebar dynamically
 fetch('sidebar.html')
 .then(res => res.text())
-.then(html => {
-    document.getElementById('sidebar-placeholder').innerHTML = html;
-});
-
-// Logout function
-function logout(){
-    localStorage.removeItem("adminName");
-    window.location.href="admin-login.html";
-}
+.then(html => { document.getElementById('sidebar-placeholder').innerHTML = html; });
 
 // Fetch buses
-function loadBuses(){
-    fetch('http://127.0.0.1:5000/get_buses')
-    .then(res=>res.json())
-    .then(data=>{
-        const table = document.getElementById("busTable");
-        table.innerHTML = "";
-        data.forEach(bus=>{
-            const row = document.createElement("tr");
-            row.innerHTML=`
-            <td><input type="checkbox" data-id="${bus.id}"></td>
-            <td>${bus.bus_number}</td>
-            <td>${bus.route_id || "N/A"}</td>
-            <td>${bus.driver_id ? "Assigned" : "Unassigned"}</td>
-            `;
-            table.appendChild(row);
-        });
+async function loadBuses(){
+    const res = await fetch('http://127.0.0.1:5000/get_buses');
+    const data = await res.json();
+    const table = document.getElementById("busTable");
+    table.innerHTML = "";
+
+    // Fetch all routes
+    const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
+    const routes = await resRoutes.json();
+
+    data.forEach(bus=>{
+        const row = document.createElement("tr");
+        const routeObj = routes.find(r=>r.id === bus.route_id);
+        const routeName = routeObj ? `${routeObj.start_point} - ${routeObj.end_point}` : "N/A";
+
+        row.innerHTML=`
+        <td><input type="checkbox" data-id="${bus.id}"></td>
+        <td>${bus.bus_number}</td>
+        <td>${routeName}</td>
+        <td><button onclick="updateBus(${bus.id})">Edit</button></td>
+        `;
+        table.appendChild(row);
     });
 }
 
-// Delete selected bus
+// Delete selected buses
 function deleteSelectedBus(){
-    const checkboxes=document.querySelectorAll('#busTable input[type="checkbox"]:checked');
-    if(checkboxes.length===0){ alert("Select at least one bus to delete!"); return;}
+    const checkboxes = document.querySelectorAll('#busTable input[type="checkbox"]:checked');
+    if(checkboxes.length === 0){ alert("Select at least one bus!"); return; }
     if(!confirm("Are you sure you want to delete selected bus(es)?")) return;
     checkboxes.forEach(box=>{
-        const busId=box.getAttribute("data-id");
+        const busId = box.getAttribute("data-id");
         fetch(`http://127.0.0.1:5000/delete_bus/${busId}`,{method:'DELETE'})
         .then(res=>res.json())
         .then(data=>{ console.log(data.message); loadBuses(); })
@@ -104,15 +100,20 @@ function deleteSelectedBus(){
     });
 }
 
-// Search function
-document.getElementById("searchInput").addEventListener("input",function(){
-    const query=this.value.toLowerCase();
-    const rows=document.querySelectorAll("#busTable tr");
+// Search buses
+function searchBuses(){
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#busTable tr");
     rows.forEach(row=>{
-        const text=row.innerText.toLowerCase();
-        row.style.display=text.includes(query) ? "" : "none";
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? "" : "none";
     });
-});
+}
+
+// Edit bus
+function updateBus(id){
+    window.location.href=`update-bus.html?id=${id}`;
+}
 
 // Initial load
 document.addEventListener("DOMContentLoaded", loadBuses);
