@@ -24,18 +24,20 @@ button.add-stop:hover{background:#1e40af;}
 .table-box th{background:#3b82f6;color:white;padding:10px;text-align:left;}
 .table-box td{padding:10px;border-bottom:1px solid #eee;}
 
-/* icon buttons */
 .icon-btn{
-    background:none;
-    border:none;
-    cursor:pointer;
-    font-size:16px;
-    margin-right:8px;
+background:none;
+border:none;
+cursor:pointer;
+font-size:16px;
+margin-right:8px;
 }
+
 .icon-btn.edit{color:#f59e0b;}
 .icon-btn.edit:hover{color:#b45309;}
+
 .icon-btn.delete{color:#ef4444;}
 .icon-btn.delete:hover{color:#dc2626;}
+
 </style>
 </head>
 <body>
@@ -77,106 +79,175 @@ button.add-stop:hover{background:#1e40af;}
 </div>
 
 <script>
-// Load sidebar
+
 fetch("sidebar.html")
 .then(res=>res.text())
 .then(data=>{ document.getElementById("sidebar-placeholder").innerHTML=data; });
 
-// Load routes
 async function loadRoutes(){
-  const res = await fetch("http://127.0.0.1:5000/get_routes");
-  const data = await res.json();
-  let options = '<option value="">-- Select Route --</option>';
-  data.forEach(route=>{
-    options += `<option value="${route.id}">${route.start_point} → ${route.end_point}</option>`;
-  });
-  document.getElementById("routeSelect").innerHTML = options;
+const res = await fetch("http://127.0.0.1:5000/get_routes");
+const data = await res.json();
+let options = '<option value="">-- Select Route --</option>';
+data.forEach(route=>{
+options += `<option value="${route.id}">${route.start_point} → ${route.end_point}</option>`;
+});
+document.getElementById("routeSelect").innerHTML = options;
 }
 loadRoutes();
 
-// Load stops for selected route
 document.getElementById("routeSelect").addEventListener("change", loadStops);
 
 async function loadStops(){
-  const routeId = document.getElementById("routeSelect").value;
-  if(!routeId){ document.getElementById("stopsTable").innerHTML=""; return; }
 
-  const res = await fetch(`http://127.0.0.1:5000/get_stops/${routeId}`);
-  const data = await res.json();
+const routeId = document.getElementById("routeSelect").value;
 
-  let rows = '';
-  data.forEach(stop=>{
-    rows += `<tr>
-      <td>${stop.id}</td>
-      <td>${stop.stop_name}</td>
-      <td>
-        <button class="icon-btn edit" title="Edit" onclick="editStop(${stop.id},\`${stop.stop_name}\`)">
-          <i class="fas fa-pencil-alt"></i>
-        </button>
-        <button class="icon-btn delete" title="Delete" onclick="deleteStop(${stop.id})">
-          <i class="fas fa-trash"></i>
-        </button>
-      </td>
-    </tr>`;
-  });
-  document.getElementById("stopsTable").innerHTML = rows;
+if(!routeId){
+document.getElementById("stopsTable").innerHTML="";
+return;
 }
 
-// Add stops
+const res = await fetch(`http://127.0.0.1:5000/get_stops/${routeId}`);
+const data = await res.json();
+
+let rows = '';
+let count = 1;
+
+data.forEach(stop=>{
+
+rows += `<tr>
+
+<td>${count++}</td>
+
+<td>${stop.stop_name}</td>
+
+<td>
+
+<button class="icon-btn edit" onclick="editStop(${stop.id},\`${stop.stop_name}\`)">
+<i class="fa-solid fa-pen"></i>
+</button>
+
+<button class="icon-btn delete" onclick="deleteStop(${stop.id})">
+<i class="fa-solid fa-trash"></i>
+</button>
+
+</td>
+
+</tr>`;
+
+});
+
+document.getElementById("stopsTable").innerHTML = rows;
+
+}
+
 async function addStops(){
-  const routeId = document.getElementById("routeSelect").value;
-  if(!routeId){ alert("Select a route first!"); return; }
 
-  const stops = document.querySelectorAll(".stop");
-  const promises = [];
-  stops.forEach(stop=>{
-    const name = stop.value.trim();
-    if(name !== ""){
-      promises.push(fetch("http://127.0.0.1:5000/add_stop",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({route_id:routeId, stop_name:name})
-      }).then(res=>res.json())
-      .then(data=>console.log(data.message))
-      .catch(err=>console.error(err)));
-      stop.value = "";
-    }
-  });
+const routeId = document.getElementById("routeSelect").value;
 
-  await Promise.all(promises);
-  loadStops();
+if(!routeId){
+alert("Select a route first!");
+return;
 }
 
-// Delete stop
+const stops = document.querySelectorAll(".stop");
+
+const promises = [];
+
+stops.forEach(stop=>{
+
+const name = stop.value.trim();
+
+if(name !== ""){
+
+promises.push(
+
+fetch("http://127.0.0.1:5000/add_stop",{
+
+method:"POST",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({route_id:routeId, stop_name:name})
+
+})
+
+.then(res=>res.json())
+
+.then(data=>console.log(data.message))
+
+.catch(err=>console.error(err))
+
+);
+
+stop.value = "";
+
+}
+
+});
+
+await Promise.all(promises);
+
+loadStops();
+
+}
+
 async function deleteStop(id){
-  const res = await fetch(`http://127.0.0.1:5000/delete_stop/${id}`, {method:"DELETE"});
-  const data = await res.json();
-  alert(data.message);
-  loadStops();
+
+const res = await fetch(`http://127.0.0.1:5000/delete_stop/${id}`, {method:"DELETE"});
+
+const data = await res.json();
+
+alert(data.message);
+
+loadStops();
+
 }
 
-// Edit stop
 function editStop(id, oldName){
-  const newName = prompt("Enter new stop name:", oldName);
-  if(newName && newName.trim() !== ""){
-    fetch(`http://127.0.0.1:5000/update_stop/${id}`,{
-      method:"PUT",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({stop_name:newName.trim()})
-    }).then(res=>{
-      if(res.ok) return res.json();
-      else throw new Error("Failed to update stop");
-    })
-    .then(data=>{
-      alert(data.message);
-      loadStops();
-    })
-    .catch(err=>{
-      console.error(err);
-      alert("Error updating stop");
-    });
-  }
+
+const newName = prompt("Enter new stop name:", oldName);
+
+if(newName && newName.trim() !== ""){
+
+fetch(`http://127.0.0.1:5000/update_stop/${id}`,{
+
+method:"PUT",
+
+headers:{"Content-Type":"application/json"},
+
+body:JSON.stringify({stop_name:newName.trim()})
+
+})
+
+.then(res=>{
+
+if(res.ok) return res.json();
+
+else throw new Error("Failed to update stop");
+
+})
+
+.then(data=>{
+
+alert(data.message);
+
+loadStops();
+
+})
+
+.catch(err=>{
+
+console.error(err);
+
+alert("Error updating stop");
+
+});
+
 }
+
+}
+
 </script>
+
 </body>
 </html>

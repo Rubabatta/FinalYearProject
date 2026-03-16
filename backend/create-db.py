@@ -100,13 +100,14 @@ CREATE TABLE IF NOT EXISTS bus_locations (
 ''')
 
 # -----------------------------
-# Stops Table
+# Stops Table (FIXED)
 # -----------------------------
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS stops (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     route_id INTEGER,
     stop_name TEXT,
+    stop_order INTEGER,
     FOREIGN KEY(route_id) REFERENCES routes(id)
 )
 ''')

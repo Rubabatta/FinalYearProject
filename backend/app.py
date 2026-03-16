@@ -41,7 +41,6 @@ def student_signup():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # StudentID unique check
     cursor.execute("SELECT * FROM students WHERE studentID=?", (studentID,))
     existing = cursor.fetchone()
 
@@ -105,7 +104,6 @@ def admin_login():
     username = data.get("username")
     password = data.get("password")
 
-    # Hash the incoming password before comparing
     password_hash = hashlib.sha256(password.encode()).hexdigest()
 
     conn = get_db_connection()
@@ -155,10 +153,68 @@ def get_students():
     return jsonify([dict(s) for s in students])
 
 # -----------------------------
+# Get single student (for edit)
+# -----------------------------
+@app.route('/get_student/<int:id>', methods=['GET'])
+def get_student(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM students WHERE id=?", (id,))
+    student = cursor.fetchone()
+    conn.close()
+
+    if student:
+        return jsonify(dict(student))
+    else:
+        return jsonify({"message":"Student not found"}), 404
+
+# -----------------------------
+# Update Student
+# -----------------------------
+@app.route('/update_student/<int:id>', methods=['PUT'])
+def update_student(id):
+    data = request.get_json()
+
+    name = data.get('name')
+    email = data.get('email')
+    studentID = data.get('studentID')
+    center = data.get('center')
+    contact = data.get('contact')
+    password = data.get('password')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE students
+        SET name=?, email=?, studentID=?, center=?, contact=?, password=?
+        WHERE id=?
+    """, (name, email, studentID, center, contact, password, id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Student updated successfully"})
+
+# -----------------------------
+# Delete Student
+# -----------------------------
+@app.route('/delete_student/<int:id>', methods=['DELETE'])
+def delete_student(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM students WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Student deleted successfully"})
+
+# -----------------------------
 # ROUTES CRUD
 # -----------------------------
 
-# Get Routes
 @app.route('/get_routes', methods=['GET'])
 def get_routes():
     conn = get_db_connection()
@@ -173,7 +229,6 @@ def get_routes():
     return jsonify([dict(r) for r in routes])
 
 
-# Add Route
 @app.route('/add_route', methods=['POST'])
 def add_route():
 
@@ -181,7 +236,7 @@ def add_route():
 
     start = data.get("start_point")
     end = data.get("end_point")
-    stops = data.get("stops") or ""   # Ensure stops is not None
+    stops = data.get("stops") or ""
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -197,7 +252,6 @@ def add_route():
     return jsonify({"message":"Route added successfully"})
 
 
-# Update Route
 @app.route('/update_route/<int:id>', methods=['PUT'])
 def update_route(id):
 
@@ -205,7 +259,7 @@ def update_route(id):
 
     start = data.get("start_point")
     end = data.get("end_point")
-    stops = data.get("stops") or ""  # Fix to allow updating stops
+    stops = data.get("stops") or ""
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -222,7 +276,6 @@ def update_route(id):
     return jsonify({"message":"Route updated successfully"})
 
 
-# Delete Route
 @app.route('/delete_route/<int:id>', methods=['DELETE'])
 def delete_route(id):
 
@@ -236,12 +289,10 @@ def delete_route(id):
 
     return jsonify({"message":"Route deleted successfully"})
 
-
 # -----------------------------
 # BUSES CRUD
 # -----------------------------
 
-# Get Buses
 @app.route('/get_buses', methods=['GET'])
 def get_buses():
 
@@ -262,7 +313,6 @@ def get_buses():
     return jsonify([dict(b) for b in buses])
 
 
-# Add Bus
 @app.route('/add_bus', methods=['POST'])
 def add_bus():
 
@@ -293,7 +343,7 @@ def add_bus():
 
     return jsonify({"message":"Bus added successfully"})
 
-# Update Bus
+
 @app.route('/update_bus/<int:id>', methods=['PUT'])
 def update_bus(id):
 
@@ -307,7 +357,6 @@ def update_bus(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Check unique bus_number except current bus
     cursor.execute("SELECT * FROM buses WHERE bus_number=? AND id!=?", (bus_number,id))
     if cursor.fetchone():
         conn.close()
@@ -325,7 +374,6 @@ def update_bus(id):
     return jsonify({"message":"Bus updated successfully"})
 
 
-# Delete Bus
 @app.route('/delete_bus/<int:id>', methods=['DELETE'])
 def delete_bus(id):
 
@@ -339,7 +387,6 @@ def delete_bus(id):
 
     return jsonify({"message":"Bus deleted successfully"})
 
-
 # -----------------------------
 # Get Stops for a Route
 # -----------------------------
@@ -347,9 +394,13 @@ def delete_bus(id):
 def get_stops(route_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM stops WHERE route_id=?", (route_id,))
+
+    cursor.execute("SELECT * FROM stops WHERE route_id=? ORDER BY id ASC", (route_id,))
+
     stops = cursor.fetchall()
+
     conn.close()
+
     return jsonify([dict(s) for s in stops])
 
 # -----------------------------
@@ -366,9 +417,15 @@ def add_stop():
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO stops (route_id, stop_name) VALUES (?, ?)", (route_id, stop_name))
+
+    cursor.execute(
+        "INSERT INTO stops (route_id, stop_name) VALUES (?, ?)",
+        (route_id, stop_name)
+    )
+
     conn.commit()
     conn.close()
+
     return jsonify({"message":"Stop added successfully"})
 
 # -----------------------------
@@ -395,9 +452,15 @@ def update_stop(id):
 def delete_stop(id):
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    cursor.execute("SELECT route_id FROM stops WHERE id=?", (id,))
+    row = cursor.fetchone()
+
     cursor.execute("DELETE FROM stops WHERE id=?", (id,))
+
     conn.commit()
     conn.close()
+
     return jsonify({"message":"Stop deleted successfully"})
 
 # -----------------------------
