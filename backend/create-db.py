@@ -109,7 +109,17 @@ CREATE TABLE IF NOT EXISTS stops (
     FOREIGN KEY(route_id) REFERENCES routes(id)
 )
 ''')
-
+# -----------------------------
+# Announcements Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS announcements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    date TEXT
+)
+''')
 # Commit changes and close connection
 conn.commit()
 conn.close()

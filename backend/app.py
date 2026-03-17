@@ -1,11 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import hashlib
+
+
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-DB_NAME = "database.db"
+import os
+DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
 
 # -----------------------------
 # Database Connection
@@ -109,23 +113,21 @@ def admin_login():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "SELECT * FROM admins WHERE username=? AND password=?",
-        (username,password)
-    )
-
+    cursor.execute("SELECT * FROM admins WHERE username=?", (username,))
     admin = cursor.fetchone()
 
     conn.close()
 
     if admin:
-        return jsonify({
-            "message":"Admin login successful",
-            "admin":dict(admin)
-        })
-    else:
-        return jsonify({"message":"Invalid username or password"}), 401
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
+        if hashed_password == admin["password"]:
+            return jsonify({
+                "message":"Admin login successful",
+                "admin":dict(admin)
+            })
+
+    return jsonify({"message":"Invalid username or password"}),401
 # -----------------------------
 # Get Students
 # -----------------------------
@@ -330,6 +332,80 @@ def get_student(student_id):
         return jsonify(dict(student))
     else:
         return jsonify({"message":"Student not found"})
+    
+
+
+  # -----------------------------
+# Add Announcement
+# -----------------------------
+@app.route('/add-announcement', methods=['POST'])
+def add_announcement():
+    data = request.get_json()
+    title = data.get('title')
+    message = data.get('message')
+    date = data.get('date')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO announcements (title,message,date) VALUES (?,?,?)",
+                   (title,message,date))
+    conn.commit()
+    conn.close()
+    return jsonify({"message":"Added successfully"})
+
+
+# -----------------------------
+# Get Announcements (Student / Admin)
+# -----------------------------
+@app.route('/get-announcements', methods=['GET'])
+def get_announcements():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM announcements ORDER BY id DESC")
+    rows = cursor.fetchall()
+    conn.close()
+
+    result = []
+    for row in rows:
+        result.append({
+            "id": row["id"],
+            "title": row["title"],
+            "message": row["message"],
+            "date": row["date"]
+        })
+    return jsonify(result)
+
+
+# -----------------------------
+# Delete Announcement
+# -----------------------------
+@app.route('/delete-announcement/<int:id>', methods=['DELETE'])
+def delete_announcement(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM announcements WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"message":"Deleted successfully"})
+
+
+# -----------------------------
+# Update Announcement
+# -----------------------------
+@app.route('/update-announcement/<int:id>', methods=['PUT'])
+def update_announcement(id):
+    data = request.get_json()
+    title = data.get('title')
+    message = data.get('message')
+    date = data.get('date')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE announcements SET title=?, message=?, date=? WHERE id=?",
+                   (title,message,date,id))
+    conn.commit()
+    conn.close()
+    return jsonify({"message":"Updated successfully"})  
 
 # -----------------------------
 # Run Server
