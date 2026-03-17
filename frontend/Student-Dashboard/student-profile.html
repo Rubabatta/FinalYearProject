@@ -120,13 +120,15 @@ fetch("student-sidebar.html")
 document.getElementById("sidebar").innerHTML = data;
 });
 
-
 const student_id = localStorage.getItem("student_id");
 
+/* Safety check */
 if(!student_id){
 document.getElementById("profileData").innerHTML = "Student not logged in";
+throw new Error("No student id");
 }
 
+/* Fetch student data */
 fetch(`http://127.0.0.1:5000/get_student/${student_id}`)
 .then(res => res.json())
 .then(data => {
@@ -152,12 +154,12 @@ document.getElementById("profileData").innerHTML = `
 
 <div class="info-box">
 <span>Student ID</span>
-<strong>${data.address}</strong>
+<strong>${data.studentID}</strong>
 </div>
 
 <div class="info-box">
-<span>Fees</span>
-<strong>${data.fees}</strong>
+<span>Phone Number</span>
+<strong>${data.contact}</strong>
 </div>
 
 </div>
