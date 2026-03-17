@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Routes Management</title>
+<title>Routes Management</title> 
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -11,88 +11,43 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{display:flex;background:#f4f6fb;}
-
 .main{margin-left:240px;width:100%;padding:30px;}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-}
-
-button{
-padding:10px 20px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-background:#3b82f6;
-color:white;
-margin-right:10px;
-}
-
-button:hover{
-background:#1e40af;
-}
-
-.table-box{
-background:white;
-padding:25px;
-border-radius:12px;
-box-shadow:0 8px 20px rgba(0,0,0,0.08);
-margin-top:15px;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-}
-
-table th{
-background:#3b82f6;
-color:white;
-padding:10px;
-text-align:left;
-}
-
-table td{
-padding:10px;
-border-bottom:1px solid #eee;
-}
-
-.manage-btn{
-background:#10b981;
-}
-
-.manage-btn:hover{
-background:#059669;
-}
-
+h1{color:#1e3a8a;margin-bottom:20px;}
+.action-row{display:flex;align-items:center;margin-bottom:15px;gap:10px;flex-wrap:wrap;}
+.action-row label{margin-right:5px;font-weight:500;}
+.action-row input{padding:8px;border-radius:6px;border:1px solid #ccc;width:200px;}
+button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;background:#3b82f6;color:white;transition:0.3s;}
+button:hover{background:#1e40af;}
+.table-box{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+table{width:100%;border-collapse:collapse;margin-top:10px;}
+table th{background:#3b82f6;color:white;padding:10px;text-align:left;}
+table td{padding:10px;border-bottom:1px solid #eee;}
+.manage-btn{background:#10b981;}
+.manage-btn:hover{background:#059669;}
+.update-btn{background:#f59e0b;margin-left:5px;}
+.update-btn:hover{background:#b45309;}
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar -->
 <div id="sidebar-placeholder"></div>
 
-<!-- Main -->
 <div class="main">
 
-<div class="topbar">
 <h1>Routes Management</h1>
 
-<div>
+<!-- Single Row: Add/Delete + Search -->
+<div class="action-row">
 <button onclick="window.location.href='add-route.html'">Add Route</button>
 <button onclick="deleteRoute()">Delete Route</button>
+<input type="text" id="searchInput" placeholder="Type route name...">
+<button onclick="searchRoutes()">Search</button>
 </div>
 
-</div>
-
+<!-- Table -->
 <div class="table-box">
-
 <table>
-
 <thead>
 <tr>
 <th>Select</th>
@@ -100,113 +55,96 @@ background:#059669;
 <th>Start Point</th>
 <th>End Point</th>
 <th>Stops</th>
+<th>Actions</th>
 </tr>
 </thead>
-
 <tbody id="routesTable"></tbody>
-
 </table>
-
 </div>
 
 </div>
 
 <script>
-
 // Load sidebar
 fetch('sidebar.html')
 .then(res=>res.text())
-.then(html=>{
-document.getElementById('sidebar-placeholder').innerHTML=html;
-});
+.then(html=>{ document.getElementById('sidebar-placeholder').innerHTML=html; });
 
+// Load routes with correct sequence
+async function loadRoutes(){
+    const res = await fetch("http://127.0.0.1:5000/get_routes");
+    const data = await res.json();
+    const table = document.getElementById("routesTable");
+    table.innerHTML="";
 
-// Load routes
-function loadRoutes(){
-
-fetch("http://127.0.0.1:5000/get_routes")
-
-.then(res=>res.json())
-
-.then(data=>{
-
-const table=document.getElementById("routesTable");
-
-table.innerHTML="";
-
-data.forEach(route=>{
-
-const row=document.createElement("tr");
-
-row.innerHTML=`
-
-<td><input type="checkbox" value="${route.id}"></td>
-
-<td>${route.id}</td>
-
-<td>${route.start_point}</td>
-
-<td>${route.end_point}</td>
-
-<td>
-<button class="manage-btn"
-onclick="manageStops(${route.id})">
-Manage Stops
-</button>
-</td>
-
-`;
-
-table.appendChild(row);
-
-});
-
-});
-
+    data.forEach((route,index)=>{
+        const row = document.createElement("tr");
+        row.innerHTML=`
+        <td><input type="checkbox" value="${route.id}"></td>
+        <td>${index+1}</td>
+        <td>${route.start_point}</td>
+        <td>${route.end_point}</td>
+        <td>
+        <button class="manage-btn" onclick="manageStops(${route.id})">Manage Stops</button>
+        </td>
+        <td>
+        <button class="update-btn" onclick="updateRoute(${route.id}, '${route.start_point}', '${route.end_point}')">Update</button>
+        </td>
+        `;
+        table.appendChild(row);
+    });
 }
 
-
-// Open stops page
+// Manage Stops
 function manageStops(routeId){
-
-window.location.href=`route-stops.html?route_id=${routeId}`;
-
+    window.location.href=`route-stops.html?route_id=${routeId}`;
 }
-
 
 // Delete route
 function deleteRoute(){
-
-const selected=document.querySelector("input[type='checkbox']:checked");
-
-if(!selected){
-
-alert("Select route first");
-
-return;
-
+    const selected=document.querySelector("input[type='checkbox']:checked");
+    if(!selected){ alert("Select route first"); return; }
+    const routeId=selected.value;
+    fetch(`http://127.0.0.1:5000/delete_route/${routeId}`,{method:"DELETE"})
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+        loadRoutes();
+    });
 }
 
-const routeId=selected.value;
+// Update route
+function updateRoute(id, oldStart, oldEnd){
+    const newStart = prompt("Enter new Start Point:", oldStart);
+    if(newStart === null) return;
+    const newEnd = prompt("Enter new End Point:", oldEnd);
+    if(newEnd === null) return;
 
-fetch(`http://127.0.0.1:5000/delete_route/${routeId}`,{method:"DELETE"})
-
-.then(res=>res.json())
-
-.then(data=>{
-
-alert(data.message);
-
-loadRoutes();
-
-});
-
+    fetch(`http://127.0.0.1:5000/update_route/${id}`,{
+        method: "PUT",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({start_point: newStart.trim(), end_point: newEnd.trim()})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+        loadRoutes();
+    })
+    .catch(err=>console.error(err));
 }
 
+// Search routes
+function searchRoutes(){
+    const query = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#routesTable tr");
+    rows.forEach(row=>{
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? "" : "none";
+    });
+}
 
 // Load page
 document.addEventListener("DOMContentLoaded",loadRoutes);
-
 </script>
 
 </body>

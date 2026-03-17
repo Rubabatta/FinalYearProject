@@ -22,6 +22,15 @@ table th{background:#3b82f6;color:white;padding:10px;text-align:left;}
 table td{padding:10px;border-bottom:1px solid #eee;}
 .delete-btn{background:#ef4444;}
 .delete-btn:hover{background:#dc2626;}
+.icon-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+  margin-right:8px;
+}
+.icon-btn.edit{color:#f59e0b;}
+.icon-btn.edit:hover{color:#b45309;}
 input{padding:8px;border:1px solid #ccc;border-radius:6px;margin-right:10px;}
 .add-box{margin-bottom:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
 </style>
@@ -78,13 +87,19 @@ function loadStops(){
     .then(data => {
         const table = document.getElementById("stopsTable");
         table.innerHTML = "";
+        let count = 1;
         data.forEach(stop => {
             const row = document.createElement("tr");
             row.innerHTML = `
-                <td>${stop.id}</td>
+                <td>${count++}</td>
                 <td>${stop.stop_name}</td>
                 <td>
-                    <button class="delete-btn" onclick="deleteStop(${stop.id})">Delete</button>
+                    <button class="icon-btn edit" onclick="editStop(${stop.id}, '${stop.stop_name}')">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    <button class="delete-btn" onclick="deleteStop(${stop.id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </td>
             `;
             table.appendChild(row);
@@ -111,6 +126,27 @@ function addStop(){
         loadStops();
     })
     .catch(err => console.error(err));
+}
+
+// Edit stop
+function editStop(id, oldName){
+    const newName = prompt("Enter new stop name:", oldName);
+    if(newName && newName.trim() !== ""){
+        fetch(`http://127.0.0.1:5000/update_stop/${id}`,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({stop_name:newName.trim()})
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            loadStops();
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error updating stop");
+        });
+    }
 }
 
 // Delete stop

@@ -2,13 +2,11 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
 import hashlib
-
-
+import os
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-import os
 DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
 
 # -----------------------------
@@ -37,15 +35,14 @@ def student_signup():
     email = data.get('email')
     password = data.get('password')
     center = data.get('center')
-    studentID = data.get('studentID')  # ✅ changed from address
+    studentID = data.get('studentID')
     contact = data.get('contact')
     fees = data.get('fees')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # StudentID unique check
-    cursor.execute("SELECT * FROM students WHERE studentID=?", (studentID,))  # ✅ changed
+    cursor.execute("SELECT * FROM students WHERE studentID=?", (studentID,))
     existing = cursor.fetchone()
 
     if existing:
@@ -104,30 +101,30 @@ def student_login():
 # -----------------------------
 @app.route('/admin_login', methods=['POST'])
 def admin_login():
-
     data = request.get_json()
-
     username = data.get("username")
     password = data.get("password")
+
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM admins WHERE username=?", (username,))
+    cursor.execute(
+        "SELECT * FROM admins WHERE username=? AND password=?",
+        (username, password_hash)
+    )
     admin = cursor.fetchone()
-
     conn.close()
 
     if admin:
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-        if hashed_password == admin["password"]:
-            return jsonify({
-                "message":"Admin login successful",
-                "admin":dict(admin)
-            })
+        return jsonify({
+            "message":"Admin login successful",
+            "admin":dict(admin)
+        })
 
     return jsonify({"message":"Invalid username or password"}),401
+
 # -----------------------------
 # Get Students
 # -----------------------------
@@ -157,86 +154,46 @@ def get_students():
     return jsonify([dict(s) for s in students])
 
 # -----------------------------
-# Add Student (Admin)
+# Get single student (for edit)
 # -----------------------------
-@app.route('/add_student', methods=['POST'])
-def add_student():
-
-    data = request.get_json()
-
-    name = data.get("name")
-    email = data.get("email")
-    studentID = data.get("studentID")
-    center = data.get("center")
-    contact = data.get("contact")
-    password = data.get("password")
-    fees = data.get("fees",0)
-
+@app.route('/get_student/<int:id>', methods=['GET'])
+def get_student(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # StudentID unique check
-    cursor.execute("SELECT * FROM students WHERE studentID=?", (studentID,))
-    existing = cursor.fetchone()
+    cursor.execute("SELECT * FROM students WHERE id=?", (id,))
+    student = cursor.fetchone()
+    conn.close()
 
-    if existing:
-        conn.close()
-        return jsonify({"message":"Student ID already exists"}),400
-
-    try:
-
-        cursor.execute("""
-            INSERT INTO students
-            (name,email,studentID,center,contact,password,fees)
-            VALUES (?,?,?,?,?,?,?)
-        """,
-        (name,email,studentID,center,contact,password,fees))
-
-        conn.commit()
-
-        return jsonify({"message":"Student added successfully"})
-
-    except sqlite3.IntegrityError:
-
-        return jsonify({"message":"Email already exists"}),400
-
-    finally:
-
-        conn.close()
+    if student:
+        return jsonify(dict(student))
+    else:
+        return jsonify({"message":"Student not found"}), 404
 
 # -----------------------------
 # Update Student
 # -----------------------------
-@app.route('/update_student/<int:student_id>', methods=['PUT'])
-def update_student(student_id):
-
+@app.route('/update_student/<int:id>', methods=['PUT'])
+def update_student(id):
     data = request.get_json()
 
-    name = data.get("name")
-    email = data.get("email")
-    studentID = data.get("studentID")
-    center = data.get("center")
-    contact = data.get("contact")
-    password = data.get("password")
+    name = data.get('name')
+    email = data.get('email')
+    studentID = data.get('studentID')
+    center = data.get('center')
+    contact = data.get('contact')
+    password = data.get('password')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
         UPDATE students
-        SET
-        name=?,
-        email=?,
-        studentID=?,
-        center=?,
-        contact=?,
-        password=?
+        SET name=?, email=?, studentID=?, center=?, contact=?, password=?
         WHERE id=?
-    """,
-    (name,email,studentID,center,contact,password,student_id))
+    """, (name, email, studentID, center, contact, password, id))
 
     conn.commit()
-
     conn.close()
 
     return jsonify({"message":"Student updated successfully"})
@@ -244,99 +201,254 @@ def update_student(student_id):
 # -----------------------------
 # Delete Student
 # -----------------------------
-@app.route('/delete_student/<int:student_id>', methods=['DELETE'])
-def delete_student(student_id):
-
+@app.route('/delete_student/<int:id>', methods=['DELETE'])
+def delete_student(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute(
-        "DELETE FROM students WHERE id=?",
-        (student_id,)
-    )
-
+    cursor.execute("DELETE FROM students WHERE id=?", (id,))
     conn.commit()
     conn.close()
 
     return jsonify({"message":"Student deleted successfully"})
 
 # -----------------------------
-# Search Students
+# Routes CRUD
 # -----------------------------
-@app.route('/search_students', methods=['GET'])
-def search_students():
-
-    query = request.args.get("q","").strip()
-
+@app.route('/get_routes', methods=['GET'])
+def get_routes():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT
-        id,
-        name,
-        email,
-        studentID,
-        center,
-        contact,
-        password,
-        fees
-        FROM students
-        WHERE
-        name LIKE ?
-        OR email LIKE ?
-        OR studentID LIKE ?
-        OR center LIKE ?
-        OR contact LIKE ?
-    """,
-    (f"%{query}%",
-     f"%{query}%",
-     f"%{query}%",
-     f"%{query}%",
-     f"%{query}%"))
+    cursor.execute("SELECT * FROM routes")
 
-    students = cursor.fetchall()
+    routes = cursor.fetchall()
 
     conn.close()
 
-    return jsonify([dict(s) for s in students])
+    return jsonify([dict(r) for r in routes])
 
-# -----------------------------
-# Get Single Student
-# -----------------------------
-@app.route('/get_student/<int:student_id>', methods=['GET'])
-def get_student(student_id):
+@app.route('/add_route', methods=['POST'])
+def add_route():
+
+    data = request.get_json()
+
+    start = data.get("start_point")
+    end = data.get("end_point")
+    stops = data.get("stops") or ""
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT
-        id,
-        name,
-        email,
-        studentID,
-        center,
-        contact,
-        password,
-        fees
-        FROM students
+        INSERT INTO routes (start_point,end_point,stops)
+        VALUES (?,?,?)
+    """,(start,end,stops))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Route added successfully"})
+
+@app.route('/update_route/<int:id>', methods=['PUT'])
+def update_route(id):
+
+    data = request.get_json()
+
+    start = data.get("start_point")
+    end = data.get("end_point")
+    stops = data.get("stops") or ""
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE routes
+        SET start_point=?, end_point=?, stops=?
         WHERE id=?
-    """,(student_id,))
+    """,(start,end,stops,id))
 
-    student = cursor.fetchone()
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Route updated successfully"})
+
+@app.route('/delete_route/<int:id>', methods=['DELETE'])
+def delete_route(id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM routes WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Route deleted successfully"})
+
+# -----------------------------
+# Buses CRUD
+# -----------------------------
+@app.route('/get_buses', methods=['GET'])
+def get_buses():
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT buses.*, routes.start_point, routes.end_point
+        FROM buses
+        LEFT JOIN routes
+        ON buses.route_id = routes.id
+    """)
+
+    buses = cursor.fetchall()
 
     conn.close()
 
-    if student:
-        return jsonify(dict(student))
-    else:
-        return jsonify({"message":"Student not found"})
-    
+    return jsonify([dict(b) for b in buses])
 
+@app.route('/add_bus', methods=['POST'])
+def add_bus():
 
-  # -----------------------------
-# Add Announcement
+    data = request.get_json()
+
+    bus_number = data.get("bus_number")
+    driver_id = data.get("driver_id")
+    capacity = data.get("capacity")
+    route_id = data.get("route_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM buses WHERE bus_number=?", (bus_number,))
+    existing = cursor.fetchone()
+
+    if existing:
+        conn.close()
+        return jsonify({"message":"Bus number already exists"}),400
+
+    cursor.execute("""
+        INSERT INTO buses (bus_number,driver_id,capacity,route_id)
+        VALUES (?,?,?,?)
+    """,(bus_number,driver_id,capacity,route_id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Bus added successfully"})
+
+@app.route('/update_bus/<int:id>', methods=['PUT'])
+def update_bus(id):
+
+    data = request.get_json()
+
+    bus_number = data.get("bus_number")
+    driver_id = data.get("driver_id")
+    capacity = data.get("capacity")
+    route_id = data.get("route_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM buses WHERE bus_number=? AND id!=?", (bus_number,id))
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({"message":"Bus number already exists"}),400
+
+    cursor.execute("""
+        UPDATE buses
+        SET bus_number=?,driver_id=?,capacity=?,route_id=?
+        WHERE id=?
+    """,(bus_number,driver_id,capacity,route_id,id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Bus updated successfully"})
+
+@app.route('/delete_bus/<int:id>', methods=['DELETE'])
+def delete_bus(id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM buses WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Bus deleted successfully"})
+
+# -----------------------------
+# Stops CRUD
+# -----------------------------
+@app.route('/get_stops/<int:route_id>', methods=['GET'])
+def get_stops(route_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM stops WHERE route_id=? ORDER BY id ASC", (route_id,))
+
+    stops = cursor.fetchall()
+
+    conn.close()
+
+    return jsonify([dict(s) for s in stops])
+
+@app.route('/add_stop', methods=['POST'])
+def add_stop():
+    data = request.get_json()
+    route_id = data.get('route_id')
+    stop_name = data.get('stop_name')
+
+    if not route_id or not stop_name:
+        return jsonify({"message":"Route and stop name are required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO stops (route_id, stop_name) VALUES (?, ?)",
+        (route_id, stop_name)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Stop added successfully"})
+
+@app.route('/update_stop/<int:id>', methods=['PUT'])
+def update_stop(id):
+    data = request.get_json()
+    stop_name = data.get('stop_name')
+    if not stop_name:
+        return jsonify({"message":"Stop name is required"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE stops SET stop_name=? WHERE id=?", (stop_name, id))
+    conn.commit()
+    conn.close()
+    return jsonify({"message":"Stop updated successfully"})
+
+@app.route('/delete_stop/<int:id>', methods=['DELETE'])
+def delete_stop(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT route_id FROM stops WHERE id=?", (id,))
+    row = cursor.fetchone()
+
+    cursor.execute("DELETE FROM stops WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message":"Stop deleted successfully"})
+
+# -----------------------------
+# Announcements CRUD (Student & Admin)
 # -----------------------------
 @app.route('/add-announcement', methods=['POST'])
 def add_announcement():
@@ -353,10 +465,6 @@ def add_announcement():
     conn.close()
     return jsonify({"message":"Added successfully"})
 
-
-# -----------------------------
-# Get Announcements (Student / Admin)
-# -----------------------------
 @app.route('/get-announcements', methods=['GET'])
 def get_announcements():
     conn = get_db_connection()
@@ -375,10 +483,6 @@ def get_announcements():
         })
     return jsonify(result)
 
-
-# -----------------------------
-# Delete Announcement
-# -----------------------------
 @app.route('/delete-announcement/<int:id>', methods=['DELETE'])
 def delete_announcement(id):
     conn = get_db_connection()
@@ -388,10 +492,6 @@ def delete_announcement(id):
     conn.close()
     return jsonify({"message":"Deleted successfully"})
 
-
-# -----------------------------
-# Update Announcement
-# -----------------------------
 @app.route('/update-announcement/<int:id>', methods=['PUT'])
 def update_announcement(id):
     data = request.get_json()

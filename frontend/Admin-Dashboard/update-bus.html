@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Bus</title>
+<title>Update Bus</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -30,7 +30,7 @@ button:hover{background:#1e40af;}
 <!-- Main content -->
 <div class="main">
 <div class="topbar">
-<h1>Add New Bus</h1>
+<h1>Update Bus</h1>
 </div>
 
 <div class="form-box">
@@ -42,7 +42,7 @@ button:hover{background:#1e40af;}
 <option value="">Select Route</option>
 </select>
 
-<button onclick="addBus()">Add Bus</button>
+<button onclick="updateBus()">Update Bus</button>
 </div>
 </div>
 
@@ -60,31 +60,50 @@ function logout(){
     window.location.href="admin-login.html";
 }
 
-// Load routes dynamically (only unassigned routes)
-async function loadRoutes(){
+// Get bus ID from URL
+function getBusId(){
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id");
+}
+
+// Load bus info and routes
+async function loadBusData(){
+    const busId = getBusId();
+    if(!busId) { alert("No bus ID provided"); return; }
+
+    const resBus = await fetch(`http://127.0.0.1:5000/get_bus/${busId}`);
+    const bus = await resBus.json();
+
+    document.getElementById("busNumber").value = bus.bus_number;
+
     const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
     const routes = await resRoutes.json();
 
     const resBuses = await fetch('http://127.0.0.1:5000/get_buses');
     const buses = await resBuses.json();
 
-    const assignedRouteIds = buses.map(b => b.route_id).filter(id => id != null);
+    const assignedRouteIds = buses
+        .filter(b => b.id != bus.id)
+        .map(b => b.route_id)
+        .filter(id => id != null);
 
     const select = document.getElementById("routeSelect");
     select.innerHTML = `<option value="">Select Route</option>`;
 
     routes.forEach(route=>{
-        if(!assignedRouteIds.includes(route.id)){
+        if(!assignedRouteIds.includes(route.id) || route.id === bus.route_id){
             const option = document.createElement("option");
             option.value = route.id;
             option.textContent = `${route.start_point} - ${route.end_point}`;
+            if(route.id === bus.route_id) option.selected = true;
             select.appendChild(option);
         }
     });
 }
 
-// Add Bus function
-function addBus(){
+// Update bus
+function updateBus(){
+    const busId = getBusId();
     const bus_number = document.getElementById("busNumber").value.trim();
     const route_id = document.getElementById("routeSelect").value;
 
@@ -93,25 +112,24 @@ function addBus(){
         return;
     }
 
-    fetch("http://127.0.0.1:5000/add_bus",{
-        method:"POST",
+    fetch(`http://127.0.0.1:5000/update_bus/${busId}`,{
+        method:"PUT",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({bus_number, route_id})
     })
-    .then(res => res.json())
-    .then(data => {
+    .then(res=>res.json())
+    .then(data=>{
         alert(data.message);
-        document.getElementById("busNumber").value="";
-        loadRoutes(); // Refresh routes dropdown
+        window.location.href="buses.html";
     })
     .catch(err=>{
-        console.error("Error:",err);
+        console.error(err);
         alert("Server error, check console");
     });
 }
 
 // Initial load
-document.addEventListener("DOMContentLoaded", loadRoutes);
+document.addEventListener("DOMContentLoaded", loadBusData);
 </script>
 
 </body>
