@@ -3,158 +3,120 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Student Dashboard</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-background:#f4f6fb;
-}
-
-/* MAIN CONTENT */
-
-.main{
-margin-left:230px;
-padding:30px;
-}
-
-/* CARDS */
-
-.cards{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:20px;
-margin-bottom:30px;
-}
-
-.card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
-
-.card h3{
-color:#2563eb;
-margin-bottom:10px;
-}
-
-/* MAP */
-
-.map{
-height:250px;
-background:#dbeafe;
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:10px;
-margin-bottom:30px;
-}
-
-/* TABLE */
-
-table{
-width:100%;
-border-collapse:collapse;
-background:white;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
-
-th,td{
-padding:12px;
-text-align:center;
-}
-
-th{
-background:#2563eb;
-color:white;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#f4f6fb;}
+.main{margin-left:230px;padding:30px;}
+h1,h2{color:#111827;margin-bottom:15px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;margin-bottom:30px;}
+.card{background:white;padding:20px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,0.1);}
+.card h3{color:#2563eb;margin-bottom:10px;font-weight:500;}
+.card p, .card select{font-size:16px;color:#333;width:100%;padding:8px;border-radius:5px;border:1px solid #ccc;}
+.map{height:250px;background:#dbeafe;display:flex;align-items:center;justify-content:center;border-radius:10px;margin-bottom:30px;color:#2563eb;font-weight:500;}
 </style>
 </head>
-
 <body>
 
-<!-- Sidebar Load -->
+<!-- Sidebar -->
 <div id="sidebar"></div>
 
-
 <div class="main">
-
 <h1>Student Dashboard</h1>
 
-<div class="cards">
+<!-- Announcement -->
+<div id="announcementCard" class="card">
+<p id="announcement">Loading announcements...</p>
+</div>
 
+<!-- Cards -->
+<div class="cards">
 <div class="card">
 <h3>My Bus</h3>
-<p>Bus 02</p>
+<select id="busSelect"><option value="">Select Bus</option></select>
 </div>
 
 <div class="card">
 <h3>Route</h3>
-<p>City → University</p>
+<p id="route">--</p>
 </div>
 
 <div class="card">
 <h3>Next Shuttle</h3>
 <p>8:30 AM</p>
 </div>
-
-<div class="card">
-<h3>Driver</h3>
-<p>Ali Khan</p>
-</div>
-
 </div>
 
 <h2>Track Shuttle</h2>
-
-<div class="map">
-Bus Location Map
-</div>
+<div class="map">Bus Location Map</div>
 
 <h2>Schedule</h2>
-
-<table>
-
-<tr>
-<th>Bus</th>
-<th>Route</th>
-<th>Departure</th>
-<th>Arrival</th>
-</tr>
-
-<tr>
-<td>Bus 01</td>
-<td>City → Uni</td>
-<td>8:00 AM</td>
-<td>8:45 AM</td>
-</tr>
-
+<table id="scheduleTable">
+<tr><th>Bus</th><th>Route</th><th>Departure</th><th>Arrival</th></tr>
+<!-- Dynamic schedule will appear here -->
 </table>
-
 </div>
 
-
 <script>
+// Load Sidebar
+fetch("student-sidebar.html").then(res=>res.text()).then(data=>{
+    document.getElementById("sidebar").innerHTML = data;
+});
 
-fetch("student-sidebar.html")
-.then(res => res.text())
-.then(data =>{
-document.getElementById("sidebar").innerHTML=data;
-})
+// Fetch announcements from backend
+fetch("http://127.0.0.1:5000/get-announcements")
+.then(res=>res.json())
+.then(data=>{
+    if(data.length>0){
+        const latest = data[0];
+        document.getElementById("announcement").textContent = latest.title + ": " + latest.message;
+    }else{
+        document.getElementById("announcement").textContent = "No new announcements";
+    }
+});
 
+// Fetch buses from backend
+fetch("http://127.0.0.1:5000/get_buses")
+.then(res=>res.json())
+.then(buses=>{
+    const busSelect = document.getElementById("busSelect");
+    buses.forEach(bus=>{
+        let option = document.createElement("option");
+        option.value = bus.id; // store bus ID
+        option.textContent = bus.bus_number;
+        busSelect.appendChild(option);
+    });
+
+    // Auto select saved bus
+    const savedBus = localStorage.getItem("selectedBus");
+    if(savedBus){
+        busSelect.value = savedBus;
+        updateRoute(savedBus,buses);
+    }
+
+    busSelect.addEventListener("change",function(){
+        const selectedId = this.value;
+        localStorage.setItem("selectedBus",selectedId);
+        updateRoute(selectedId,buses);
+    });
+});
+
+// Update route text
+function updateRoute(busId,buses){
+    const bus = buses.find(b=>b.id==busId);
+    document.getElementById("route").textContent = bus ? `${bus.start_point} → ${bus.end_point}` : "--";
+
+    // Optional: update schedule table dynamically
+    const table = document.getElementById("scheduleTable");
+    table.innerHTML = `<tr><th>Bus</th><th>Route</th><th>Departure</th><th>Arrival</th></tr>`;
+    if(bus){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${bus.bus_number}</td><td>${bus.start_point} → ${bus.end_point}</td><td>8:00 AM</td><td>8:45 AM</td>`;
+        table.appendChild(tr);
+    }
+}
 </script>
-
 </body>
 </html>

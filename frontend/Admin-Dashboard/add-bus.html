@@ -3,34 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Add Bus</title>
+<title>Add Bus - Admin Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+/* Reset & Fonts */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{display:flex;background:#f4f6fb;}
+
+/* Sidebar Placeholder */
+#sidebar-placeholder{position:fixed;left:0;top:0;height:100%;z-index:10;}
+
+/* Main Content */
 .main{margin-left:240px;padding:40px;width:100%;}
-.topbar h1{color:#1e3a8a;margin-bottom:20px;}
-.form-box{background:white;padding:30px;border-radius:10px;width:400px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
-.form-box label{display:block;margin-top:15px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.topbar h1{color:#1e3a8a;font-size:28px;}
+.topbar button{padding:8px 15px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;}
+.topbar button:hover{background:#b91c1c;}
+
+/* Form Box */
+.form-box{background:white;padding:30px;border-radius:10px;width:450px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+.form-box label{display:block;margin-top:15px;font-weight:500;color:#1e3a8a;}
 .form-box input,
-.form-box select{width:100%;padding:10px;margin-top:5px;border:1px solid #ccc;border-radius:6px;}
-button{margin-top:20px;padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;}
-button:hover{background:#1e40af;}
+.form-box select{width:100%;padding:12px;margin-top:5px;border:1px solid #ccc;border-radius:6px;font-size:15px;}
+button.add-btn{margin-top:25px;padding:12px 20px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:16px;}
+button.add-btn:hover{background:#1e40af;}
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar placeholder -->
+<!-- Sidebar -->
 <div id="sidebar-placeholder"></div>
 
-<!-- Main content -->
+<!-- Main Content -->
 <div class="main">
 <div class="topbar">
 <h1>Add New Bus</h1>
+<button onclick="logout()">Logout <i class="fas fa-sign-out-alt"></i></button>
 </div>
 
 <div class="form-box">
@@ -42,49 +54,48 @@ button:hover{background:#1e40af;}
 <option value="">Select Route</option>
 </select>
 
-<button onclick="addBus()">Add Bus</button>
+<button class="add-btn" onclick="addBus()">Add Bus</button>
 </div>
 </div>
 
 <script>
-// Load sidebar dynamically
+// Fetch Sidebar
 fetch('sidebar.html')
 .then(res => res.text())
 .then(html => {
     document.getElementById('sidebar-placeholder').innerHTML = html;
 });
 
-// Logout function
+// Logout
 function logout(){
     localStorage.removeItem("adminName");
     window.location.href="admin-login.html";
 }
 
-// Load routes dynamically (only unassigned routes)
+// Load Routes
 async function loadRoutes(){
-    const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
-    const routes = await resRoutes.json();
+    try{
+        const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
+        const routes = await resRoutes.json();
 
-    const resBuses = await fetch('http://127.0.0.1:5000/get_buses');
-    const buses = await resBuses.json();
+        const select = document.getElementById("routeSelect");
+        select.innerHTML = `<option value="">Select Route</option>`;
 
-    const assignedRouteIds = buses.map(b => b.route_id).filter(id => id != null);
-
-    const select = document.getElementById("routeSelect");
-    select.innerHTML = `<option value="">Select Route</option>`;
-
-    routes.forEach(route=>{
-        if(!assignedRouteIds.includes(route.id)){
+        routes.forEach(route=>{
             const option = document.createElement("option");
             option.value = route.id;
-            option.textContent = `${route.start_point} - ${route.end_point}`;
+            option.textContent = `${route.start_point} → ${route.end_point}`;
             select.appendChild(option);
-        }
-    });
+        });
+
+    }catch(err){
+        console.error("Error loading routes:", err);
+        alert("Failed to load routes. Check server.");
+    }
 }
 
-// Add Bus function
-function addBus(){
+// Add Bus
+async function addBus(){
     const bus_number = document.getElementById("busNumber").value.trim();
     const route_id = document.getElementById("routeSelect").value;
 
@@ -93,24 +104,25 @@ function addBus(){
         return;
     }
 
-    fetch("http://127.0.0.1:5000/add_bus",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({bus_number, route_id})
-    })
-    .then(res => res.json())
-    .then(data => {
+    try{
+        const res = await fetch("http://127.0.0.1:5000/add_bus",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({bus_number, route_id})
+        });
+        const data = await res.json();
         alert(data.message);
-        document.getElementById("busNumber").value="";
-        loadRoutes(); // Refresh routes dropdown
-    })
-    .catch(err=>{
-        console.error("Error:",err);
+        if(res.ok){
+            document.getElementById("busNumber").value="";
+            loadRoutes(); // Refresh dropdown
+        }
+    }catch(err){
+        console.error("Error:", err);
         alert("Server error, check console");
-    });
+    }
 }
 
-// Initial load
+// Initial Load
 document.addEventListener("DOMContentLoaded", loadRoutes);
 </script>
 
