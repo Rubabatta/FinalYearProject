@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Select Login | Uni Shuttle</title>
+<title>Login | Uni Shuttle</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -23,7 +24,6 @@ body{
     align-items:center;
 }
 
-/* MENU ICON */
 .menu-icon{
     position:absolute;
     top:30px;
@@ -33,118 +33,164 @@ body{
     cursor:pointer;
 }
 
-/* MAIN CONTAINER */
 .container{
     text-align:center;
-    padding:20px;
-    background: rgba(255,255,255,0.15); /* very light transparency */
-    backdrop-filter: blur(2px); /* subtle blur */
+    padding:30px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(2px);
     border-radius:20px;
+    width:320px;
 }
 
-/* PAGE TITLE */
-.container h1{
+h1{
     color:white;
-    margin-bottom:50px;
-    font-size:32px;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
-}
-
-/* LOGIN CARDS */
-.cards{
-    display:flex;
-    gap:40px;
-    flex-wrap:wrap;
-    justify-content:center;
-}
-
-.card{
-    background: rgba(255,255,255,0.25); /* light transparent */
-    backdrop-filter: blur(1px); /* subtle */
-    padding:40px 30px;
-    width:250px;
-    border-radius:20px;
-    cursor:pointer;
-    transition:0.3s;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    border:1px solid rgba(255,255,255,0.2);
-}
-
-.card:hover{
-    transform:translateY(-10px) scale(1.05);
-    box-shadow:0 15px 35px rgba(0,0,0,0.2);
-}
-
-.card i{
-    font-size:50px;
-    color:#3b82f6;
     margin-bottom:20px;
 }
 
-.card h3{
-    margin-bottom:12px;
-    color:white;
-    font-size:22px;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+.input-group{
+    margin:10px 0;
 }
 
-.card p{
-    font-size:15px;
-    color:white;
-    line-height:1.5;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+input{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+    font-size:14px;
 }
 
-/* MOBILE */
-@media(max-width:700px){
-    .cards{
-        flex-direction:column;
-        align-items:center;
-    }
-    .card{
-        width:80%;
-    }
+button{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border:none;
+    border-radius:8px;
+    background:#3b82f6;
+    color:white;
+    cursor:pointer;
+    font-weight:500;
+}
+
+button:hover{
+    background:#1e40af;
+}
+
+#message{
+    margin-top:10px;
+    color:white;
+    font-size:14px;
 }
 </style>
 </head>
+
 <body>
 
-<!-- MENU ICON -->
 <div class="menu-icon" onclick="goHome()">
     <i class="fa fa-bars"></i>
 </div>
 
 <div class="container">
-    <h1>Select Login Type</h1>
-    <div class="cards">
-        <!-- STUDENT -->
-        <div class="card" onclick="goStudent()">
-            <i class="fa fa-user-graduate"></i>
-            <h3>Student Login</h3>
-            <p>Login to track shuttle and view routes</p>
-        </div>
-        <!-- ADMIN -->
-       <div class="card" onclick="window.location.href='../Admin-Dashboard/admin-login.html'">
-            <i class="fa fa-user-shield"></i>
-            <h3>Admin Login</h3>
-            <p>Manage buses, routes and GPS tracking</p>
-        </div>
-    </div>
+
+<h1>Login</h1>
+
+<!-- EMAIL / USERNAME -->
+<div class="input-group">
+<input type="text" id="identifier" placeholder="Email / Username">
+</div>
+
+<!-- PASSWORD -->
+<div class="input-group">
+<input type="password" id="password" placeholder="Password">
+</div>
+
+<button onclick="login()">Login</button>
+
+<p id="message"></p>
+
 </div>
 
 <script>
-function goStudent(){
-    window.location.href="../Student-Dashboard/student-login.html";
+
+function login(){
+
+    const identifier = document.getElementById("identifier").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const message = document.getElementById("message");
+
+    if(identifier === "" || password === ""){
+        message.style.color="red";
+        message.innerText="❌ Please fill all fields";
+        return;
+    }
+
+    // 🔵 TRY STUDENT LOGIN FIRST
+    fetch('http://127.0.0.1:5000/student_login', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+            email: identifier,
+            password: password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if(data.student){
+
+            message.style.color="lightgreen";
+            message.innerText="✅ Student Login Successful";
+
+            localStorage.setItem("studentName", data.student.name);
+
+            setTimeout(()=>{
+                // ✅ DIRECT STUDENT DASHBOARD
+                window.location.href="../Student-Dashboard/student-dashborad.html";
+            },500);
+
+        } 
+        else {
+
+            // 🔴 IF NOT STUDENT → TRY ADMIN
+            fetch('http://127.0.0.1:5000/admin_login', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    username: identifier,
+                    password: password
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+
+                if(data.admin){
+
+                    message.style.color="lightgreen";
+                    message.innerText="✅ Admin Login Successful";
+
+                    localStorage.setItem("adminName", data.admin.username);
+
+                    setTimeout(()=>{
+                        window.location.href="../Admin-Dashboard/admin.html";
+                    },500);
+
+                } else {
+                    message.style.color="red";
+                    message.innerText="❌ Invalid credentials";
+                }
+
+            });
+
+        }
+
+    });
+
 }
-function goAdmin(){
-    window.location.href="../Admin-Dashboard/admin-login.html";
-}
+
 function goHome(){
     window.location.href="index.html";
 }
+
 </script>
 
 </body>

@@ -125,6 +125,57 @@ def admin_login():
 
     return jsonify({"message":"Invalid username or password"}),401
 
+
+# =============================
+# ⭐ SINGLE LOGIN (NEW FIX ADDED HERE)
+# =============================
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+
+    email = data.get('email')
+    password = data.get('password')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # -------------------------
+    # 1️⃣ Check Student Login
+    # -------------------------
+    cursor.execute(
+        "SELECT * FROM students WHERE email=? AND password=?",
+        (email, password)
+    )
+    student = cursor.fetchone()
+
+    if student:
+        conn.close()
+        return jsonify({
+            "role": "student",
+            "user": dict(student)
+        })
+
+    # -------------------------
+    # 2️⃣ Check Admin Login
+    # -------------------------
+    password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+    cursor.execute(
+        "SELECT * FROM admins WHERE username=? AND password=?",
+        (email, password_hash)
+    )
+    admin = cursor.fetchone()
+
+    conn.close()
+
+    if admin:
+        return jsonify({
+            "role": "admin",
+            "user": dict(admin)
+        })
+
+    return jsonify({"message": "Invalid login"}), 401
+
 # -----------------------------
 # Get Students
 # -----------------------------
