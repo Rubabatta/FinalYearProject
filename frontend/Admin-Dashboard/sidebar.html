@@ -17,9 +17,16 @@
         <li onclick="window.location.href='admin-announcements.html'">
             <i class="fas fa-bullhorn"></i> Announcements
         </li>
+
         <li>
             <i class="fa fa-location-dot"></i> GPS Tracking
         </li>
+
+        <!-- 🔥 FIX ADDED -->
+        <li onclick="openChangePassword()">
+            <i class="fa fa-key"></i> Change Password
+        </li>
+
         <li onclick="logout()">
             <i class="fa fa-right-from-bracket"></i> Logout
         </li>
@@ -27,7 +34,6 @@
 </div>
 
 <style>
-/* Sidebar CSS */
 .sidebar{
     width:240px;
     height:100vh;

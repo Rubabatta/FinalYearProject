@@ -558,6 +558,43 @@ def update_announcement(id):
     conn.close()
     return jsonify({"message":"Updated successfully"})  
 
+
+@app.route('/change_admin_password', methods=['POST'])
+def change_admin_password():
+    data = request.get_json()
+
+    username = data.get('username')
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    old_hash = hashlib.sha256(old_password.encode()).hexdigest()
+    new_hash = hashlib.sha256(new_password.encode()).hexdigest()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # check admin exists
+    cursor.execute(
+        "SELECT * FROM admins WHERE username=? AND password=?",
+        (username, old_hash)
+    )
+    admin = cursor.fetchone()
+
+    if not admin:
+        conn.close()
+        return jsonify({"message": "Old password incorrect"}), 401
+
+    # update password
+    cursor.execute(
+        "UPDATE admins SET password=? WHERE username=?",
+        (new_hash, username)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Password changed successfully"})
+
 # -----------------------------
 # Run Server
 # -----------------------------

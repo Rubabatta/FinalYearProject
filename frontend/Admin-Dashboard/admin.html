@@ -9,7 +9,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* Dashboard main styles */
 *{
 margin:0;
 padding:0;
@@ -23,7 +22,7 @@ background:#f4f6fb;
 }
 
 .main{
-margin-left:240px; /* matches sidebar width */
+margin-left:240px;
 width:100%;
 padding:30px;
 }
@@ -61,12 +60,55 @@ font-size:24px;
 font-weight:600;
 color:#1e3a8a;
 }
+
+/* MODAL */
+.modal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+justify-content:center;
+align-items:center;
+}
+
+.modal-content{
+background:white;
+padding:25px;
+border-radius:10px;
+width:300px;
+}
+
+.modal-content input{
+width:100%;
+padding:10px;
+margin:8px 0;
+border-radius:6px;
+border:1px solid #ccc;
+}
+
+.modal-content button{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:none;
+background:#3b82f6;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+.close-btn{
+background:#ef4444 !important;
+}
 </style>
 
 </head>
+
 <body>
 
-<!-- Sidebar will load here -->
 <div id="sidebar-placeholder"></div>
 
 <div class="main">
@@ -101,34 +143,95 @@ color:#1e3a8a;
 </div>
 </div>
 
+<!-- PASSWORD MODAL -->
+<div class="modal" id="passwordModal">
+    <div class="modal-content">
+        <h3>Change Password</h3>
+        <input type="password" id="oldPassword" placeholder="Old Password">
+        <input type="password" id="newPassword" placeholder="New Password">
+        <button onclick="submitPassword()">Update</button>
+        <button class="close-btn" onclick="closeModal()">Cancel</button>
+    </div>
+</div>
+
 <script>
-// Load sidebar from external file
+
+// sidebar load
 fetch('sidebar.html')
 .then(res => res.text())
 .then(html => {
     document.getElementById('sidebar-placeholder').innerHTML = html;
 });
 
-// Fetch total students
+// stats
 fetch('http://127.0.0.1:5000/get_students')
 .then(res=>res.json())
 .then(data=>{
     document.getElementById("totalStudents").innerText=data.length;
 });
 
-// Fetch total buses
 fetch('http://127.0.0.1:5000/get_buses')
 .then(res=>res.json())
 .then(data=>{
     document.getElementById("totalBuses").innerText=data.length;
 });
 
-// Fetch total routes
 fetch('http://127.0.0.1:5000/get_routes')
 .then(res=>res.json())
 .then(data=>{
     document.getElementById("totalRoutes").innerText=data.length;
 });
+
+// open modal
+function openChangePassword(){
+    document.getElementById("passwordModal").style.display="flex";
+}
+
+function closeModal(){
+    document.getElementById("passwordModal").style.display="none";
+}
+
+// ✅ FIXED PASSWORD FUNCTION (MAIN FIX HERE)
+function submitPassword(){
+
+    const oldPass = document.getElementById("oldPassword").value;
+    const newPass = document.getElementById("newPassword").value;
+
+    if(!oldPass || !newPass){
+        alert("Fill all fields");
+        return;
+    }
+
+    const username = localStorage.getItem("adminName");
+
+    if(!username){
+        alert("Session expired. Please login again");
+        window.location.href="../Home-page/login.html";
+        return;
+    }
+
+    fetch('http://127.0.0.1:5000/change_admin_password',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+            username: username,
+            old_password: oldPass,
+            new_password: newPass
+        })
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+        closeModal();
+    });
+}
+
+// logout
+function logout(){
+    localStorage.removeItem("adminName");
+    window.location.href="../Home-page/login.html";
+}
+
 </script>
 
 </body>
