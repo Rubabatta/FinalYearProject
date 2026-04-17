@@ -1,0 +1,54 @@
+<!-- HEADER -->
+<div class="header">
+    <h2>🚍 Student Dashboard</h2>
+
+    <div class="header-right">
+        <i class="fa fa-bell"></i>
+
+        <div class="profile">
+            <img id="headerImg" src="https://i.imgur.com/6VBx3io.png">
+        </div>
+    </div>
+</div>
+
+<style>
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:linear-gradient(90deg,#2563eb,#1e3a8a);
+padding:14px 20px;
+border-radius:12px;
+color:white;
+margin-bottom:18px;
+box-shadow:0 6px 18px rgba(0,0,0,0.12);
+}
+
+.header h2{font-size:17px;}
+
+.header-right{display:flex;align-items:center;gap:14px;}
+
+.profile img{
+width:38px;
+height:38px;
+border-radius:50%;
+object-fit:cover;
+border:2px solid white;
+}
+</style>
+
+<script>
+function setHeaderImage(){
+    const img = localStorage.getItem("profileImg");
+    const headerImg = document.getElementById("headerImg");
+
+    if(img && headerImg){
+        headerImg.src = img + "?t=" + Date.now();
+    }
+}
+
+setHeaderImage();
+
+// live update support
+window.addEventListener("storage", setHeaderImage);
+</script>

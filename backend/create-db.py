@@ -123,6 +123,15 @@ CREATE TABLE IF NOT EXISTS announcements (
     date TEXT
 )
 ''')
+
+# -----------------------------
+# Add image column (ONLY ONCE)
+# -----------------------------
+cursor.execute("PRAGMA table_info(students)")
+columns = [col[1] for col in cursor.fetchall()]
+
+if "image" not in columns:
+    cursor.execute("ALTER TABLE students ADD COLUMN image TEXT;")
 # Commit changes and close connection
 
 conn.commit()

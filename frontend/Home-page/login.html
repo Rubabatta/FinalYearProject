@@ -47,29 +47,23 @@ h1{
     margin-bottom:20px;
 }
 
-.input-group{
-    margin:10px 0;
-}
-
 input{
     width:100%;
     padding:12px;
+    margin:10px 0;
     border:none;
     border-radius:8px;
     outline:none;
-    font-size:14px;
 }
 
 button{
     width:100%;
     padding:12px;
-    margin-top:15px;
     border:none;
     border-radius:8px;
     background:#3b82f6;
     color:white;
     cursor:pointer;
-    font-weight:500;
 }
 
 button:hover{
@@ -79,7 +73,6 @@ button:hover{
 #message{
     margin-top:10px;
     color:white;
-    font-size:14px;
 }
 </style>
 </head>
@@ -87,22 +80,15 @@ button:hover{
 <body>
 
 <div class="menu-icon" onclick="goHome()">
-    <i class="fa fa-bars"></i>
+<i class="fa fa-bars"></i>
 </div>
 
 <div class="container">
 
 <h1>Login</h1>
 
-<!-- EMAIL / USERNAME -->
-<div class="input-group">
 <input type="text" id="identifier" placeholder="Email / Username">
-</div>
-
-<!-- PASSWORD -->
-<div class="input-group">
 <input type="password" id="password" placeholder="Password">
-</div>
 
 <button onclick="login()">Login</button>
 
@@ -114,81 +100,83 @@ button:hover{
 
 function login(){
 
-    const identifier = document.getElementById("identifier").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const message = document.getElementById("message");
+const identifier = document.getElementById("identifier").value.trim();
+const password = document.getElementById("password").value.trim();
+const message = document.getElementById("message");
 
-    if(identifier === "" || password === ""){
-        message.style.color="red";
-        message.innerText="❌ Please fill all fields";
-        return;
-    }
+if(identifier === "" || password === ""){
+message.style.color="red";
+message.innerText="❌ Please fill all fields";
+return;
+}
 
-    // 🔵 TRY STUDENT LOGIN FIRST
-    fetch('http://127.0.0.1:5000/student_login', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-            email: identifier,
-            password: password
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
+// ================= STUDENT LOGIN =================
+fetch('http://127.0.0.1:5000/student_login', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({
+email: identifier,
+password: password
+})
+})
+.then(res => res.json())
+.then(data => {
 
-        if(data.student){
+if(data.student){
 
-            message.style.color="lightgreen";
-            message.innerText="✅ Student Login Successful";
+message.style.color="lightgreen";
+message.innerText="✅ Student Login Successful";
 
-            localStorage.setItem("studentName", data.student.name);
+// ⭐⭐⭐ IMPORTANT FIX (THIS WAS MISSING)
+localStorage.setItem("student_id", data.student.id);
+localStorage.setItem("studentName", data.student.name);
+localStorage.setItem("studentEmail", data.student.email);
 
-            setTimeout(()=>{
-                // ✅ DIRECT STUDENT DASHBOARD
-                window.location.href="../Student-Dashboard/student-dashborad.html";
-            },500);
+setTimeout(()=>{
+window.location.href="../Student-Dashboard/student-dashborad.html";
+},500);
 
-        } 
-        else {
+} 
+else {
 
-            // 🔴 IF NOT STUDENT → TRY ADMIN
-            fetch('http://127.0.0.1:5000/admin_login', {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({
-                    username: identifier,
-                    password: password
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
+// ================= ADMIN LOGIN =================
+fetch('http://127.0.0.1:5000/admin_login', {
+method: 'POST',
+headers: {'Content-Type':'application/json'},
+body: JSON.stringify({
+username: identifier,
+password: password
+})
+})
+.then(res => res.json())
+.then(data => {
 
-                if(data.admin){
+if(data.admin){
 
-                    message.style.color="lightgreen";
-                    message.innerText="✅ Admin Login Successful";
+message.style.color="lightgreen";
+message.innerText="✅ Admin Login Successful";
 
-                    localStorage.setItem("adminName", data.admin.username);
+localStorage.setItem("adminName", data.admin.username);
 
-                    setTimeout(()=>{
-                        window.location.href="../Admin-Dashboard/admin.html";
-                    },500);
+setTimeout(()=>{
+window.location.href="../Admin-Dashboard/admin.html";
+},500);
 
-                } else {
-                    message.style.color="red";
-                    message.innerText="❌ Invalid credentials";
-                }
+} else {
+message.style.color="red";
+message.innerText="❌ Invalid credentials";
+}
 
-            });
+});
 
-        }
+}
 
-    });
+});
 
 }
 
 function goHome(){
-    window.location.href="index.html";
+window.location.href="index.html";
 }
 
 </script>

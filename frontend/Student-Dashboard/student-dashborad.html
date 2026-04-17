@@ -181,19 +181,9 @@ color:#444;
 
 <div class="main">
 
-<!-- HEADER -->
-<div class="header">
-<h2>🚍 Student Dashboard</h2>
+    <div id="header"></div>   <!-- ⭐ NEW -->
 
-<div class="header-right">
-<i class="fa fa-bell"></i>
-<div class="profile">
-<img src="https://i.imgur.com/6VBx3io.png">
-</div>
-</div>
-</div>
-
-<div class="container">
+    <div class="container">
 
 <!-- LEFT -->
 <div class="left">
@@ -242,7 +232,11 @@ color:#444;
 </div>
 
 <script>
-
+fetch("header.html")
+.then(res => res.text())
+.then(data => {
+    document.getElementById("header").innerHTML = data;
+});
 // Sidebar
 fetch("student-sidebar.html")
 .then(res=>res.text())
