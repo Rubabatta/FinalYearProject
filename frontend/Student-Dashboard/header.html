@@ -47,8 +47,9 @@ function setHeaderImage(){
     }
 }
 
-setHeaderImage();
+/* ✅ FIX 1: run after DOM is ready */
+document.addEventListener("DOMContentLoaded", setHeaderImage);
 
-// live update support
-window.addEventListener("storage", setHeaderImage);
+/* ✅ FIX 2: interval for real-time sync (reliable fix) */
+setInterval(setHeaderImage, 1000);
 </script>

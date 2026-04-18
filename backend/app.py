@@ -597,19 +597,8 @@ def change_admin_password():
 
 @app.route("/upload_profile_img", methods=["POST"])
 def upload_profile_img():
-
     file = request.files["image"]
     student_id = request.form["student_id"]
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    # GET student record first (IMPORTANT FIX)
-    cursor.execute("SELECT id FROM students WHERE id=?", (student_id,))
-    student = cursor.fetchone()
-
-    if not student:
-        return jsonify({"success": False, "message": "Student not found"}), 404
 
     folder = os.path.join("static", "profile")
     os.makedirs(folder, exist_ok=True)
@@ -619,14 +608,23 @@ def upload_profile_img():
 
     file.save(path)
 
-    image_url = f"http://127.0.0.1:5000/static/profile/{filename}"
+    image_url = f"/static/profile/{filename}"
 
-    cursor.execute("UPDATE students SET image=? WHERE id=?", (image_url, student_id))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "UPDATE students SET image=? WHERE id=?",
+        (image_url, student_id)
+    )
 
     conn.commit()
     conn.close()
 
-    return jsonify({"success": True, "image_url": image_url})
+    return jsonify({
+        "success": True,
+        "image_url": image_url
+    })
 
 # -----------------------------
 # Run Server

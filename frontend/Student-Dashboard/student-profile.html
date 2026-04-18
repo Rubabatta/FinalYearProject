@@ -118,11 +118,9 @@ font-size:14px;
 <div id="sidebar"></div>
 
 <div class="content">
-<div class="main">
 
-    <div id="header"></div>   <!-- ⭐ NEW -->
+<div id="header"></div>
 
-    <div class="container">
 <div class="page-title">
 <i class="fas fa-user"></i> Student Profile
 </div>
@@ -153,10 +151,22 @@ font-size:14px;
 </div>
 
 <script>
+
+/* HEADER LOAD + FIX (IMPORTANT CHANGE) */
 fetch("header.html")
 .then(res => res.text())
 .then(data => {
     document.getElementById("header").innerHTML = data;
+
+    // ✅ FIX: wait for DOM injection then set image
+    setTimeout(() => {
+        const img = localStorage.getItem("profileImg");
+        const headerImg = document.getElementById("headerImg");
+
+        if(img && headerImg){
+            headerImg.src = img + "?t=" + Date.now();
+        }
+    }, 150);
 });
 
 /* sidebar */
@@ -175,7 +185,7 @@ document.getElementById("profileData").innerHTML =
 throw new Error("No student_id");
 }
 
-/* default image (SAFE LOCAL) */
+/* default image */
 const defaultImg =
 "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTAiIGhlaWdodD0iOTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2VlZWVlZSIvPjwvc3ZnPg==";
 
@@ -191,7 +201,6 @@ fetch(`http://127.0.0.1:5000/get_student/${student_id}`)
 document.getElementById("name").innerText = data.name;
 document.getElementById("email").innerText = data.email;
 
-/* IMAGE FIX (NO GLITCH) */
 if(data.image && data.image !== "null"){
 document.getElementById("profileImg").src =
 data.image + "?t=" + Date.now();
@@ -235,8 +244,19 @@ body: formData
 let data = await res.json();
 
 if(data.success){
+
+/* ✅ FIX: update header sync */
+const imgUrl = data.image_url + "?t=" + Date.now();
+
+localStorage.setItem("profileImg", imgUrl);
+
+setTimeout(()=>{
+    const headerImg = document.getElementById("headerImg");
+    if(headerImg) headerImg.src = imgUrl;
+},200);
+
 setTimeout(()=>loadProfile(),500);
-} 
+}
 
 }catch(err){
 console.log(err);

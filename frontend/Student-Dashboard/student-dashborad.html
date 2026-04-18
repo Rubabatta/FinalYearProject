@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
@@ -20,13 +20,11 @@ body{
 background:#f4f6fb;
 }
 
-/* MAIN */
 .main{
 margin-left:230px;
 padding:25px;
 }
 
-/* HEADER */
 .header{
 display:flex;
 justify-content:space-between;
@@ -56,15 +54,13 @@ border-radius:50%;
 border:2px solid white;
 }
 
-/* GRID */
 .container{
 display:grid;
 grid-template-columns: 3fr 1.3fr;
 gap:18px;
-align-items:stretch; /* IMPORTANT */
+align-items:stretch;
 }
 
-/* LEFT */
 .left{
 display:flex;
 flex-direction:column;
@@ -102,7 +98,6 @@ font-size:13px;
 font-size:13px;
 }
 
-/* MAP */
 .map{
 height:340px;
 background:linear-gradient(135deg,#dbeafe,#eff6ff);
@@ -114,26 +109,23 @@ font-size:15px;
 color:#2563eb;
 }
 
-/* RIGHT SIDE */
 .right{
 display:flex;
 flex-direction:column;
 height:100%;
-gap:12px; /* 👈 ye space dega dono boxes ke beech */
+gap:12px;
 }
-/* STATUS BOX (BIG) */
+
 .status-box{
 background:white;
 padding:20px;
 border-radius:14px;
 box-shadow:0 4px 12px rgba(0,0,0,0.1);
 border-left:5px solid #2563eb;
-
 display:flex;
 flex-direction:column;
 gap:10px;
-
-flex:1; /* 👈 fills space */
+flex:1;
 }
 
 .status-box h3{
@@ -150,15 +142,13 @@ border-radius:8px;
 font-size:14px;
 }
 
-/* ANNOUNCEMENT */
 .announcement-box{
 background:white;
 padding:15px;
 border-radius:14px;
 box-shadow:0 4px 12px rgba(0,0,0,0.1);
 border-left:5px solid #10b981;
-
-margin-top:auto; /* 👈 stays bottom */
+margin-top:auto;
 }
 
 .announcement-box h3{
@@ -176,16 +166,14 @@ color:#444;
 
 <body>
 
-<!-- Sidebar -->
 <div id="sidebar"></div>
 
 <div class="main">
 
-    <div id="header"></div>   <!-- ⭐ NEW -->
+    <div id="header"></div>
 
     <div class="container">
 
-<!-- LEFT -->
 <div class="left">
 
 <div class="top-row">
@@ -208,16 +196,13 @@ color:#444;
 
 </div>
 
-<!-- RIGHT -->
 <div class="right">
 
 <div class="status-box">
 <h3>Bus Status 🚍</h3>
-
 <p><span>Bus</span> <span id="busName">--</span></p>
 <p><span>Current Stop</span> <span id="currentStop">--</span></p>
 <p><span>Next Stop</span> <span id="nextStop">--</span></p>
-
 </div>
 
 <div class="announcement-box">
@@ -228,15 +213,27 @@ color:#444;
 </div>
 
 </div>
-
 </div>
 
 <script>
+
+/* HEADER LOAD + FIX (MAIN ISSUE SOLVED HERE) */
 fetch("header.html")
 .then(res => res.text())
 .then(data => {
     document.getElementById("header").innerHTML = data;
+
+    // ⭐ FIX: header image sync
+    setTimeout(() => {
+        const img = localStorage.getItem("profileImg");
+        const headerImg = document.getElementById("headerImg");
+
+        if(img && headerImg){
+            headerImg.src = img;
+        }
+    }, 200);
 });
+
 // Sidebar
 fetch("student-sidebar.html")
 .then(res=>res.text())
@@ -284,7 +281,6 @@ updateAll(id,buses);
 });
 });
 
-// UPDATE
 function updateAll(busId,buses){
 const bus = buses.find(b=>b.id==busId);
 
