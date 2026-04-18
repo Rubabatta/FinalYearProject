@@ -3,6 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import hashlib
 import os
+from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
@@ -181,6 +182,27 @@ def login():
 # -----------------------------
 @app.route('/get_students', methods=['GET'])
 def get_students():
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+        id,
+        name,
+        email,
+        studentID,
+        center,
+        contact,
+        fees,
+        image
+        FROM students
+    """)
+
+    students = cursor.fetchall()
+    conn.close()
+
+    return jsonify([dict(s) for s in students])
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -625,7 +647,9 @@ def upload_profile_img():
         "success": True,
         "image_url": image_url
     })
-
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 # -----------------------------
 # Run Server
 # -----------------------------
