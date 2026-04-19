@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Settings</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#f4f6fb;
+display:flex;
+}
+
+/* sidebar */
+#sidebar{
+width:240px;
+}
+
+/* main */
+.main{
+margin-left:240px;
+padding:30px;
+width:100%;
+}
+
+.title{
+font-size:28px;
+font-weight:600;
+color:#1e3a8a;
+margin-bottom:25px;
+}
+
+/* box */
+.settings-box{
+background:white;
+padding:25px;
+border-radius:14px;
+box-shadow:0 8px 20px rgba(0,0,0,0.08);
+max-width:750px;
+}
+
+/* item */
+.setting-item{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:18px;
+border:1px solid #eee;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.left{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+.left i{
+width:42px;
+height:42px;
+border-radius:50%;
+background:#dbeafe;
+color:#2563eb;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+}
+
+.left h3{font-size:16px;}
+.left p{font-size:13px;color:#666;}
+
+/* buttons */
+.btn{
+border:none;
+padding:10px 16px;
+border-radius:8px;
+cursor:pointer;
+font-weight:500;
+}
+
+.blue{background:#2563eb;color:white;}
+.red{background:#ef4444;color:white;}
+.green{background:#10b981;color:white;}
+
+/* toggle */
+.toggle{
+width:40px;
+height:20px;
+background:#ccc;
+border-radius:20px;
+position:relative;
+cursor:pointer;
+}
+
+.toggle::after{
+content:'';
+width:16px;
+height:16px;
+background:white;
+position:absolute;
+top:2px;
+left:2px;
+border-radius:50%;
+transition:0.3s;
+}
+
+.toggle.active{
+background:#10b981;
+}
+
+.toggle.active::after{
+left:22px;
+}
+
+/* popup */
+.popup{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.5);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.popup-box{
+background:white;
+padding:20px;
+border-radius:12px;
+width:320px;
+}
+
+.popup-box input{
+width:100%;
+padding:10px;
+margin-bottom:10px;
+border:1px solid #ccc;
+border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="sidebar"></div>
+
+<div class="main">
+
+<div class="title">
+<i class="fa fa-gear"></i> Settings
+</div>
+
+<div class="settings-box">
+
+<!-- Profile -->
+<div class="setting-item">
+<div class="left">
+<i class="fa fa-user"></i>
+<div>
+<h3>Admin Profile</h3>
+<p>View admin account info</p>
+</div>
+</div>
+<button class="btn green" onclick="showProfile()">View</button>
+</div>
+
+<!-- Change Password -->
+<div class="setting-item">
+<div class="left">
+<i class="fa fa-key"></i>
+<div>
+<h3>Change Password</h3>
+<p>Update your admin password securely</p>
+</div>
+</div>
+<button class="btn blue" onclick="openPopup()">Open</button>
+</div>
+
+<!-- Notifications -->
+<div class="setting-item">
+<div class="left">
+<i class="fa fa-bell"></i>
+<div>
+<h3>Notifications</h3>
+<p>Enable or disable alerts</p>
+</div>
+</div>
+
+<div class="toggle" onclick="this.classList.toggle('active')"></div>
+</div>
+
+<!-- Clear Cache -->
+<div class="setting-item">
+<div class="left">
+<i class="fa fa-broom"></i>
+<div>
+<h3>Clear Cache</h3>
+<p>Remove temporary system data</p>
+</div>
+</div>
+<button class="btn red" onclick="clearCache()">Clear</button>
+</div>
+
+<!-- Logout -->
+<div class="setting-item">
+<div class="left">
+<i class="fa fa-right-from-bracket"></i>
+<div>
+<h3>Logout</h3>
+<p>Sign out from admin panel</p>
+</div>
+</div>
+<button class="btn red" onclick="logout()">Logout</button>
+</div>
+
+</div>
+</div>
+
+<!-- POPUP -->
+<div class="popup" id="popup">
+<div class="popup-box">
+
+<h3>Change Password</h3>
+
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="oldPass" placeholder="Old Password">
+<input type="password" id="newPass" placeholder="New Password">
+
+<button class="btn blue" onclick="changePassword()">Update</button>
+<button class="btn red" onclick="closePopup()">Close</button>
+
+</div>
+</div>
+
+<script>
+
+// sidebar
+fetch("sidebar.html")
+.then(r=>r.text())
+.then(d=>{
+document.getElementById("sidebar").innerHTML=d;
+});
+
+// popup
+function openPopup(){
+document.getElementById("popup").style.display="flex";
+}
+
+function closePopup(){
+document.getElementById("popup").style.display="none";
+}
+
+// logout
+function logout(){
+window.location.href="admin-login.html";
+}
+
+// cache clear (demo)
+function clearCache(){
+localStorage.clear();
+alert("Cache cleared successfully!");
+}
+
+// profile
+function showProfile(){
+alert("Admin: System Administrator\nRole: Admin Panel");
+}
+
+// password API
+function changePassword(){
+
+fetch("http://127.0.0.1:5000/change_admin_password",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+username:document.getElementById("username").value,
+old_password:document.getElementById("oldPass").value,
+new_password:document.getElementById("newPass").value
+})
+})
+.then(r=>r.json())
+.then(d=>{
+alert(d.message);
+if(d.message==="Password changed successfully"){
+closePopup();
+}
+});
+
+}
+
+</script>
+
+</body>
+</html>
