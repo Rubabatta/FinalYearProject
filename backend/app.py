@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+
 from flask_cors import CORS
 import sqlite3
 import hashlib
@@ -8,7 +8,11 @@ from flask import Flask, request, jsonify, send_from_directory
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
-DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+DB_NAME = os.path.join(BASE_DIR, "database.db")
+STATIC_FOLDER = os.path.join(BASE_DIR, "static")
+PROFILE_FOLDER = os.path.join(STATIC_FOLDER, "profile")
 
 # -----------------------------
 # Database Connection
@@ -619,14 +623,18 @@ def change_admin_password():
 
 @app.route("/upload_profile_img", methods=["POST"])
 def upload_profile_img():
+
     file = request.files["image"]
     student_id = request.form["student_id"]
 
-    folder = os.path.join("static", "profile")
-    os.makedirs(folder, exist_ok=True)
+    os.makedirs(PROFILE_FOLDER, exist_ok=True)
 
-    filename = f"{student_id}.jpg"
-    path = os.path.join(folder, filename)
+    ext = os.path.splitext(file.filename)[1]
+    if ext == "":
+        ext = ".jpg"
+
+    filename = f"{student_id}{ext}"
+    path = os.path.join(PROFILE_FOLDER, filename)
 
     file.save(path)
 
@@ -647,9 +655,10 @@ def upload_profile_img():
         "success": True,
         "image_url": image_url
     })
+   
 @app.route('/static/<path:filename>')
 def static_files(filename):
-    return send_from_directory('static', filename)
+    return send_from_directory(STATIC_FOLDER, filename)
 # -----------------------------
 # Run Server
 # -----------------------------
