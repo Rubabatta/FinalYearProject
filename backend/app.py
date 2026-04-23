@@ -1,4 +1,3 @@
-
 from flask_cors import CORS
 import sqlite3
 import hashlib
