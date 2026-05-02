@@ -659,9 +659,33 @@ def upload_profile_img():
 @app.route('/static/<path:filename>')
 def static_files(filename):
     return send_from_directory(STATIC_FOLDER, filename)
+
+#.........location route.........
+current_location = {}
+
+@app.route('/update_location', methods=['POST'])
+def update_location():
+    global current_location
+    current_location = request.get_json()
+    return {"status": "ok"}
+
+@app.route('/get_location')
+def get_location():
+    return current_location
+
+
+# -----------------------------
+# FRONTEND ROUTE (ADD THIS)
+# -----------------------------
+@app.route('/frontend/<path:filename>')
+def frontend(filename):
+    return send_from_directory('../frontend', filename)
+
+@app.route('/mobile.html')
+def mobile():
+    return send_from_directory('../frontend', 'mobile.html')
 # -----------------------------
 # Run Server
 # -----------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
-
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -7,7 +7,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
 *{
 margin:0;
@@ -181,7 +181,7 @@ color:#444;
 
 </div>
 
-<div class="map">🗺️ Live Bus Tracking Map</div>
+<div id="map" class="map"></div>
 
 </div>
 
@@ -203,7 +203,7 @@ color:#444;
 
 </div>
 </div>
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 
 // HEADER
@@ -221,7 +221,7 @@ document.getElementById("sidebar").innerHTML = data;
 });
 
 // ANNOUNCEMENTS ✔ FIXED
-fetch("http://127.0.0.1:5000/get-announcements")
+fetch("http://192.168.100.145:5000/get-announcements")
 .then(res => res.json())
 .then(data => {
 
@@ -237,7 +237,7 @@ document.getElementById("announcement").textContent = "No announcements";
 });
 
 // BUS DATA
-fetch("http://127.0.0.1:5000/get_buses")
+fetch("http://192.168.100.145:5000/get_buses")
 .then(res=>res.json())
 .then(buses=>{
 
@@ -271,7 +271,43 @@ bus ? bus.start_point : "--";
 document.getElementById("nextStop").textContent =
 bus ? bus.end_point : "--";
 }
+let map = L.map('map').setView([24.8607, 67.0011], 13);
 
+// OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+// marker
+let marker = L.marker([24.8607, 67.0011]).addTo(map);
+
+setInterval(() => {
+
+  fetch("http://192.168.100.145:5000/get_location")
+    .then(res => res.json())
+    .then(data => {
+
+      console.log("Received:", data);
+
+      if (data.lat && data.lng) {
+
+        let lat = parseFloat(data.lat);
+        let lng = parseFloat(data.lng);
+
+        // move marker
+        marker.setLatLng([lat, lng]);
+
+        // smooth map follow
+        map.panTo([lat, lng]);
+
+      }
+
+    })
+    .catch(err => {
+      console.log("Location fetch error:", err);
+    });
+
+}, 3000);
 </script>
 
 </body>
