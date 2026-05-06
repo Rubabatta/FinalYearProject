@@ -281,33 +281,37 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 // marker
 let marker = L.marker([24.8607, 67.0011]).addTo(map);
 
+// LIVE LOCATION UPDATE
 setInterval(() => {
 
-  fetch("http://192.168.100.145:5000/get_location")
+  fetch("https://frightful-skies-untrimmed.ngrok-free.dev/get_location")
     .then(res => res.json())
     .then(data => {
 
-      console.log("Received:", data);
+      console.log("Location received:", data);
 
-      if (data.lat && data.lng) {
+      // SAFE CHECK
+      if (data && data.lat !== undefined && data.lng !== undefined) {
 
-        let lat = parseFloat(data.lat);
-        let lng = parseFloat(data.lng);
+        let lat = Number(data.lat);
+        let lng = Number(data.lng);
 
-        // move marker
-        marker.setLatLng([lat, lng]);
+        if (!isNaN(lat) && !isNaN(lng)) {
 
-        // smooth map follow
-        map.panTo([lat, lng]);
+          marker.setLatLng([lat, lng]);
+          map.setView([lat, lng]); // follow bus
+
+        }
 
       }
 
     })
     .catch(err => {
-      console.log("Location fetch error:", err);
+      console.log("Error fetching location:", err);
     });
 
 }, 3000);
+
 </script>
 
 </body>

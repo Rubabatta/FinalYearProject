@@ -132,8 +132,8 @@ columns = [col[1] for col in cursor.fetchall()]
 
 if "image" not in columns:
     cursor.execute("ALTER TABLE students ADD COLUMN image TEXT;")
-# Commit changes and close connection
 
+# Commit changes and close connection
 conn.commit()
 conn.close()
 
