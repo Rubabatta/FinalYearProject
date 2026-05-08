@@ -7,11 +7,11 @@
 <title>Track Bus</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
+<style>
 *{
 margin:0;
 padding:0;
@@ -23,27 +23,24 @@ body{
 background:#f4f6fb;
 }
 
-/* MAIN CONTENT */
+#sidebar{
+position:fixed;
+left:0;
+top:0;
+height:100%;
+width:240px;
+background:#fff;
+}
 
 .main{
 margin-left:240px;
 padding:30px;
 }
 
-/* HEADER */
-
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:30px;
-}
-
 .header h1{
 color:#1e3a8a;
+margin-bottom:20px;
 }
-
-/* INFO CARDS */
 
 .cards{
 display:grid;
@@ -55,57 +52,34 @@ margin-bottom:30px;
 .card{
 background:white;
 padding:20px;
-border-radius:10px;
+border-radius:12px;
 box-shadow:0 3px 10px rgba(0,0,0,0.1);
-display:flex;
-align-items:center;
-gap:15px;
 }
 
 .card i{
-font-size:25px;
 color:#2563eb;
-}
-
-.card h3{
-font-size:16px;
-color:#555;
+font-size:22px;
+margin-bottom:10px;
 }
 
 .card p{
 font-size:18px;
-font-weight:500;
+font-weight:600;
+color:#1e3a8a;
 }
 
-/* MAP SECTION */
-
-.map-section{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
+#map{
+height:400px;
+width:100%;
+border-radius:12px;
 }
-
-.map{
-height:350px;
-background:#dbeafe;
-border-radius:8px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:18px;
-color:#333;
-margin-top:15px;
-}
-
 </style>
+
 </head>
 
 <body>
 
-<!-- Sidebar Load -->
 <div id="sidebar"></div>
-
 
 <div class="main">
 
@@ -113,60 +87,101 @@ margin-top:15px;
 <h1>Track Shuttle</h1>
 </div>
 
-
-<!-- Bus Info -->
-
 <div class="cards">
 
 <div class="card">
 <i class="fas fa-bus"></i>
-<div>
 <h3>Bus Number</h3>
-<p>Bus 02</p>
-</div>
+<p id="busNo">Loading...</p>
 </div>
 
 <div class="card">
 <i class="fas fa-map-marker-alt"></i>
-<div>
 <h3>Current Location</h3>
-<p>City Mall</p>
-</div>
+<p id="location">Waiting...</p>
 </div>
 
 <div class="card">
 <i class="fas fa-clock"></i>
-<div>
-<h3>Arrival Time</h3>
-<p>10 Minutes</p>
-</div>
+<h3>Last Update</h3>
+<p id="time">---</p>
 </div>
 
 </div>
 
-
-<!-- Map -->
-
-<div class="map-section">
-
-<h2>Live Bus Location</h2>
-
-<div class="map">
-Map will appear here
-</div>
+<!-- MAP -->
+<div id="map"></div>
 
 </div>
 
-</div>
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
+// sidebar load
 fetch("student-sidebar.html")
-.then(res => res.text())
-.then(data =>{
-document.getElementById("sidebar").innerHTML=data;
+.then(r => r.text())
+.then(d => {
+document.getElementById("sidebar").innerHTML = d;
+});
+
+// MAP INIT
+let map = L.map('map').setView([30.1575, 71.5249], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+maxZoom: 19
+}).addTo(map);
+
+// marker
+let marker = L.marker([30.1575, 71.5249]).addTo(map);
+
+// =======================
+// LIVE LOCATION FUNCTION
+// =======================
+function loadLocation() {
+
+fetch("http://192.168.100.145:5000/get_location/2")
+.then(res => res.json())
+.then(data => {
+
+console.log("API DATA:", data);
+
+// if no data
+if (!data || data.message) {
+console.log("No location found");
+return;
+}
+
+let lat = parseFloat(data.latitude);
+let lng = parseFloat(data.longitude);
+
+// validation
+if (isNaN(lat) || isNaN(lng)) {
+console.log("Invalid coordinates");
+return;
+}
+
+// UI update
+document.getElementById("busNo").innerText = data.bus_id;
+document.getElementById("location").innerText = lat + ", " + lng;
+document.getElementById("time").innerText = data.last_updated || "Now";
+
+// map update
+marker.setLatLng([lat, lng]);
+map.setView([lat, lng], 16);
+
 })
+.catch(err => {
+console.log("API ERROR:", err);
+});
+
+}
+
+// =======================
+// AUTO START (IMPORTANT FIX)
+// =======================
+setInterval(loadLocation, 5000);
+loadLocation();
 
 </script>
 

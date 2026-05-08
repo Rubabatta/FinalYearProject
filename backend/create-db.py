@@ -45,20 +45,6 @@ INSERT OR IGNORE INTO admins (username, password) VALUES (?, ?)
 """, (admin_username, admin_password))
 
 # -----------------------------
-# Drivers Table
-# -----------------------------
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS drivers (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE,
-    password TEXT,
-    contact TEXT,
-    assigned_bus_id INTEGER
-)
-''')
-
-# -----------------------------
 # Routes Table
 # -----------------------------
 cursor.execute('''
@@ -124,6 +110,19 @@ CREATE TABLE IF NOT EXISTS announcements (
 )
 ''')
 
+# -----------------------------
+# Drivers Table
+# -----------------------------
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS drivers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE,
+    password TEXT,
+    contact TEXT,
+    route_number TEXT
+)
+''')
 # -----------------------------
 # Add image column (ONLY ONCE)
 # -----------------------------

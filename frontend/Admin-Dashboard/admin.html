@@ -118,6 +118,7 @@ background:#ef4444 !important;
 </div>
 
 <div class="cards">
+
     <div class="card">
         <div>
             <h3>Total Students</h3>
@@ -141,6 +142,16 @@ background:#ef4444 !important;
         </div>
         <i class="fa fa-route"></i>
     </div>
+
+    <!-- ⭐ NEW DRIVER CARD -->
+    <div class="card">
+        <div>
+            <h3>Total Drivers</h3>
+            <p id="totalDrivers">0</p>
+        </div>
+        <i class="fa fa-id-card"></i>
+    </div>
+
 </div>
 </div>
 
@@ -182,6 +193,9 @@ fetch('http://127.0.0.1:5000/get_routes')
 .then(data=>{
     document.getElementById("totalRoutes").innerText=data.length;
 });
+fetch('http://127.0.0.1:5000/get_drivers')
+.then(r=>r.json())
+.then(d=>document.getElementById("totalDrivers").innerText=d.length);
 
 // open modal
 function openChangePassword(){

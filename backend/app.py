@@ -3,6 +3,7 @@ import sqlite3
 import hashlib
 import os
 from flask import Flask, request, jsonify, send_from_directory
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
@@ -659,20 +660,54 @@ def upload_profile_img():
 def static_files(filename):
     return send_from_directory(STATIC_FOLDER, filename)
 
-#.........location route.........
-current_location = {}
+
 
 @app.route('/update_location', methods=['POST'])
 def update_location():
-    global current_location
-    current_location = request.get_json()
-    return {"status": "ok"}
 
-@app.route('/get_location')
-def get_location():
-    return current_location
+    data = request.get_json()
+
+    print("LOCATION DATA:", data)
+
+    bus_id = data.get('bus_id')
+    latitude = data.get('latitude')
+    longitude = data.get('longitude')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO bus_locations
+        (bus_id, latitude, longitude, last_updated)
+        VALUES (?, ?, ?, datetime('now'))
+    """, (bus_id, latitude, longitude))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Location updated"})
 
 
+@app.route('/get_location/<int:bus_id>', methods=['GET'])
+def get_location(bus_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM bus_locations
+        WHERE bus_id=?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (bus_id,))
+
+    location = cursor.fetchone()
+    conn.close()
+
+    if location:
+        return jsonify(dict(location))
+    else:
+        return jsonify({"message": "No location found"})
 # -----------------------------
 # FRONTEND ROUTE (ADD THIS)
 # -----------------------------
@@ -683,6 +718,137 @@ def frontend(filename):
 @app.route('/mobile.html')
 def mobile():
     return send_from_directory('../frontend', 'mobile.html')
+
+#//////////////////////
+#  Driver Login
+#//////////////////////
+
+@app.route('/driver_login', methods=['POST'])
+def driver_login():
+    data = request.get_json()
+
+    email = data.get('email')
+    password = data.get('password')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # check driver exists (ONLY admin-added drivers)
+    cursor.execute("""
+        SELECT * FROM drivers
+        WHERE email=? AND password=?
+    """, (email, password))
+
+    driver = cursor.fetchone()
+    conn.close()
+
+    if driver:
+        return jsonify({
+            "message": "Login successful",
+            "driver": {
+                "id": driver["id"],
+                "name": driver["name"],
+                "email": driver["email"],
+                "route_number": driver["route_number"]
+            }
+        })
+    else:
+        return jsonify({
+            "message": "Driver not found or invalid credentials"
+        }), 401
+#......................
+#Add Driver
+#......................
+@app.route('/add_driver', methods=['POST'])
+def add_driver():
+    data = request.get_json()
+
+    print("DATA RECEIVED:", data)
+
+    name = data.get('name')
+    email = data.get('email')
+    password = data.get('password')
+    contact = data.get('contact')
+    route_number = data.get('route_number')
+
+    if not all([name, email, password]):
+        return jsonify({"message": "Missing required fields"}), 400
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT * FROM drivers WHERE email=?", (email,))
+        if cursor.fetchone():
+            return jsonify({"message": "Driver already exists"}), 400
+
+        cursor.execute("""
+            INSERT INTO drivers (name, email, password, contact, route_number)
+            VALUES (?, ?, ?, ?, ?)
+        """, (name, email, password, contact, route_number))
+
+        conn.commit()
+        return jsonify({"message": "Driver added successfully"})
+
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"message": "Server error"}), 500
+
+    finally:
+        conn.close()
+
+
+@app.route('/get_drivers', methods=['GET'])
+def get_drivers():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM drivers")
+    drivers = cursor.fetchall()
+
+    conn.close()
+
+    return jsonify([dict(d) for d in drivers])
+
+
+@app.route('/update_driver/<int:id>', methods=['PUT'])
+def update_driver(id):
+    data = request.get_json()
+
+    name = data.get('name')
+    email = data.get('email')
+    contact = data.get('contact')
+    route_number = data.get('route_number')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE drivers
+        SET name=?, email=?, contact=?, route_number=?
+        WHERE id=?
+    """, (name, email, contact, route_number, id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Driver updated successfully"})
+
+
+@app.route('/delete_driver/<int:id>', methods=['DELETE'])
+def delete_driver(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM drivers WHERE id=?", (id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Driver deleted successfully"})
+
+
+    
 # -----------------------------
 # Run Server
 # -----------------------------
