@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Track Bus</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 <style>
@@ -109,7 +107,6 @@ border-radius:12px;
 
 </div>
 
-<!-- MAP -->
 <div id="map"></div>
 
 </div>
@@ -118,12 +115,18 @@ border-radius:12px;
 
 <script>
 
+// =======================
+// CHANGE ONLY THIS URL 👇
+// =======================
+const API_URL = "https://acceptable-solace-production-1bb7.up.railway.app";
+
 // sidebar load
 fetch("student-sidebar.html")
 .then(r => r.text())
 .then(d => {
 document.getElementById("sidebar").innerHTML = d;
-});
+})
+.catch(err => console.log("Sidebar error:", err));
 
 // MAP INIT
 let map = L.map('map').setView([30.1575, 71.5249], 13);
@@ -140,22 +143,21 @@ let marker = L.marker([30.1575, 71.5249]).addTo(map);
 // =======================
 function loadLocation() {
 
-fetch("http://192.168.100.145:5000/get_location/2")
+fetch(`${API_URL}/get_location/2`)
 .then(res => res.json())
 .then(data => {
 
 console.log("API DATA:", data);
 
-// if no data
+// no data
 if (!data || data.message) {
-console.log("No location found");
+document.getElementById("location").innerText = "No location";
 return;
 }
 
 let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
-// validation
 if (isNaN(lat) || isNaN(lng)) {
 console.log("Invalid coordinates");
 return;
@@ -173,15 +175,14 @@ map.setView([lat, lng], 16);
 })
 .catch(err => {
 console.log("API ERROR:", err);
+document.getElementById("location").innerText = "API Error";
 });
 
 }
 
-// =======================
-// AUTO START (IMPORTANT FIX)
-// =======================
-setInterval(loadLocation, 5000);
+// AUTO START
 loadLocation();
+setInterval(loadLocation, 5000);
 
 </script>
 
