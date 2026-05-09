@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Track Bus</title>
+<title>Live Bus Tracking</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
 body{
@@ -20,7 +20,7 @@ margin-left:240px;
 }
 
 #map{
-height:400px;
+height:420px;
 border-radius:12px;
 margin-top:20px;
 }
@@ -30,6 +30,19 @@ background:#fff;
 padding:15px;
 border-radius:10px;
 margin-bottom:10px;
+box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+input,button{
+padding:10px;
+margin-top:10px;
+}
+
+button{
+background:green;
+color:white;
+border:none;
+cursor:pointer;
 }
 </style>
 </head>
@@ -38,17 +51,15 @@ margin-bottom:10px;
 
 <div class="main">
 
-<h2>🚍 Live Bus Tracking</h2>
+<h2>🚍 Live Bus Tracking System</h2>
 
-<!-- BUS INPUT -->
-<input type="number" id="busIdInput" placeholder="Enter Bus ID"
-style="padding:10px;width:200px;margin-bottom:10px;">
-
-<button onclick="startTracking()">Track</button>
+<input type="number" id="busIdInput" placeholder="Enter Bus ID">
+<button onclick="startTracking()">Track Bus</button>
 
 <div class="card">
 Bus: <span id="busNo">-</span><br>
 Location: <span id="location">Waiting...</span><br>
+Status: <span id="status">Idle</span><br>
 Time: <span id="time">-</span>
 </div>
 
@@ -60,7 +71,7 @@ Time: <span id="time">-</span>
 
 <script>
 
-const API_URL = "https://acceptable-solace-production-06f3.up.railway.app/";
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
 
 let map = L.map('map').setView([30.1575, 71.5249], 13);
 
@@ -68,15 +79,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 maxZoom: 19
 }).addTo(map);
 
-// default marker
 let marker = L.marker([30.1575, 71.5249]).addTo(map);
 
-let busId = null;
 let interval = null;
+let busId = null;
 
-// -----------------------------
-// START TRACKING
-// -----------------------------
+// ---------------- START TRACKING ----------------
 function startTracking(){
 
 busId = document.getElementById("busIdInput").value;
@@ -86,53 +94,64 @@ alert("Enter Bus ID");
 return;
 }
 
-// stop old interval
 if(interval) clearInterval(interval);
 
-// first call
 loadLocation();
-
-// repeat every 5 sec
-interval = setInterval(loadLocation, 5000);
+interval = setInterval(loadLocation, 4000);
 }
 
-// -----------------------------
-// LOAD LOCATION
-// -----------------------------
+// ---------------- LOAD LOCATION ----------------
 function loadLocation(){
 
 fetch(`${API_URL}/get_location/${busId}`)
-.then(res => res.json())
+.then(res => {
+
+if(!res.ok){
+throw new Error("HTTP Error " + res.status);
+}
+
+return res.json();
+
+})
 .then(data => {
 
-if(!data || data.message){
-document.getElementById("location").innerText = "No data";
+if(!data || data.message || data.error){
+
+document.getElementById("location").innerText = "Bus Offline";
+document.getElementById("status").innerText = "🔴 Inactive";
+document.getElementById("busNo").innerText = busId;
 return;
 }
 
 let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
+if(isNaN(lat) || isNaN(lng)){
+document.getElementById("status").innerText = "Invalid GPS Data";
+return;
+}
+
 // UI update
 document.getElementById("busNo").innerText = data.bus_id;
-document.getElementById("location").innerText = lat + ", " + lng;
+document.getElementById("location").innerText = lat.toFixed(5) + ", " + lng.toFixed(5);
 document.getElementById("time").innerText = data.last_updated;
+document.getElementById("status").innerText = "🟢 Live";
 
-// -----------------------------
-// SMOOTH MARKER MOVEMENT
-// -----------------------------
-marker.setLatLng([lat, lng]).update();
+// marker move
+marker.setLatLng([lat, lng]);
 
-// smooth map follow (not jumpy)
-map.panTo([lat, lng], {
-animate: true,
-duration: 1
-});
+// smooth follow
+map.panTo([lat, lng]);
 
 })
+
 .catch(err => {
-console.log(err);
-document.getElementById("location").innerText = "Server Error";
+
+console.log("ERROR:", err);
+
+document.getElementById("status").innerText = "Server Error";
+document.getElementById("location").innerText = "Connection Failed";
+
 });
 
 }
