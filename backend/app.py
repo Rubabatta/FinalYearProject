@@ -675,11 +675,11 @@ def update_location():
 
     data = request.get_json()
 
-    print("LOCATION DATA:", data)
-
     bus_id = data.get('bus_id')
     latitude = data.get('latitude')
     longitude = data.get('longitude')
+
+    print("📩 RECEIVED:", data)   # 👈 optional debug
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -691,11 +691,13 @@ def update_location():
     """, (bus_id, latitude, longitude))
 
     conn.commit()
+
+    # ⭐ THIS LINE ADD HERE 👇
+    print("📍 LOCATION SAVED:", bus_id, latitude, longitude)
+
     conn.close()
 
     return jsonify({"message": "Location updated"})
-
-
 @app.route('/get_location/<int:bus_id>')
 def get_location(bus_id):
 

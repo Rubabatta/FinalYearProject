@@ -115,20 +115,17 @@ border-radius:12px;
 
 <script>
 
-// =======================
-// CHANGE ONLY THIS URL 👇
-// =======================
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app/";
 
-// sidebar load
+// optional sidebar
 fetch("student-sidebar.html")
 .then(r => r.text())
 .then(d => {
 document.getElementById("sidebar").innerHTML = d;
 })
-.catch(err => console.log("Sidebar error:", err));
+.catch(() => {});
 
-// MAP INIT
+// map init
 let map = L.map('map').setView([30.1575, 71.5249], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -138,20 +135,20 @@ maxZoom: 19
 // marker
 let marker = L.marker([30.1575, 71.5249]).addTo(map);
 
-// =======================
-// LIVE LOCATION FUNCTION
-// =======================
+// ⭐ CHANGE THIS IF MULTIPLE BUSES
+let busId = 2;
+
 function loadLocation() {
 
-fetch(`${API_URL}/get_location/2`)
+fetch(`${API_URL}/get_location/${busId}`)
 .then(res => res.json())
 .then(data => {
 
 console.log("API DATA:", data);
 
-// no data
+// safe check
 if (!data || data.message) {
-document.getElementById("location").innerText = "No location";
+document.getElementById("location").innerText = "No location found";
 return;
 }
 
@@ -159,14 +156,14 @@ let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
 if (isNaN(lat) || isNaN(lng)) {
-console.log("Invalid coordinates");
+document.getElementById("location").innerText = "Invalid coordinates";
 return;
 }
 
 // UI update
-document.getElementById("busNo").innerText = data.bus_id;
-document.getElementById("location").innerText = lat + ", " + lng;
-document.getElementById("time").innerText = data.last_updated || "Now";
+document.getElementById("busNo").innerText = data.bus_id || busId;
+document.getElementById("location").innerText = lat.toFixed(5) + ", " + lng.toFixed(5);
+document.getElementById("time").innerText = data.last_updated || "Just now";
 
 // map update
 marker.setLatLng([lat, lng]);
@@ -175,12 +172,12 @@ map.setView([lat, lng], 16);
 })
 .catch(err => {
 console.log("API ERROR:", err);
-document.getElementById("location").innerText = "API Error";
+document.getElementById("location").innerText = "Server Error";
 });
 
 }
 
-// AUTO START
+// start
 loadLocation();
 setInterval(loadLocation, 5000);
 
