@@ -722,6 +722,38 @@ def get_location(bus_id):
 
     except Exception as e:
         return jsonify({"error": str(e)})
+    
+
+    #.......................
+    #  All Location
+    #========================
+
+
+    # =========================
+# GET ALL BUSES LOCATION
+# =========================
+@app.route('/get_all_locations', methods=['GET'])
+def get_all_locations():
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT bl.*
+        FROM bus_locations bl
+        INNER JOIN (
+            SELECT bus_id, MAX(id) as max_id
+            FROM bus_locations
+            GROUP BY bus_id
+        ) latest
+        ON bl.id = latest.max_id
+    """)
+
+    locations = cursor.fetchall()
+
+    conn.close()
+
+    return jsonify([dict(row) for row in locations])
 # -----------------------------
 # FRONTEND ROUTE (ADD THIS)
 # -----------------------------
