@@ -749,6 +749,33 @@ def get_all_locations():
             result.append(dict(row))
 
     return jsonify(result)
+# =========================
+# GET SINGLE BUS LOCATION
+# =========================
+@app.route('/get_location/<int:bus_id>', methods=['GET'])
+def get_location(bus_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM bus_locations
+        WHERE bus_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (bus_id,))
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row:
+        return jsonify(dict(row))
+    else:
+        return jsonify({
+            "message": "No location found"
+        }), 404
 #==================================student get loc by route================
 
 

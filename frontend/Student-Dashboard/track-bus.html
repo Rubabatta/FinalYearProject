@@ -1,66 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Live Bus Tracking</title>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
+
 body{
-font-family:Poppins;
-background:#f4f6fb;
 margin:0;
+font-family:Arial;
+background:#f4f6fb;
 }
 
 .main{
 padding:20px;
-margin-left:240px;
 }
 
-#map{
-height:420px;
-border-radius:12px;
-margin-top:20px;
+.top{
+display:flex;
+gap:10px;
+margin-bottom:15px;
 }
 
-.card{
-background:#fff;
-padding:15px;
+input{
+padding:12px;
+width:220px;
+border:none;
 border-radius:10px;
-margin-bottom:10px;
-box-shadow:0 2px 10px rgba(0,0,0,0.08);
-}
-
-input,button{
-padding:10px;
-margin-top:10px;
+font-size:16px;
 }
 
 button{
-background:green;
-color:white;
+padding:12px 20px;
 border:none;
+background:#2563eb;
+color:white;
+border-radius:10px;
+font-size:16px;
 cursor:pointer;
 }
+
+.card{
+background:white;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+line-height:1.8;
+}
+
+#map{
+height:500px;
+border-radius:12px;
+}
+
+.live{
+color:green;
+font-weight:bold;
+}
+
+.error{
+color:red;
+font-weight:bold;
+}
+
 </style>
+
 </head>
 
 <body>
 
 <div class="main">
 
-<h2>🚍 Live Bus Tracking System</h2>
+<h2>🚍 Live Bus Tracking</h2>
 
-<input type="number" id="busIdInput" placeholder="Enter Bus ID">
-<button onclick="startTracking()">Track Bus</button>
+<div class="top">
+
+<input
+type="number"
+id="busIdInput"
+placeholder="Enter Bus ID"
+/>
+
+<button onclick="startTracking()">
+Track Bus
+</button>
+
+</div>
 
 <div class="card">
-Bus: <span id="busNo">-</span><br>
-Location: <span id="location">Waiting...</span><br>
-Status: <span id="status">Idle</span><br>
-Time: <span id="time">-</span>
+
+<b>Bus:</b>
+<span id="busNo">-</span>
+
+<br>
+
+<b>Location:</b>
+<span id="location">Waiting...</span>
+
+<br>
+
+<b>Status:</b>
+<span id="status" class="error">
+Not Connected
+</span>
+
+<br>
+
+<b>Time:</b>
+<span id="time">-</span>
+
 </div>
 
 <div id="map"></div>
@@ -71,86 +125,116 @@ Time: <span id="time">-</span>
 
 <script>
 
-const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+// IMPORTANT
+const API_URL =
+"https://acceptable-solace-production-06f3.up.railway.app";
 
-let map = L.map('map').setView([30.1575, 71.5249], 13);
+let map = L.map('map').setView([30.1575,71.5249],13);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-maxZoom: 19
-}).addTo(map);
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+maxZoom:19
+}
+).addTo(map);
 
-let marker = L.marker([30.1575, 71.5249]).addTo(map);
+let marker = L.marker([30.1575,71.5249])
+.addTo(map);
 
 let interval = null;
 let busId = null;
 
-// ---------------- START TRACKING ----------------
 function startTracking(){
 
-busId = document.getElementById("busIdInput").value;
+busId =
+document.getElementById("busIdInput").value;
 
 if(!busId){
 alert("Enter Bus ID");
 return;
 }
 
-if(interval) clearInterval(interval);
-
-loadLocation();
-interval = setInterval(loadLocation, 4000);
+if(interval){
+clearInterval(interval);
 }
 
-// ---------------- LOAD LOCATION ----------------
+loadLocation();
+
+interval = setInterval(loadLocation,5000);
+
+}
+
 function loadLocation(){
 
 fetch(`${API_URL}/get_location/${busId}`)
-.then(res => {
 
-if(!res.ok){
-throw new Error("HTTP Error " + res.status);
+.then(async response => {
+
+console.log("STATUS:", response.status);
+
+if(!response.ok){
+
+const text = await response.text();
+console.log("SERVER RESPONSE:", text);
+
+throw new Error("Server Error");
 }
 
-return res.json();
+return response.json();
 
 })
+
 .then(data => {
 
-if(!data || data.message || data.error){
-
-document.getElementById("location").innerText = "Bus Offline";
-document.getElementById("status").innerText = "🔴 Inactive";
-document.getElementById("busNo").innerText = busId;
-return;
-}
+console.log("DATA:", data);
 
 let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
 if(isNaN(lat) || isNaN(lng)){
-document.getElementById("status").innerText = "Invalid GPS Data";
+
+document.getElementById("location")
+.innerText = "Invalid Coordinates";
+
 return;
 }
 
-// UI update
-document.getElementById("busNo").innerText = data.bus_id;
-document.getElementById("location").innerText = lat.toFixed(5) + ", " + lng.toFixed(5);
-document.getElementById("time").innerText = data.last_updated;
-document.getElementById("status").innerText = "🟢 Live";
+document.getElementById("busNo")
+.innerText = data.bus_id;
 
-// marker move
-marker.setLatLng([lat, lng]);
+document.getElementById("location")
+.innerText = lat + ", " + lng;
 
-// smooth follow
-map.panTo([lat, lng]);
+document.getElementById("time")
+.innerText = data.last_updated;
+
+document.getElementById("status")
+.innerText = "🟢 LIVE";
+
+document.getElementById("status")
+.className = "live";
+
+marker.setLatLng([lat,lng]);
+
+map.panTo([lat,lng],{
+animate:true,
+duration:1
+});
 
 })
 
-.catch(err => {
+.catch(error => {
 
-console.log("ERROR:", err);
+console.log("ERROR:", error);
 
-document.getElementById("status").innerText = "Server Error";
-document.getElementById("location").innerText = "Connection Failed";
+document.getElementById("location")
+.innerText = "Connection Failed";
+
+document.getElementById("status")
+.innerText = "❌ Server Error";
+
+document.getElementById("status")
+.className = "error";
 
 });
 
