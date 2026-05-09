@@ -43,6 +43,7 @@ margin-bottom:10px;
 <!-- BUS INPUT -->
 <input type="number" id="busIdInput" placeholder="Enter Bus ID"
 style="padding:10px;width:200px;margin-bottom:10px;">
+
 <button onclick="startTracking()">Track</button>
 
 <div class="card">
@@ -67,11 +68,15 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 maxZoom: 19
 }).addTo(map);
 
+// default marker
 let marker = L.marker([30.1575, 71.5249]).addTo(map);
 
 let busId = null;
 let interval = null;
 
+// -----------------------------
+// START TRACKING
+// -----------------------------
 function startTracking(){
 
 busId = document.getElementById("busIdInput").value;
@@ -81,16 +86,19 @@ alert("Enter Bus ID");
 return;
 }
 
-// stop previous loop
+// stop old interval
 if(interval) clearInterval(interval);
 
-// first load
+// first call
 loadLocation();
 
 // repeat every 5 sec
 interval = setInterval(loadLocation, 5000);
 }
 
+// -----------------------------
+// LOAD LOCATION
+// -----------------------------
 function loadLocation(){
 
 fetch(`${API_URL}/get_location/${busId}`)
@@ -105,21 +113,31 @@ return;
 let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
+// UI update
 document.getElementById("busNo").innerText = data.bus_id;
 document.getElementById("location").innerText = lat + ", " + lng;
 document.getElementById("time").innerText = data.last_updated;
 
-marker.setLatLng([lat, lng]);
-map.setView([lat, lng], 16);
+// -----------------------------
+// SMOOTH MARKER MOVEMENT
+// -----------------------------
+marker.setLatLng([lat, lng]).update();
+
+// smooth map follow (not jumpy)
+map.panTo([lat, lng], {
+animate: true,
+duration: 1
+});
 
 })
 .catch(err => {
 console.log(err);
 document.getElementById("location").innerText = "Server Error";
 });
+
 }
 
 </script>
 
 </body>
-</html> 
+</html>

@@ -1,49 +1,80 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>All Buses Live Tracking</title>
+<title>Live Bus Tracking System</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-
 body{
 margin:0;
 font-family:Poppins;
-background:#f4f6fb;
+display:flex;
 }
 
-h1{
-padding:20px;
-color:#1e3a8a;
+/* SIDEBAR */
+.sidebar{
+width:260px;
+height:100vh;
+background:#1e3a8a;
+color:white;
+padding:15px;
+position:fixed;
+left:0;
+top:0;
+overflow:auto;
+}
+
+.sidebar h2{
+margin-bottom:10px;
+}
+
+.busItem{
+background:rgba(255,255,255,0.12);
+padding:10px;
+margin:8px 0;
+border-radius:8px;
+font-size:14px;
+}
+
+/* MAIN MAP */
+.main{
+margin-left:260px;
+width:calc(100% - 260px);
 }
 
 #map{
-height:90vh;
+height:100vh;
 width:100%;
 }
-
 </style>
+
 </head>
 
 <body>
 
-<h1>Live Shuttle Tracking</h1>
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h2>🚍 Active Buses</h2>
+<p>Total Active: <span id="count">0</span></p>
+<div id="list"></div>
+</div>
 
+<!-- MAP -->
+<div class="main">
 <div id="map"></div>
+</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
-const API_URL =
-"https://acceptable-solace-production-06f3.up.railway.app";
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
 
-let map = L.map('map').setView([30.1575,71.5249], 12);
+let map = L.map('map').setView([30.1575, 71.5249], 12);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
@@ -51,37 +82,76 @@ maxZoom:19
 
 let markers = {};
 
+// ==========================
+// LOAD LIVE DATA
+// ==========================
 function loadAllLocations(){
 
 fetch(`${API_URL}/get_all_locations`)
 .then(res => res.json())
 .then(data => {
 
-console.log("ALL LOCATIONS:", data);
+let activeCount = 0;
+let sidebarHTML = "";
 
+// clear sidebar
+document.getElementById("list").innerHTML = "";
+
+// loop buses
 data.forEach(bus => {
 
 let lat = parseFloat(bus.latitude);
 let lng = parseFloat(bus.longitude);
 
+// invalid data skip
 if(isNaN(lat) || isNaN(lng)) return;
 
+// safe time check
+let now = Date.now();
+let last = bus.last_updated ? new Date(bus.last_updated).getTime() : 0;
+
+let diff = (now - last) / 1000;
+
+// ==========================
+// ACTIVE BUS (ONLY SHOW THIS)
+// ==========================
+if(last && diff < 60){
+
+activeCount++;
+
+// sidebar UI
+sidebarHTML += `
+<div class="busItem">
+🚍 Bus ${bus.bus_id} <b>LIVE</b>
+</div>
+`;
+
+// map marker update
 if(markers[bus.bus_id]){
-
 markers[bus.bus_id].setLatLng([lat,lng]);
-
-}else{
-
+}
+else{
 markers[bus.bus_id] = L.marker([lat,lng])
 .addTo(map)
-.bindPopup(`
-<b>Bus ID:</b> ${bus.bus_id}<br>
-<b>Last Update:</b> ${bus.last_updated}
-`);
+.bindPopup("Bus ID: " + bus.bus_id);
+}
 
+}
+// ==========================
+// INACTIVE → REMOVE FROM MAP
+// ==========================
+else{
+if(markers[bus.bus_id]){
+map.removeLayer(markers[bus.bus_id]);
+delete markers[bus.bus_id];
+}
 }
 
 });
+
+// update UI
+document.getElementById("list").innerHTML = sidebarHTML;
+document.getElementById("count").innerText = activeCount;
 
 })
 .catch(err => {
@@ -90,12 +160,11 @@ console.log("ERROR:", err);
 
 }
 
+// start system
 loadAllLocations();
-
-setInterval(loadAllLocations,5000);
+setInterval(loadAllLocations, 4000);
 
 </script>
 
 </body>
 </html>
-
