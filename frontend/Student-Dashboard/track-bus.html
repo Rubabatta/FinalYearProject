@@ -5,106 +5,50 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Track Bus</title>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
 body{
+font-family:Poppins;
 background:#f4f6fb;
-}
-
-#sidebar{
-position:fixed;
-left:0;
-top:0;
-height:100%;
-width:240px;
-background:#fff;
+margin:0;
 }
 
 .main{
-margin-left:240px;
-padding:30px;
-}
-
-.header h1{
-color:#1e3a8a;
-margin-bottom:20px;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:20px;
-margin-bottom:30px;
-}
-
-.card{
-background:white;
 padding:20px;
-border-radius:12px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
-}
-
-.card i{
-color:#2563eb;
-font-size:22px;
-margin-bottom:10px;
-}
-
-.card p{
-font-size:18px;
-font-weight:600;
-color:#1e3a8a;
+margin-left:240px;
 }
 
 #map{
 height:400px;
-width:100%;
 border-radius:12px;
+margin-top:20px;
+}
+
+.card{
+background:#fff;
+padding:15px;
+border-radius:10px;
+margin-bottom:10px;
 }
 </style>
-
 </head>
 
 <body>
 
-<div id="sidebar"></div>
-
 <div class="main">
 
-<div class="header">
-<h1>Track Shuttle</h1>
-</div>
+<h2>🚍 Live Bus Tracking</h2>
 
-<div class="cards">
-
-<div class="card">
-<i class="fas fa-bus"></i>
-<h3>Bus Number</h3>
-<p id="busNo">Loading...</p>
-</div>
+<!-- BUS INPUT -->
+<input type="number" id="busIdInput" placeholder="Enter Bus ID"
+style="padding:10px;width:200px;margin-bottom:10px;">
+<button onclick="startTracking()">Track</button>
 
 <div class="card">
-<i class="fas fa-map-marker-alt"></i>
-<h3>Current Location</h3>
-<p id="location">Waiting...</p>
-</div>
-
-<div class="card">
-<i class="fas fa-clock"></i>
-<h3>Last Update</h3>
-<p id="time">---</p>
-</div>
-
+Bus: <span id="busNo">-</span><br>
+Location: <span id="location">Waiting...</span><br>
+Time: <span id="time">-</span>
 </div>
 
 <div id="map"></div>
@@ -117,69 +61,63 @@ border-radius:12px;
 
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app/";
 
-// optional sidebar
-fetch("student-sidebar.html")
-.then(r => r.text())
-.then(d => {
-document.getElementById("sidebar").innerHTML = d;
-})
-.catch(() => {});
-
-// map init
 let map = L.map('map').setView([30.1575, 71.5249], 13);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 maxZoom: 19
 }).addTo(map);
 
-// marker
 let marker = L.marker([30.1575, 71.5249]).addTo(map);
 
-// ⭐ CHANGE THIS IF MULTIPLE BUSES
-let busId = 2;
+let busId = null;
+let interval = null;
 
-function loadLocation() {
+function startTracking(){
+
+busId = document.getElementById("busIdInput").value;
+
+if(!busId){
+alert("Enter Bus ID");
+return;
+}
+
+// stop previous loop
+if(interval) clearInterval(interval);
+
+// first load
+loadLocation();
+
+// repeat every 5 sec
+interval = setInterval(loadLocation, 5000);
+}
+
+function loadLocation(){
 
 fetch(`${API_URL}/get_location/${busId}`)
 .then(res => res.json())
 .then(data => {
 
-console.log("API DATA:", data);
-
-// safe check
-if (!data || data.message) {
-document.getElementById("location").innerText = "No location found";
+if(!data || data.message){
+document.getElementById("location").innerText = "No data";
 return;
 }
 
 let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
-if (isNaN(lat) || isNaN(lng)) {
-document.getElementById("location").innerText = "Invalid coordinates";
-return;
-}
+document.getElementById("busNo").innerText = data.bus_id;
+document.getElementById("location").innerText = lat + ", " + lng;
+document.getElementById("time").innerText = data.last_updated;
 
-// UI update
-document.getElementById("busNo").innerText = data.bus_id || busId;
-document.getElementById("location").innerText = lat.toFixed(5) + ", " + lng.toFixed(5);
-document.getElementById("time").innerText = data.last_updated || "Just now";
-
-// map update
 marker.setLatLng([lat, lng]);
 map.setView([lat, lng], 16);
 
 })
 .catch(err => {
-console.log("API ERROR:", err);
+console.log(err);
 document.getElementById("location").innerText = "Server Error";
 });
-
 }
-
-// start
-loadLocation();
-setInterval(loadLocation, 5000);
 
 </script>
 
