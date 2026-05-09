@@ -750,7 +750,6 @@ def get_all_locations():
     """)
 
     locations = cursor.fetchall()
-
     conn.close()
 
     return jsonify([dict(row) for row in locations])
