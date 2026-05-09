@@ -11,8 +11,14 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 DB_NAME = "/tmp/database.db"
-STATIC_FOLDER = os.path.join(BASE_DIR, "static")
-PROFILE_FOLDER = os.path.join(STATIC_FOLDER, "profile")
+STATIC_FOLDER = "static"
+PROFILE_FOLDER = "static/profile"
+
+
+
+@app.route('/test')
+def test():
+    return "OK WORKING"
 
 # -----------------------------
 # Database Connection
@@ -714,13 +720,13 @@ def get_location(bus_id):
 # -----------------------------
 # FRONTEND ROUTE (ADD THIS)
 # -----------------------------
-@app.route('/frontend/<path:filename>')
-def frontend(filename):
-    return send_from_directory('../frontend', filename)
+#@app.route('/frontend/<path:filename>')
+#def frontend(filename):
+    #return send_from_directory('../frontend', filename)
 
-@app.route('/mobile.html')
-def mobile():
-    return send_from_directory('../frontend', 'mobile.html')
+#@app.route('/mobile.html')
+#def mobile():
+    #return send_from_directory('../frontend', 'mobile.html')
 
 #//////////////////////
 #  Driver Login
