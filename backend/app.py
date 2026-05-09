@@ -10,9 +10,12 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_NAME = os.path.join(BASE_DIR, "database.db")
+DB_NAME = "/tmp/database.db"
 STATIC_FOLDER = "static"
 PROFILE_FOLDER = "static/profile"
+
+print("🚀 SERVER STARTING")
+print("DB PATH:", DB_NAME)
 
 
 
@@ -740,38 +743,28 @@ def driver_login():
         email = data.get('email')
         password = data.get('password')
 
+        print("LOGIN:", email, password)
+
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT id, name, email, route_number 
-            FROM drivers
-            WHERE email=? AND password=?
-        """, (email, password))
-
+        cursor.execute("SELECT * FROM drivers WHERE email=?", (email,))
         driver = cursor.fetchone()
-        conn.close()
 
         if driver:
-            return jsonify({
-                "message": "Login successful",
-                "driver": {
-                    "id": driver[0],
-                    "name": driver[1],
-                    "email": driver[2],
-                    "route_number": driver[3]
-                }
-            })
+            if driver["password"] == password:
+                return jsonify({
+                    "message": "Login successful",
+                    "driver": dict(driver)
+                })
+            else:
+                return jsonify({"message": "Wrong password"}), 401
 
-        else:
-            return jsonify({"message": "Invalid credentials"}), 401
+        return jsonify({"message": "Driver not found"}), 404
 
     except Exception as e:
-        print("DRIVER LOGIN ERROR:", e)
-        return jsonify({
-            "message": "Server error",
-            "error": str(e)
-        }), 500
+        print("ERROR:", e)
+        return jsonify({"error": str(e)}), 500
 #......................
 #Add Driver
 #......................
