@@ -4,7 +4,7 @@ import hashlib
 import os
 from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime
-
+from datetime import datetime, timedelta
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -670,6 +670,8 @@ def static_files(filename):
 
 
 
+from datetime import datetime
+
 @app.route('/update_location', methods=['POST'])
 def update_location():
 
@@ -679,7 +681,7 @@ def update_location():
     latitude = data.get('latitude')
     longitude = data.get('longitude')
 
-    print("📩 RECEIVED:", data)   # 👈 optional debug
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -687,43 +689,13 @@ def update_location():
     cursor.execute("""
         INSERT INTO bus_locations
         (bus_id, latitude, longitude, last_updated)
-        VALUES (?, ?, ?, datetime('now'))
-    """, (bus_id, latitude, longitude))
+        VALUES (?, ?, ?, ?)
+    """, (bus_id, latitude, longitude, now))
 
     conn.commit()
-
-    # ⭐ THIS LINE ADD HERE 👇
-    print("📍 LOCATION SAVED:", bus_id, latitude, longitude)
-
     conn.close()
 
     return jsonify({"message": "Location updated"})
-@app.route('/get_location/<int:bus_id>')
-def get_location(bus_id):
-
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            SELECT * FROM bus_locations
-            WHERE bus_id=?
-            ORDER BY id DESC
-            LIMIT 1
-        """, (bus_id,))
-
-        location = cursor.fetchone()
-        conn.close()
-
-        if location:
-            return jsonify(dict(location))
-        else:
-            return jsonify({"message": "No location found"})
-
-    except Exception as e:
-        return jsonify({"error": str(e)})
-    
-
     #.......................
     #  All Location
     #========================
@@ -739,21 +711,44 @@ def get_all_locations():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT bl.*
-        FROM bus_locations bl
-        INNER JOIN (
-            SELECT bus_id, MAX(id) as max_id
-            FROM bus_locations
-            GROUP BY bus_id
-        ) latest
-        ON bl.id = latest.max_id
+        SELECT * FROM bus_locations
+        ORDER BY id DESC
     """)
 
-    locations = cursor.fetchall()
+    rows = cursor.fetchall()
     conn.close()
 
-    return jsonify([dict(row) for row in locations])
+    result = []
+    seen = set()
+    now = datetime.now()
 
+    def parse_time(t):
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+            try:
+                return datetime.strptime(t, fmt)
+            except:
+                pass
+        return None
+
+    for row in rows:
+
+        bus_id = row["bus_id"]
+
+        if bus_id in seen:
+            continue
+
+        last = parse_time(row["last_updated"])
+        if not last:
+            continue
+
+        diff = (now - last).total_seconds()
+
+        # 🔥 ACTIVE ONLY
+        if diff < 30:
+            seen.add(bus_id)
+            result.append(dict(row))
+
+    return jsonify(result)
 #==================================student get loc by route================
 
 
