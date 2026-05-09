@@ -10,7 +10,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_NAME = "database.db"
+DB_NAME = os.path.join(BASE_DIR, "database.db")
 STATIC_FOLDER = "static"
 PROFILE_FOLDER = "static/profile"
 
@@ -24,7 +24,7 @@ def test():
 # Database Connection
 # -----------------------------
 def get_db_connection():
-    conn = sqlite3.connect(DB_NAME, check_same_thread=False)
+    conn = sqlite3.connect(DB_NAME, timeout=10)
     conn.row_factory = sqlite3.Row
     return conn
 # -----------------------------
@@ -734,37 +734,44 @@ def get_location(bus_id):
 
 @app.route('/driver_login', methods=['POST'])
 def driver_login():
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    email = data.get('email')
-    password = data.get('password')
+        email = data.get('email')
+        password = data.get('password')
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    # check driver exists (ONLY admin-added drivers)
-    cursor.execute("""
-        SELECT * FROM drivers
-        WHERE email=? AND password=?
-    """, (email, password))
+        cursor.execute("""
+            SELECT id, name, email, route_number 
+            FROM drivers
+            WHERE email=? AND password=?
+        """, (email, password))
 
-    driver = cursor.fetchone()
-    conn.close()
+        driver = cursor.fetchone()
+        conn.close()
 
-    if driver:
+        if driver:
+            return jsonify({
+                "message": "Login successful",
+                "driver": {
+                    "id": driver[0],
+                    "name": driver[1],
+                    "email": driver[2],
+                    "route_number": driver[3]
+                }
+            })
+
+        else:
+            return jsonify({"message": "Invalid credentials"}), 401
+
+    except Exception as e:
+        print("DRIVER LOGIN ERROR:", e)
         return jsonify({
-            "message": "Login successful",
-            "driver": {
-                "id": driver["id"],
-                "name": driver["name"],
-                "email": driver["email"],
-                "route_number": driver["route_number"]
-            }
-        })
-    else:
-        return jsonify({
-            "message": "Driver not found or invalid credentials"
-        }), 401
+            "message": "Server error",
+            "error": str(e)
+        }), 500
 #......................
 #Add Driver
 #......................
