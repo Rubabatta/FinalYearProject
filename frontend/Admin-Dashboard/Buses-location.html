@@ -2,34 +2,100 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Live Tracking (Latest Only)</title>
+<title>Admin Live Tracking (Fixed)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
+
 body{
 margin:0;
 font-family:Poppins;
+display:flex;
+height:100vh;
 background:#f4f6fb;
 }
 
-h1{
+/* SIDEBAR */
+.sidebar{
+width:300px;
+background:#111827;
+color:white;
 padding:15px;
-color:#1e3a8a;
+overflow-y:auto;
+}
+
+.bus-card{
+background:#1f2937;
+padding:10px;
+margin-bottom:10px;
+border-radius:10px;
+cursor:pointer;
+}
+
+.bus-card:hover{
+background:#2563eb;
+}
+
+.online{
+color:lime;
+font-weight:bold;
+}
+
+.offline{
+color:red;
+font-weight:bold;
+}
+
+/* MAIN */
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+.header{
+padding:10px;
+background:white;
+font-weight:bold;
+border-bottom:1px solid #ddd;
+}
+
+.info{
+padding:10px;
+background:white;
+border-bottom:1px solid #ddd;
 }
 
 #map{
-height:90vh;
-width:100%;
+flex:1;
 }
+
 </style>
 </head>
 
 <body>
 
-<h1>🚍 Live Shuttle Tracking</h1>
+<!-- SIDEBAR -->
+<div class="sidebar">
+<h3>🚍 Active Buses</h3>
+<div id="busList"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="header">Admin Live Tracking System</div>
+
+<div class="info">
+Bus: <span id="busId">-</span> |
+Status: <span id="status">-</span> |
+Next Stop: <span id="nextStop">-</span>
+</div>
 
 <div id="map"></div>
+
+</div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -45,38 +111,45 @@ maxZoom:19
 
 let markers = {};
 
-// ===============================
-// ONLY LATEST LOCATION PER BUS
-// ===============================
+// ==========================
+// LOAD ALL LOCATIONS
+// ==========================
 function loadAllLocations(){
 
 fetch(`${API_URL}/get_all_locations`)
 .then(res => res.json())
 .then(data => {
 
-console.log("RAW DATA:", data);
+let busList = document.getElementById("busList");
+busList.innerHTML = "";
 
-// STEP 1: keep latest per bus
+// latest per bus
 let latest = {};
 
 data.forEach(item => {
 
 let id = item.bus_id;
 
-let time = item.last_updated ? new Date(item.last_updated).getTime() : 0;
+// SAFE TIME PARSE
+let lastTime = new Date(item.last_updated + " UTC").getTime();
 
-// keep ONLY latest record
-if(!latest[id] || time > latest[id].time){
+if(!latest[id] || lastTime > latest[id].time){
 latest[id] = {
 data: item,
-time: time
+time: lastTime
 };
 }
 
 });
 
-// STEP 2: render map
-Object.keys(latest).forEach(id => {
+// CLEAR OLD MARKERS
+Object.keys(markers).forEach(id=>{
+map.removeLayer(markers[id]);
+});
+markers = {};
+
+// RENDER
+Object.keys(latest).forEach(id=>{
 
 let bus = latest[id].data;
 
@@ -85,31 +158,72 @@ let lng = parseFloat(bus.longitude);
 
 if(isNaN(lat) || isNaN(lng)) return;
 
-// marker update
-if(markers[id]){
-markers[id].setLatLng([lat,lng]);
-}
-else{
+// FIXED TIME DIFF
+let now = new Date().getTime();
+let last = new Date(bus.last_updated + " UTC").getTime();
+
+let diff = (now - last)/1000;
+
+// STATUS LOGIC
+let status = (diff >= 0 && diff < 60) ? "ONLINE" : "OFFLINE";
+
+// SIDEBAR CARD
+let div = document.createElement("div");
+div.className = "bus-card";
+
+div.innerHTML = `
+<b>🚍 Bus ${id}</b><br>
+<span class="${status=='ONLINE'?'online':'offline'}">
+${status}
+</span>
+`;
+
+div.onclick = ()=>showBus(bus,status);
+
+busList.appendChild(div);
+
+// MARKER
 markers[id] = L.marker([lat,lng])
 .addTo(map)
 .bindPopup(`
-<b>🚍 Bus:</b> ${id}<br>
-<b>Status:</b> LIVE
+<b>Bus:</b> ${id}<br>
+<b>Status:</b> ${status}<br>
+<b>Time:</b> ${bus.last_updated}
 `);
-}
 
 });
 
 })
 .catch(err=>{
-console.log("ERROR:", err);
+console.log("ERROR:",err);
 });
 
 }
 
-// start
+// ==========================
+// SHOW BUS INFO
+// ==========================
+function showBus(bus,status){
+
+document.getElementById("busId").innerText = bus.bus_id;
+
+document.getElementById("status").innerText =
+status == "ONLINE" ? "ONLINE 🟢" : "OFFLINE 🔴";
+
+document.getElementById("nextStop").innerText = "On Route";
+
+if(status == "OFFLINE"){
+alert("⚠ Bus " + bus.bus_id + " is disconnected!");
+}
+
+map.setView([bus.latitude,bus.longitude],15);
+
+}
+
+// AUTO REFRESH
+setInterval(loadAllLocations,5000);
+
 loadAllLocations();
-setInterval(loadAllLocations, 4000);
 
 </script>
 
