@@ -10,7 +10,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_NAME = "/tmp/database.db"
+DB_NAME = os.path.join(BASE_DIR, "database.db")
 STATIC_FOLDER = "static"
 PROFILE_FOLDER = "static/profile"
 
