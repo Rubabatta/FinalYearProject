@@ -20,7 +20,6 @@ display:flex;
 background:#f4f6fb;
 }
 
-/* MAIN */
 .main{
 margin-left:240px;
 width:100%;
@@ -32,7 +31,6 @@ color:#1e3a8a;
 margin-bottom:20px;
 }
 
-/* BOX */
 .box{
 background:white;
 padding:25px;
@@ -40,7 +38,6 @@ border-radius:12px;
 box-shadow:0 8px 20px rgba(0,0,0,0.08);
 }
 
-/* BUTTON */
 .add-btn{
 padding:8px 14px;
 background:#10b981;
@@ -51,7 +48,6 @@ cursor:pointer;
 margin-bottom:15px;
 }
 
-/* TABLE */
 table{
 width:100%;
 border-collapse:collapse;
@@ -73,7 +69,6 @@ tr:hover{
 background:#f1f5ff;
 }
 
-/* ICON BUTTONS */
 .icon-btn{
 border:none;
 padding:6px;
@@ -86,7 +81,6 @@ color:white;
 .edit{background:#f59e0b;}
 .delete{background:#ef4444;}
 
-/* MODAL */
 .modal{
 display:none;
 position:fixed;
@@ -99,13 +93,14 @@ background:rgba(0,0,0,0.5);
 
 .modal-content{
 background:white;
-width:320px;
+width:350px;
 margin:10% auto;
 padding:20px;
 border-radius:10px;
 }
 
-.modal-content input{
+.modal-content input,
+.modal-content select{
 width:100%;
 padding:8px;
 margin:8px 0;
@@ -115,10 +110,8 @@ margin:8px 0;
 
 <body>
 
-<!-- SIDEBAR -->
 <div id="sidebar"></div>
 
-<!-- MAIN -->
 <div class="main">
 
 <h1>Drivers Management</h1>
@@ -158,7 +151,8 @@ margin:8px 0;
 <input type="email" id="email" placeholder="Email">
 <input type="password" id="password" placeholder="Password">
 <input type="text" id="contact" placeholder="Contact">
-<input type="text" id="route_number" placeholder="Route">
+
+<select id="route_id"></select>
 
 <button onclick="save()">Save</button>
 <button onclick="closeModal()">Close</button>
@@ -168,27 +162,49 @@ margin:8px 0;
 
 <script>
 
-/* SIDEBAR LOAD (same as your real file) */
+const API = "http://127.0.0.1:5000";
+
+/* SIDEBAR */
 fetch("sidebar.html")
 .then(r=>r.text())
 .then(d=>{
 document.getElementById("sidebar").innerHTML=d;
 });
 
-/* OPEN / CLOSE */
+/* OPEN */
 function openModal(){
 document.getElementById("modal").style.display="block";
 clear();
+loadRoutes();
 }
 
+/* CLOSE */
 function closeModal(){
 document.getElementById("modal").style.display="none";
+}
+
+/* LOAD ROUTES */
+function loadRoutes(){
+
+fetch(`${API}/get_routes`)
+.then(res=>res.json())
+.then(data=>{
+
+let html = "<option value=''>Select Route</option>";
+
+data.forEach(r=>{
+html += `<option value="${r.id}">Route ${r.id}</option>`;
+});
+
+document.getElementById("route_id").innerHTML = html;
+
+});
 }
 
 /* LOAD DRIVERS */
 function load(){
 
-fetch("http://127.0.0.1:5000/get_drivers")
+fetch(`${API}/get_drivers`)
 .then(r=>r.json())
 .then(data=>{
 
@@ -202,7 +218,7 @@ rows+=`
 <td>${d.name}</td>
 <td>${d.email}</td>
 <td>${d.contact}</td>
-<td>${d.route_number}</td>
+<td>Route ${d.route_number ?? "-"}</td>
 
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
@@ -213,7 +229,6 @@ rows+=`
 <i class="fa fa-trash"></i>
 </button>
 </td>
-
 </tr>
 `;
 
@@ -222,32 +237,26 @@ rows+=`
 document.getElementById("table").innerHTML=rows;
 
 });
-
 }
 
-/* SAVE (ADD + UPDATE) */
+/* SAVE */
 function save(){
 
 let id=document.getElementById("id").value;
 
 let data={
-name:document.getElementById("name").value.trim(),
-email:document.getElementById("email").value.trim(),
-password:document.getElementById("password").value.trim(),
-contact:document.getElementById("contact").value.trim(),
-route_number:document.getElementById("route_number").value.trim()
+name:document.getElementById("name").value,
+email:document.getElementById("email").value,
+password:document.getElementById("password").value,
+contact:document.getElementById("contact").value,
+route_number:document.getElementById("route_id").value
 };
 
-if(!data.name || !data.email || !data.password){
-alert("Name, Email, Password required");
-return;
-}
-
-let url="http://127.0.0.1:5000/add_driver";
+let url=`${API}/add_driver`;
 let method="POST";
 
 if(id){
-url=`http://127.0.0.1:5000/update_driver/${id}`;
+url=`${API}/update_driver/${id}`;
 method="PUT";
 }
 
@@ -272,7 +281,12 @@ document.getElementById("id").value=d.id;
 document.getElementById("name").value=d.name;
 document.getElementById("email").value=d.email;
 document.getElementById("contact").value=d.contact;
-document.getElementById("route_number").value=d.route_number;
+
+loadRoutes();
+
+setTimeout(()=>{
+document.getElementById("route_id").value=d.route_number;
+},300);
 
 document.getElementById("modal").style.display="block";
 }
@@ -280,7 +294,7 @@ document.getElementById("modal").style.display="block";
 /* DELETE */
 function del(id){
 
-fetch(`http://127.0.0.1:5000/delete_driver/${id}`,{
+fetch(`${API}/delete_driver/${id}`,{
 method:"DELETE"
 })
 .then(r=>r.json())
@@ -298,7 +312,7 @@ document.getElementById("name").value="";
 document.getElementById("email").value="";
 document.getElementById("password").value="";
 document.getElementById("contact").value="";
-document.getElementById("route_number").value="";
+document.getElementById("route_id").value="";
 }
 
 load();

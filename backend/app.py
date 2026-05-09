@@ -754,6 +754,29 @@ def get_all_locations():
     conn.close()
 
     return jsonify([dict(row) for row in locations])
+
+#==================================student get loc by route================
+
+
+@app.route('/get_bus_by_route/<route_number>')
+def get_bus_by_route(route_number):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM buses
+        WHERE route_id = ?
+        LIMIT 1
+    """, (route_number,))
+
+    bus = cursor.fetchone()
+    conn.close()
+
+    if bus:
+        return jsonify(dict(bus))
+    else:
+        return jsonify({"message": "No bus found for this route"})
 # -----------------------------
 # FRONTEND ROUTE (ADD THIS)
 # -----------------------------
