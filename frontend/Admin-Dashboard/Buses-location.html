@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Live Tracking</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+<style>
+body{
+margin:0;
+font-family:Poppins;
+background:#f4f6fb;
+}
+
+.header{
+padding:15px;
+background:#1e3a8a;
+color:white;
+text-align:center;
+}
+
+#map{
+height:90vh;
+width:100%;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h2>🚍 Admin Live Bus Tracking</h2>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app/";
+
+// map init
+let map = L.map('map').setView([30.1575, 71.5249], 12);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+maxZoom: 19
+}).addTo(map);
+
+// store markers
+let markers = {};
+
+// 🔥 LOAD ALL BUS LOCATIONS
+function loadAllLocations(){
+
+fetch(`${API_URL}/get_all_locations`)
+.then(res => res.json())
+.then(data => {
+
+console.log("ALL BUSES:", data);
+
+// loop all buses
+data.forEach(bus => {
+
+let id = bus.bus_id;
+let lat = parseFloat(bus.latitude);
+let lng = parseFloat(bus.longitude);
+
+// invalid skip
+if(!lat || !lng) return;
+
+// if marker already exists → update
+if(markers[id]){
+markers[id].setLatLng([lat, lng]);
+}
+else{
+// new marker
+markers[id] = L.marker([lat, lng])
+.addTo(map)
+.bindPopup("🚍 Bus ID: " + id);
+}
+
+});
+
+})
+.catch(err => {
+console.log("ERROR:", err);
+});
+
+}
+
+// first load
+loadAllLocations();
+
+// auto refresh
+setInterval(loadAllLocations, 5000);
+
+</script>
+
+</body>
+</html>
