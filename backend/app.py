@@ -10,7 +10,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_NAME = "/tmp/database.db"
+DB_NAME = "database.db"
 STATIC_FOLDER = "static"
 PROFILE_FOLDER = "static/profile"
 
@@ -861,5 +861,6 @@ def delete_driver(id):
 # -----------------------------
 # Run Server
 # -----------------------------
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
