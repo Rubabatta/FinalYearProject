@@ -687,26 +687,30 @@ def update_location():
     return jsonify({"message": "Location updated"})
 
 
-@app.route('/get_location/<int:bus_id>', methods=['GET'])
+@app.route('/get_location/<int:bus_id>')
 def get_location(bus_id):
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT * FROM bus_locations
-        WHERE bus_id=?
-        ORDER BY id DESC
-        LIMIT 1
-    """, (bus_id,))
+        cursor.execute("""
+            SELECT * FROM bus_locations
+            WHERE bus_id=?
+            ORDER BY id DESC
+            LIMIT 1
+        """, (bus_id,))
 
-    location = cursor.fetchone()
-    conn.close()
+        location = cursor.fetchone()
+        conn.close()
 
-    if location:
-        return jsonify(dict(location))
-    else:
-        return jsonify({"message": "No location found"})
+        if location:
+            return jsonify(dict(location))
+        else:
+            return jsonify({"message": "No location found"})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 # -----------------------------
 # FRONTEND ROUTE (ADD THIS)
 # -----------------------------
