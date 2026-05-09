@@ -743,28 +743,39 @@ def driver_login():
         email = data.get('email')
         password = data.get('password')
 
-        print("LOGIN:", email, password)
+        if not email or not password:
+            return jsonify({"message": "Email and password required"}), 400
 
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM drivers WHERE email=?", (email,))
+        # DEBUG
+        print("LOGIN ATTEMPT:", email, password)
+
+        cursor.execute("""
+            SELECT * FROM drivers WHERE email=?
+        """, (email,))
+
         driver = cursor.fetchone()
+        conn.close()
 
         if driver:
-            if driver["password"] == password:
+            db_pass = driver["password"]
+
+            # direct compare (simple version)
+            if db_pass == password:
                 return jsonify({
                     "message": "Login successful",
                     "driver": dict(driver)
-                })
+                }), 200
             else:
                 return jsonify({"message": "Wrong password"}), 401
 
         return jsonify({"message": "Driver not found"}), 404
 
     except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"error": str(e)}), 500
+        print("LOGIN ERROR:", e)
+        return jsonify({"message": str(e)}), 500
 #......................
 #Add Driver
 #......................
