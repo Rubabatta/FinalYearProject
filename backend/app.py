@@ -10,7 +10,7 @@ CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-DB_NAME = os.path.join(BASE_DIR, "database.db")
+DB_NAME = "/tmp/database.db"
 STATIC_FOLDER = os.path.join(BASE_DIR, "static")
 PROFILE_FOLDER = os.path.join(STATIC_FOLDER, "profile")
 
@@ -18,10 +18,9 @@ PROFILE_FOLDER = os.path.join(STATIC_FOLDER, "profile")
 # Database Connection
 # -----------------------------
 def get_db_connection():
-    conn = sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
-
 # -----------------------------
 # Home Route
 # -----------------------------
