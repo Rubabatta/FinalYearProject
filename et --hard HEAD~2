@@ -1,0 +1,69 @@
+[33m3f69784[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m c
+[33m1988c8b[m stops manage
+[33mb453cee[m  manage location
+[33ma6421fc[m  manage stops
+[33mfc371ca[m location
+[33mb4590c9[m fixed get_location route
+[33mde8ed5f[m  upate file
+[33mf2f286a[m loc
+[33mde77215[m change
+[33m6a5b5cc[m  lcoation update
+[33m4f28854[m trach bus update
+[33mf484984[m  update files
+[33ma9e3aa8[m added all locations api
+[33m59f124d[m  add track file in admin
+[33m086b3ea[m update
+[33m1c687b6[m  update student track bus
+[33m8c9a701[m fix database path issue
+[33mc454374[m fix driver login
+[33mbcace6f[m new link
+[33m4c9339d[m change procfile
+[33m541e4e8[m  remove squit
+[33ma64dbe0[m fix deployment
+[33m53af72a[m fix
+[33m5e3dc06[m crash
+[33m7df7792[m fix railway crash
+[33mc446abe[m fix railway crash
+[33m22d8b38[m fix railway sqlite crash
+[33me432913[m  data base isssu
+[33m94ee3f2[m j
+[33m1997623[m fixed gunicorn
+[33m09d9b5a[m railway setup
+[33m97d6e05[m attach flutter
+[33m6a0e5cc[m changing for tracking location
+[33mcc1bf97[m set-up location
+[33ma00637f[m logout admin
+[33m0e2e3d9[m  setting for img upload
+[33mb822495[m  add about and conntat section
+[33m3eb95ad[m  setting page in admin
+[33m25837d7[m  annoucemnet seting
+[33m4159230[m profile edit feature and ad img colomn in admin pannel
+[33m199b38e[m profile setting
+[33me99cb7e[m profile
+[33mff8ac20[m  set img in profile
+[33ma623bf8[m admin changing
+[33m6870f09[m login
+[33m26d8b3d[m change student dashbord
+[33m8412dbd[m page
+[33m514c906[m profile
+[33m7e4f3df[m Merged local and remote changes
+[33m96f5f48[m anouncements page setup
+[33mbc3a775[m admin update
+[33mcd8dabb[m admin
+[33me1d90bf[m students updated
+[33m9bc8646[m updating
+[33m00af303[m mange regiter and login
+[33m1f89aa2[m sprate folders
+[33mc48b991[m  make profile page
+[33m97ad1af[m work on student dashboard
+[33ma416a93[m  create data base and manage all modules in side bar
+[33m1e2d786[m inshra
+[33m3473a80[m  login set
+[33mcbc5ca4[m  user inter face
+[33m5edf57d[m Student dashboard, login & signup completed
+[33me8fb4bf[m change dashbord
+[33m19b1729[m add map
+[33mc7aa131[m h
+[33m6763777[m home page
+[33m8ae55b3[m Changings
+[33m6673813[m first commit
