@@ -138,7 +138,7 @@ let studentsData=[];
 /* load */
 function loadStudents(){
 
-fetch('http://127.0.0.1:5000/get_students')
+fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students')
 .then(res=>res.json())
 .then(data=>{
 studentsData=data;
@@ -157,7 +157,7 @@ data.forEach(student=>{
 
 // SAFE IMAGE FIX
 let img = student.image
-? `http://127.0.0.1:5000${student.image}?t=${Date.now()}`
+? `https://acceptable-solace-production-06f3.up.railway.app${student.image}?t=${Date.now()}`
 : "https://via.placeholder.com/45";
 
 rows+=`
@@ -220,7 +220,7 @@ if(e.key==="Enter") searchStudent();
 /* delete */
 function deleteStudent(id){
 if(confirm("Are you sure?")){
-fetch(`http://127.0.0.1:5000/delete_student/${id}`,{method:'DELETE'})
+fetch(`https://acceptable-solace-production-06f3.up.railway.app/delete_student/${id}`,{method:'DELETE'})
 .then(res=>res.json())
 .then(data=>{
 alert(data.message);

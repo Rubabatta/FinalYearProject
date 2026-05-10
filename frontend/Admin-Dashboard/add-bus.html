@@ -75,7 +75,7 @@ function logout(){
 // Load Routes
 async function loadRoutes(){
     try{
-        const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
+        const resRoutes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes');
         const routes = await resRoutes.json();
 
         const select = document.getElementById("routeSelect");
@@ -105,7 +105,7 @@ async function addBus(){
     }
 
     try{
-        const res = await fetch("http://127.0.0.1:5000/add_bus",{
+        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/add_bus",{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({bus_number, route_id})

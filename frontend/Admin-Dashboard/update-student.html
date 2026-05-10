@@ -75,7 +75,7 @@ const studentId = urlParams.get('id');
 
 function loadStudent(){
 
-fetch(`http://127.0.0.1:5000/get_student/${studentId}`)
+fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_student/${studentId}`)
 .then(res=>res.json())
 .then(data=>{
 
@@ -103,7 +103,7 @@ password:document.getElementById("password").value
 
 };
 
-fetch(`http://127.0.0.1:5000/update_student/${studentId}`,{
+fetch(`https://acceptable-solace-production-06f3.up.railway.app/update_student/${studentId}`,{
 
 method:"PUT",
 headers:{

@@ -162,7 +162,8 @@ margin:8px 0;
 
 <script>
 
-const API = "http://127.0.0.1:5000";
+const API = "https://acceptable-solace-production-06f3.up.railway.app";
+let routes = [];
 
 /* SIDEBAR */
 fetch("sidebar.html")
@@ -185,40 +186,43 @@ document.getElementById("modal").style.display="none";
 
 /* LOAD ROUTES */
 function loadRoutes(){
+    return fetch(`${API}/get_routes`)
+    .then(res=>res.json())
+    .then(data=>{
+        routes = data;
 
-fetch(`${API}/get_routes`)
-.then(res=>res.json())
-.then(data=>{
+        let html = "<option value=''>Select Route</option>";
 
-let html = "<option value=''>Select Route</option>";
+        data.forEach((r)=>{
+            html += `<option value="${r.id}">Route ${r.id} (${r.start_point} → ${r.end_point})</option>`;
+        });
 
-data.forEach(r=>{
-html += `<option value="${r.id}">Route ${r.id}</option>`;
-});
-
-document.getElementById("route_id").innerHTML = html;
-
-});
+        document.getElementById("route_id").innerHTML = html;
+    });
 }
 
 /* LOAD DRIVERS */
+function getRouteLabel(routeId){
+    const idx = routes.findIndex(r => String(r.id) === String(routeId));
+    return idx === -1 ? "-" : `Route ${routeId}`;
+}
+
 function load(){
+    loadRoutes().then(()=>{
+        fetch(`${API}/get_drivers`)
+        .then(r=>r.json())
+        .then(data=>{
 
-fetch(`${API}/get_drivers`)
-.then(r=>r.json())
-.then(data=>{
+            let rows="";
 
-let rows="";
-
-data.forEach(d=>{
-
-rows+=`
+            data.forEach(d=>{
+                rows+=`
 <tr>
 <td>${d.id}</td>
 <td>${d.name}</td>
 <td>${d.email}</td>
 <td>${d.contact}</td>
-<td>Route ${d.route_number ?? "-"}</td>
+<td>${getRouteLabel(d.route_number)}</td>
 
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
@@ -232,11 +236,12 @@ rows+=`
 </tr>
 `;
 
-});
+            });
 
-document.getElementById("table").innerHTML=rows;
+            document.getElementById("table").innerHTML=rows;
 
-});
+        });
+    });
 }
 
 /* SAVE */
@@ -282,11 +287,9 @@ document.getElementById("name").value=d.name;
 document.getElementById("email").value=d.email;
 document.getElementById("contact").value=d.contact;
 
-loadRoutes();
-
-setTimeout(()=>{
-document.getElementById("route_id").value=d.route_number;
-},300);
+loadRoutes().then(()=>{
+    document.getElementById("route_id").value=d.route_number;
+});
 
 document.getElementById("modal").style.display="block";
 }

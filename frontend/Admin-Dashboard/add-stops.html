@@ -85,7 +85,7 @@ fetch("sidebar.html")
 .then(data=>{ document.getElementById("sidebar-placeholder").innerHTML=data; });
 
 async function loadRoutes(){
-const res = await fetch("http://127.0.0.1:5000/get_routes");
+const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/get_routes");
 const data = await res.json();
 let options = '<option value="">-- Select Route --</option>';
 data.forEach(route=>{
@@ -106,7 +106,7 @@ document.getElementById("stopsTable").innerHTML="";
 return;
 }
 
-const res = await fetch(`http://127.0.0.1:5000/get_stops/${routeId}`);
+const res = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${routeId}`);
 const data = await res.json();
 
 let rows = '';
@@ -161,7 +161,7 @@ if(name !== ""){
 
 promises.push(
 
-fetch("http://127.0.0.1:5000/add_stop",{
+fetch("https://acceptable-solace-production-06f3.up.railway.app/add_stop",{
 
 method:"POST",
 
@@ -193,7 +193,7 @@ loadStops();
 
 async function deleteStop(id){
 
-const res = await fetch(`http://127.0.0.1:5000/delete_stop/${id}`, {method:"DELETE"});
+const res = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/delete_stop/${id}`, {method:"DELETE"});
 
 const data = await res.json();
 
@@ -209,7 +209,7 @@ const newName = prompt("Enter new stop name:", oldName);
 
 if(newName && newName.trim() !== ""){
 
-fetch(`http://127.0.0.1:5000/update_stop/${id}`,{
+fetch(`https://acceptable-solace-production-06f3.up.railway.app/update_stop/${id}`,{
 
 method:"PUT",
 

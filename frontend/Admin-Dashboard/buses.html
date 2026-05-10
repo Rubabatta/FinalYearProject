@@ -62,13 +62,13 @@ fetch('sidebar.html')
 
 // Fetch buses
 async function loadBuses(){
-    const res = await fetch('http://127.0.0.1:5000/get_buses');
+    const res = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_buses');
     const data = await res.json();
     const table = document.getElementById("busTable");
     table.innerHTML = "";
 
     // Fetch all routes
-    const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
+    const resRoutes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes');
     const routes = await resRoutes.json();
 
     data.forEach(bus=>{
@@ -93,7 +93,7 @@ function deleteSelectedBus(){
     if(!confirm("Are you sure you want to delete selected bus(es)?")) return;
     checkboxes.forEach(box=>{
         const busId = box.getAttribute("data-id");
-        fetch(`http://127.0.0.1:5000/delete_bus/${busId}`,{method:'DELETE'})
+        fetch(`https://acceptable-solace-production-06f3.up.railway.app/delete_bus/${busId}`,{method:'DELETE'})
         .then(res=>res.json())
         .then(data=>{ console.log(data.message); loadBuses(); })
         .catch(err=>console.error(err));

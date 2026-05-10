@@ -108,7 +108,7 @@ let latestAnnouncements = [];
 
 async function loadAnnouncements(){
     try {
-        const res = await fetch("http://127.0.0.1:5000/get-announcements");
+        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/get-announcements");
         const data = await res.json();
         const container = document.getElementById("announcement-body");
         container.innerHTML="";

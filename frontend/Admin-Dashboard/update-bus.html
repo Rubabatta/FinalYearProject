@@ -71,15 +71,15 @@ async function loadBusData(){
     const busId = getBusId();
     if(!busId) { alert("No bus ID provided"); return; }
 
-    const resBus = await fetch(`http://127.0.0.1:5000/get_bus/${busId}`);
+    const resBus = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_bus/${busId}`);
     const bus = await resBus.json();
 
     document.getElementById("busNumber").value = bus.bus_number;
 
-    const resRoutes = await fetch('http://127.0.0.1:5000/get_routes');
+    const resRoutes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes');
     const routes = await resRoutes.json();
 
-    const resBuses = await fetch('http://127.0.0.1:5000/get_buses');
+    const resBuses = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_buses');
     const buses = await resBuses.json();
 
     const assignedRouteIds = buses
@@ -112,7 +112,7 @@ function updateBus(){
         return;
     }
 
-    fetch(`http://127.0.0.1:5000/update_bus/${busId}`,{
+    fetch(`https://acceptable-solace-production-06f3.up.railway.app/update_bus/${busId}`,{
         method:"PUT",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({bus_number, route_id})

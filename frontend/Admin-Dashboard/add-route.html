@@ -57,7 +57,7 @@ document.getElementById("addRouteForm").addEventListener("submit", function(e){
     const start_point = document.getElementById("start_point").value;
     const end_point = document.getElementById("end_point").value;
 
-    fetch("http://127.0.0.1:5000/add_route", {
+    fetch("https://acceptable-solace-production-06f3.up.railway.app/add_route", {
         method:"POST",
         headers: { "Content-Type":"application/json" },
         body: JSON.stringify({ start_point, end_point })  // stops removed

@@ -189,7 +189,7 @@ fetch("sidebar.html")
 // ----------------- ANNOUNCEMENTS -----------------
 async function loadAnnouncements(){
     try {
-        const res = await fetch("http://127.0.0.1:5000/get-announcements");
+        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/get-announcements");
         const data = await res.json();
         const tbody = document.getElementById("announcement-body");
         tbody.innerHTML="";
@@ -233,7 +233,7 @@ async function addAnnouncement(){
     }
 
     try {
-        const res = await fetch("http://127.0.0.1:5000/add-announcement", {
+        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/add-announcement", {
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({title,message,date})
@@ -262,7 +262,7 @@ async function deleteAnnouncement(id){
     if(!confirm("Are you sure?")) return;
 
     try {
-        const res = await fetch(`http://127.0.0.1:5000/delete-announcement/${id}`, {method:"DELETE"});
+        const res = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/delete-announcement/${id}`, {method:"DELETE"});
         const data = await res.json();
         console.log("Delete response:", data);
         loadAnnouncements();
@@ -279,7 +279,7 @@ async function editAnnouncement(a){
 
     const date = new Date().toLocaleDateString();
     try {
-        const res = await fetch(`http://127.0.0.1:5000/update-announcement/${a.id}`, {
+        const res = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/update-announcement/${a.id}`, {
             method:"PUT",
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({title:newTitle,message:newMsg,date})

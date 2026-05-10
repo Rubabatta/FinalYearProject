@@ -116,7 +116,7 @@ document.getElementById("sidebar").innerHTML=data;
 
 // Load Routes and Stops
 function loadRoutes(){
-fetch("http://127.0.0.1:5000/get_routes")
+fetch("https://acceptable-solace-production-06f3.up.railway.app/get_routes")
 .then(res => res.json())
 .then(data => {
 const container = document.getElementById("routesContainer");
@@ -148,7 +148,7 @@ return;
 }
 
 // Fetch stops for this route
-fetch(`http://127.0.0.1:5000/get_stops/${routeId}`)
+fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${routeId}`)
 .then(res => res.json())
 .then(data => {
 listEl.innerHTML = "";

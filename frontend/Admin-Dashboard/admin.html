@@ -176,24 +176,24 @@ fetch('sidebar.html')
 });
 
 // stats
-fetch('http://127.0.0.1:5000/get_students')
+fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students')
 .then(res=>res.json())
 .then(data=>{
     document.getElementById("totalStudents").innerText=data.length;
 });
 
-fetch('http://127.0.0.1:5000/get_buses')
+fetch('https://acceptable-solace-production-06f3.up.railway.app/get_buses')
 .then(res=>res.json())
 .then(data=>{
     document.getElementById("totalBuses").innerText=data.length;
 });
 
-fetch('http://127.0.0.1:5000/get_routes')
+fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes')
 .then(res=>res.json())
 .then(data=>{
     document.getElementById("totalRoutes").innerText=data.length;
 });
-fetch('http://127.0.0.1:5000/get_drivers')
+fetch('https://acceptable-solace-production-06f3.up.railway.app/get_drivers')
 .then(r=>r.json())
 .then(d=>document.getElementById("totalDrivers").innerText=d.length);
 
@@ -225,7 +225,7 @@ function submitPassword(){
         return;
     }
 
-    fetch('http://127.0.0.1:5000/change_admin_password',{
+    fetch('https://acceptable-solace-production-06f3.up.railway.app/change_admin_password',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({

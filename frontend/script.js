@@ -13,7 +13,7 @@ if(studentSignupForm){
         const address = document.getElementById('signupAddress').value;
         const fees = parseFloat(document.getElementById('signupFees').value);
 
-        fetch('http://127.0.0.1:5000/student_signup', {
+        fetch('https://acceptable-solace-production-06f3.up.railway.app/student_signup', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, email, password, center, address, fees })
@@ -35,7 +35,7 @@ if(studentLoginForm){
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
 
-        fetch('http://127.0.0.1:5000/student_login', {
+        fetch('https://acceptable-solace-production-06f3.up.railway.app/student_login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -71,7 +71,7 @@ if(adminLoginForm){
             return;
         }
 
-        fetch('http://127.0.0.1:5000/admin_login', {
+        fetch('https://acceptable-solace-production-06f3.up.railway.app/admin_login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -100,7 +100,7 @@ if(adminLoginForm){
 // Get Students (for admin dashboard)
 // -----------------------------
 function loadStudents(){
-    fetch('http://127.0.0.1:5000/get_students')
+    fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students')
     .then(res => res.json())
     .then(students => {
         const tableBody = document.getElementById('studentsTableBody');
