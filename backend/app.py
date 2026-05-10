@@ -723,6 +723,34 @@ def static_files(filename):
 
 from datetime import datetime
 
+
+
+#============location traking root=============================
+
+
+@app.route('/get_latest_location/<int:bus_id>', methods=['GET'])
+def get_latest_location(bus_id):
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM bus_locations
+        WHERE bus_id = ?
+        ORDER BY id DESC
+        LIMIT 1
+    """, (bus_id,))
+
+    row = cursor.fetchone()
+    conn.close()
+
+    if row:
+        return jsonify(dict(row))
+    else:
+        return jsonify({"message": "No location found"}), 404
+
+
 @app.route('/update_location', methods=['POST'])
 def update_location():
 
@@ -973,9 +1001,16 @@ def get_drivers():
             d.contact,
             d.bus_id,
             b.bus_number,
-            b.route_id AS route_id
+            b.route_id,
+            routes.start_point,
+            routes.end_point,
+            CASE
+                WHEN routes.start_point IS NOT NULL THEN routes.start_point || ' - ' || routes.end_point
+                ELSE NULL
+            END AS route_name
         FROM drivers d
         LEFT JOIN buses b ON d.bus_id = b.id
+        LEFT JOIN routes ON b.route_id = routes.id
     """)
 
     drivers = cursor.fetchall()

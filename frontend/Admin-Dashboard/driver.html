@@ -148,31 +148,32 @@ function clear(){
 
 /* LOAD BUSES */
 async function loadBuses(){
+    const res = await fetch(`${API}/get_buses`);
+    const data = await res.json();
 
-const res = await fetch(`${API}/get_buses`);
-const data = await res.json();
+    let html = `<option value="">Select Bus</option>`;
 
-let html = `<option value="">Select Bus</option>`;
+    data.forEach(b=>{
+        const routeText = b.start_point && b.end_point
+            ? `${b.start_point} - ${b.end_point}`
+            : b.route_id || "";
 
-data.forEach(b=>{
-html += `
-<option value="${b.id}" data-route="${b.route_id}">
-Bus ${b.bus_number}
-</option>`;
-});
+        html += `
+            <option value="${b.id}" data-route="${routeText}">
+                Bus ${b.bus_number}
+            </option>`;
+    });
 
-document.getElementById("bus_id").innerHTML = html;
+    const busSelect = document.getElementById("bus_id");
+    busSelect.innerHTML = html;
 
-/* AUTO ROUTE SHOW */
-document.getElementById("bus_id").addEventListener("change", function(){
+    busSelect.onchange = function(){
+        let selected = this.options[this.selectedIndex];
+        let route = selected.getAttribute("data-route");
 
-let selected = this.options[this.selectedIndex];
-let route = selected.getAttribute("data-route");
-
-document.getElementById("route_show").innerText =
-route ? "Route: " + route : "";
-
-});
+        document.getElementById("route_show").innerText =
+            route ? "Route: " + route : "";
+    };
 }
 
 /* LOAD DRIVERS */
@@ -210,12 +211,16 @@ document.getElementById("table").innerHTML = rows;
 }
 
 /* EDIT */
-function edit(d){
+async function edit(d){
     document.getElementById("id").value = d.id;
     document.getElementById("name").value = d.name;
     document.getElementById("email").value = d.email;
     document.getElementById("contact").value = d.contact;
+
+    await loadBuses();
+
     document.getElementById("bus_id").value = d.bus_id || "";
+    document.getElementById("bus_id").dispatchEvent(new Event("change"));
     document.getElementById("modal").style.display="block";
 }
 
