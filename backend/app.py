@@ -432,29 +432,30 @@ def add_bus():
     data = request.get_json()
 
     bus_number = data.get("bus_number")
-    driver_id = data.get("driver_id")
-    capacity = data.get("capacity")
     route_id = data.get("route_id")
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM buses WHERE bus_number=?", (bus_number,))
-    existing = cursor.fetchone()
+    try:
+        cursor.execute("SELECT * FROM buses WHERE bus_number=?", (bus_number,))
+        if cursor.fetchone():
+            return jsonify({"message":"Bus number already exists"}),400
 
-    if existing:
+        cursor.execute("""
+            INSERT INTO buses (bus_number, route_id)
+            VALUES (?, ?)
+        """,(bus_number, route_id))
+
+        conn.commit()
+        return jsonify({"message":"Bus added successfully"})
+
+    except Exception as e:
+        print("ERROR:", e)
+        return jsonify({"message":"Server error"}),500
+
+    finally:
         conn.close()
-        return jsonify({"message":"Bus number already exists"}),400
-
-    cursor.execute("""
-        INSERT INTO buses (bus_number,driver_id,capacity,route_id)
-        VALUES (?,?,?,?)
-    """,(bus_number,driver_id,capacity,route_id))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message":"Bus added successfully"})
 
 @app.route('/update_bus/<int:id>', methods=['PUT'])
 def update_bus(id):
