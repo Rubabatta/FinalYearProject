@@ -145,7 +145,7 @@ async function loadRoutes(){
 // Buses
 async function loadBuses(){
     try{
-        const res = await fetch(`${API_URL}/get_buses`);
+        const res = await fetch(`${API_URL}/get_all_buses`);
         allBuses = await res.json();
 
         const table = document.getElementById("busTable");
@@ -157,7 +157,7 @@ async function loadBuses(){
 
             const routeName = route
                 ? `${route.start_point} → ${route.end_point}`
-                : "N/A";
+                : (bus.start_point && bus.end_point ? `${bus.start_point} → ${bus.end_point}` : "N/A");
 
             const row = document.createElement("tr");
 

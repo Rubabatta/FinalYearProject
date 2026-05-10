@@ -426,6 +426,26 @@ def get_buses():
 
     return jsonify([dict(b) for b in buses])
 
+@app.route('/get_available_buses', methods=['GET'])
+def get_available_buses():
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT buses.*, routes.start_point, routes.end_point
+        FROM buses
+        LEFT JOIN routes
+        ON buses.route_id = routes.id
+        WHERE buses.id NOT IN (SELECT bus_id FROM drivers WHERE bus_id IS NOT NULL)
+    """)
+
+    buses = cursor.fetchall()
+
+    conn.close()
+
+    return jsonify([dict(b) for b in buses])
+
 @app.route('/add_bus', methods=['POST'])
 def add_bus():
 

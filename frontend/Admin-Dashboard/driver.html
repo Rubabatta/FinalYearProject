@@ -131,7 +131,7 @@ document.getElementById("sidebar").innerHTML=d;
 function openModal(){
 document.getElementById("modal").style.display="block";
 clear();
-loadBuses();
+loadBuses(false);
 }
 
 /* CLOSE */
@@ -152,8 +152,9 @@ selectedRoute=null;
 }
 
 /* LOAD BUSES */
-async function loadBuses(){
-const res = await fetch(`${API}/get_buses`);
+async function loadBuses(includeAssigned = false){
+const url = includeAssigned ? `${API}/get_buses` : `${API}/get_available_buses`;
+const res = await fetch(url);
 const data = await res.json();
 
 buses = data;
@@ -173,7 +174,10 @@ const bus = buses.find(b=>b.id == e.target.value);
 
 if(bus){
 selectedRoute = bus.route_id;
-document.getElementById("route_show").innerText = "Route: " + bus.route_id;
+const routeText = bus.start_point && bus.end_point
+    ? `${bus.start_point} → ${bus.end_point}`
+    : bus.route_id;
+document.getElementById("route_show").innerText = "Route: " + routeText;
 }else{
 selectedRoute = null;
 document.getElementById("route_show").innerText = "";
@@ -210,6 +214,21 @@ rows+=`
 });
 
 document.getElementById("table").innerHTML = rows;
+}
+
+function edit(d){
+    document.getElementById("id").value = d.id;
+    document.getElementById("name").value = d.name;
+    document.getElementById("email").value = d.email;
+    document.getElementById("password").value = "";
+    document.getElementById("contact").value = d.contact;
+
+    loadBuses(true).then(() => {
+        document.getElementById("bus_id").value = d.bus_id || "";
+        document.getElementById("bus_id").dispatchEvent(new Event("change"));
+    });
+
+    document.getElementById("modal").style.display = "block";
 }
 
 /* SAVE DRIVER */
