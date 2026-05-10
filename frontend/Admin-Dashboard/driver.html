@@ -105,6 +105,12 @@ width:100%;
 padding:8px;
 margin:8px 0;
 }
+
+#route_show{
+font-size:13px;
+color:#1e3a8a;
+margin-top:5px;
+}
 </style>
 </head>
 
@@ -129,7 +135,8 @@ margin:8px 0;
 <th>Name</th>
 <th>Email</th>
 <th>Contact</th>
-<th>Route</th>
+<th>Bus Number</th>
+<th>Route Number</th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -142,7 +149,6 @@ margin:8px 0;
 
 <!-- MODAL -->
 <div class="modal" id="modal">
-
 <div class="modal-content">
 
 <input type="hidden" id="id">
@@ -152,7 +158,9 @@ margin:8px 0;
 <input type="password" id="password" placeholder="Password">
 <input type="text" id="contact" placeholder="Contact">
 
-<select id="route_id"></select>
+<select id="bus_id"></select>
+
+<p id="route_show"></p>
 
 <button onclick="save()">Save</button>
 <button onclick="closeModal()">Close</button>
@@ -163,7 +171,8 @@ margin:8px 0;
 <script>
 
 const API = "https://acceptable-solace-production-06f3.up.railway.app";
-let routes = [];
+
+let buses = [];
 
 /* SIDEBAR */
 fetch("sidebar.html")
@@ -176,7 +185,7 @@ document.getElementById("sidebar").innerHTML=d;
 function openModal(){
 document.getElementById("modal").style.display="block";
 clear();
-loadRoutes();
+loadBuses();
 }
 
 /* CLOSE */
@@ -184,45 +193,74 @@ function closeModal(){
 document.getElementById("modal").style.display="none";
 }
 
-/* LOAD ROUTES */
-function loadRoutes(){
-    return fetch(`${API}/get_routes`)
-    .then(res=>res.json())
-    .then(data=>{
-        routes = data;
-
-        let html = "<option value=''>Select Route</option>";
-
-        data.forEach((r, index)=>{
-            html += `<option value="${r.id}">Route ${index + 1} (${r.start_point} → ${r.end_point})</option>`;
-        });
-
-        document.getElementById("route_id").innerHTML = html;
-    });
+/* CLEAR */
+function clear(){
+document.getElementById("id").value="";
+document.getElementById("name").value="";
+document.getElementById("email").value="";
+document.getElementById("password").value="";
+document.getElementById("contact").value="";
+document.getElementById("bus_id").value="";
+document.getElementById("route_show").innerText="";
 }
+
+/* LOAD BUSES */
+function loadBuses(){
+return fetch(`${API}/get_buses`)
+.then(r=>r.json())
+.then(data=>{
+buses = data;
+
+let html = "<option value=''>Select Bus</option>";
+
+data.forEach(b=>{
+html += `<option value="${b.id}">
+Bus ${b.bus_number}
+</option>`;
+});
+
+document.getElementById("bus_id").innerHTML = html;
+});
+}
+
+/* SHOW ROUTE ON BUS SELECT */
+document.addEventListener("change", function(e){
+
+if(e.target.id === "bus_id"){
+
+const bus = buses.find(b => b.id == e.target.value);
+
+if(bus){
+document.getElementById("route_show").innerText =
+"Route: " + bus.route_id;
+}else{
+document.getElementById("route_show").innerText = "";
+}
+}
+
+});
 
 /* LOAD DRIVERS */
-function getRouteLabel(routeId){
-    const idx = routes.findIndex(r => String(r.id) === String(routeId));
-    return idx === -1 ? "-" : `Route ${idx + 1}`;
-}
-
 function load(){
-    loadRoutes().then(()=>{
-        fetch(`${API}/get_drivers`)
-        .then(r=>r.json())
-        .then(data=>{
 
-            let rows="";
+fetch(`${API}/get_drivers`)
+.then(r=>r.json())
+.then(data=>{
 
-            data.forEach(d=>{
-                rows+=`
+let rows="";
+
+data.forEach(d=>{
+
+rows+=`
 <tr>
 <td>${d.id}</td>
 <td>${d.name}</td>
 <td>${d.email}</td>
 <td>${d.contact}</td>
-<td>${getRouteLabel(d.route_number)}</td>
+
+<td>${d.bus_number ? d.bus_number : "Not Assigned"}</td>
+
+<td>${d.route_id ? d.route_id : "Not Assigned"}</td>
 
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
@@ -236,15 +274,14 @@ function load(){
 </tr>
 `;
 
-            });
+});
 
-            document.getElementById("table").innerHTML=rows;
+document.getElementById("table").innerHTML=rows;
 
-        });
-    });
+});
 }
 
-/* SAVE */
+/* SAVE DRIVER */
 function save(){
 
 let id=document.getElementById("id").value;
@@ -254,7 +291,7 @@ name:document.getElementById("name").value,
 email:document.getElementById("email").value,
 password:document.getElementById("password").value,
 contact:document.getElementById("contact").value,
-route_number:document.getElementById("route_id").value
+bus_id:document.getElementById("bus_id").value
 };
 
 let url=`${API}/add_driver`;
@@ -276,7 +313,6 @@ alert(res.message);
 closeModal();
 load();
 });
-
 }
 
 /* EDIT */
@@ -287,8 +323,8 @@ document.getElementById("name").value=d.name;
 document.getElementById("email").value=d.email;
 document.getElementById("contact").value=d.contact;
 
-loadRoutes().then(()=>{
-    document.getElementById("route_id").value=d.route_number;
+loadBuses().then(()=>{
+document.getElementById("bus_id").value=d.bus_id;
 });
 
 document.getElementById("modal").style.display="block";
@@ -305,20 +341,10 @@ method:"DELETE"
 alert(res.message);
 load();
 });
-
 }
 
-/* CLEAR */
-function clear(){
-document.getElementById("id").value="";
-document.getElementById("name").value="";
-document.getElementById("email").value="";
-document.getElementById("password").value="";
-document.getElementById("contact").value="";
-document.getElementById("route_id").value="";
-}
-
-load();
+/* INIT */
+loadBuses().then(load);
 
 </script>
 

@@ -971,16 +971,16 @@ def update_driver(id):
     name = data.get('name')
     email = data.get('email')
     contact = data.get('contact')
-    route_number = data.get('route_number')
+    bus_id = data.get('bus_id')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
         UPDATE drivers
-        SET name=?, email=?, contact=?, route_number=?
+        SET name=?, email=?, contact=?, bus_id=?
         WHERE id=?
-    """, (name, email, contact, route_number, id))
+    """, (name, email, contact, bus_id, id))
 
     conn.commit()
     conn.close()
