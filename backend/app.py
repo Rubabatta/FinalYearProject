@@ -908,39 +908,34 @@ def driver_login():
 def add_driver():
     data = request.get_json()
 
-    print("DATA RECEIVED:", data)
-
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
     contact = data.get('contact')
-    route_number = data.get('route_number')
-
-    if not all([name, email, password]):
-        return jsonify({"message": "Missing required fields"}), 400
+    bus_id = data.get('bus_id')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    try:
-        cursor.execute("SELECT * FROM drivers WHERE email=?", (email,))
-        if cursor.fetchone():
-            return jsonify({"message": "Driver already exists"}), 400
+    # ❌ CHECK IF BUS ALREADY ASSIGNED
+    cursor.execute("SELECT * FROM drivers WHERE bus_id=?", (bus_id,))
+    existing = cursor.fetchone()
 
-        cursor.execute("""
-            INSERT INTO drivers (name, email, password, contact, route_number)
-            VALUES (?, ?, ?, ?, ?)
-        """, (name, email, password, contact, route_number))
-
-        conn.commit()
-        return jsonify({"message": "Driver added successfully"})
-
-    except Exception as e:
-        print("ERROR:", e)
-        return jsonify({"message": "Server error"}), 500
-
-    finally:
+    if existing:
         conn.close()
+        return jsonify({
+            "message": "This bus is already assigned to another driver"
+        }), 400
+
+    cursor.execute("""
+        INSERT INTO drivers (name, email, password, contact, bus_id)
+        VALUES (?, ?, ?, ?, ?)
+    """, (name, email, password, contact, bus_id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Driver added successfully"})
 
 
 @app.route('/get_drivers', methods=['GET'])
@@ -948,13 +943,26 @@ def get_drivers():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM drivers")
-    drivers = cursor.fetchall()
+    cursor.execute("""
+        SELECT 
+            d.id,
+            d.name,
+            d.email,
+            d.contact,
+            d.bus_id,
+            b.bus_number,
+            b.route_id,
+            r.start_point,
+            r.end_point
+        FROM drivers d
+        LEFT JOIN buses b ON d.bus_id = b.id
+        LEFT JOIN routes r ON b.route_id = r.id
+    """)
 
+    drivers = cursor.fetchall()
     conn.close()
 
     return jsonify([dict(d) for d in drivers])
-
 
 @app.route('/update_driver/<int:id>', methods=['PUT'])
 def update_driver(id):
