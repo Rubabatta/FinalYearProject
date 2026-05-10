@@ -193,8 +193,8 @@ function loadRoutes(){
 
         let html = "<option value=''>Select Route</option>";
 
-        data.forEach((r)=>{
-            html += `<option value="${r.id}">Route ${r.id} (${r.start_point} → ${r.end_point})</option>`;
+        data.forEach((r, index)=>{
+            html += `<option value="${r.id}">Route ${index + 1} (${r.start_point} → ${r.end_point})</option>`;
         });
 
         document.getElementById("route_id").innerHTML = html;
@@ -204,7 +204,7 @@ function loadRoutes(){
 /* LOAD DRIVERS */
 function getRouteLabel(routeId){
     const idx = routes.findIndex(r => String(r.id) === String(routeId));
-    return idx === -1 ? "-" : `Route ${routeId}`;
+    return idx === -1 ? "-" : `Route ${idx + 1}`;
 }
 
 function load(){
