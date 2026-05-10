@@ -789,16 +789,8 @@ def get_all_locations():
         if bus_id in seen:
             continue
 
-        last = parse_time(row["last_updated"])
-        if not last:
-            continue
-
-        diff = (now - last).total_seconds()
-
-        # 🔥 ACTIVE ONLY
-        if diff < 30:
-            seen.add(bus_id)
-            result.append(dict(row))
+        seen.add(bus_id)
+        result.append(dict(row))
 
     return jsonify(result)
 # =========================
@@ -870,21 +862,24 @@ def driver_login():
     try:
         data = request.get_json()
 
-        email = data.get('email')
+        identifier = data.get('email') or data.get('name') or data.get('identifier')
         password = data.get('password')
 
-        if not email or not password:
-            return jsonify({"message": "Email and password required"}), 400
+        if not identifier or not password:
+            return jsonify({"message": "Email/name and password required"}), 400
+
+        identifier = identifier.strip().lower()
 
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # DEBUG
-        print("LOGIN ATTEMPT:", email, password)
+        print("LOGIN ATTEMPT:", identifier, password)
 
+        # ✅ FIX: email OR name both check
         cursor.execute("""
-            SELECT * FROM drivers WHERE email=?
-        """, (email,))
+            SELECT * FROM drivers 
+            WHERE LOWER(email)=? OR LOWER(name)=?
+        """, (identifier, identifier))
 
         driver = cursor.fetchone()
         conn.close()
@@ -892,7 +887,6 @@ def driver_login():
         if driver:
             db_pass = driver["password"]
 
-            # direct compare (simple version)
             if db_pass == password:
                 return jsonify({
                     "message": "Login successful",

@@ -72,14 +72,23 @@ function logout(){
     window.location.href="admin-login.html";
 }
 
+const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000'
+    : 'https://acceptable-solace-production-06f3.up.railway.app';
+
 // Load Routes
 async function loadRoutes(){
     try{
-        const resRoutes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes');
+        const resRoutes = await fetch(`${API_URL}/get_routes`);
         const routes = await resRoutes.json();
 
         const select = document.getElementById("routeSelect");
         select.innerHTML = `<option value="">Select Route</option>`;
+
+        if(!Array.isArray(routes) || routes.length === 0){
+            select.innerHTML = `<option value="">No routes available</option>`;
+            return;
+        }
 
         routes.forEach(route=>{
             const option = document.createElement("option");
@@ -90,7 +99,7 @@ async function loadRoutes(){
 
     }catch(err){
         console.error("Error loading routes:", err);
-        alert("Failed to load routes. Check server.");
+        alert("Failed to load routes. Check server or network.");
     }
 }
 
@@ -105,20 +114,23 @@ async function addBus(){
     }
 
     try{
-        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/add_bus",{
+        const res = await fetch(`${API_URL}/add_bus`,{
             method:"POST",
             headers:{"Content-Type":"application/json"},
             body: JSON.stringify({bus_number, route_id})
         });
         const data = await res.json();
-        alert(data.message);
+
         if(res.ok){
+            alert(data.message || "Bus added successfully");
             document.getElementById("busNumber").value="";
-            loadRoutes(); // Refresh dropdown
+            document.getElementById("routeSelect").value="";
+        } else {
+            alert(data.message || "Unable to add bus. Please try again.");
         }
     }catch(err){
-        console.error("Error:", err);
-        alert("Server error, check console");
+        console.error("Error adding bus:", err);
+        alert("Server error, check console for details.");
     }
 }
 
