@@ -1,62 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Live Bus Tracking</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 
 <style>
 
-body{
+*{
 margin:0;
-font-family:Arial;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
 background:#f4f6fb;
 }
 
+/* SIDEBAR SPACE */
 .main{
-padding:20px;
+margin-left:230px;
+padding:25px;
 }
 
-.top{
+/* HEADER STYLE LIKE YOUR DASHBOARD */
+.header{
+background:linear-gradient(90deg,#2563eb,#1e3a8a);
+color:white;
+padding:18px 22px;
+border-radius:12px;
+margin-bottom:18px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* TOP CONTROL BOX */
+.controls{
+background:white;
+padding:15px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 display:flex;
 gap:10px;
+align-items:center;
 margin-bottom:15px;
 }
 
-input{
-padding:12px;
-width:220px;
-border:none;
-border-radius:10px;
-font-size:16px;
+.controls input{
+padding:10px;
+border:1px solid #ddd;
+border-radius:8px;
+width:200px;
+outline:none;
 }
 
-button{
-padding:12px 20px;
+.controls button{
+padding:10px 16px;
 border:none;
 background:#2563eb;
 color:white;
-border-radius:10px;
-font-size:16px;
+border-radius:8px;
 cursor:pointer;
 }
 
+/* INFO CARD */
 .card{
 background:white;
 padding:15px;
-border-radius:12px;
+border-radius:14px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
 margin-bottom:15px;
 line-height:1.8;
 }
 
+/* MAP */
 #map{
 height:500px;
-border-radius:12px;
+border-radius:14px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
 }
 
 .live{
@@ -70,53 +97,38 @@ font-weight:bold;
 }
 
 </style>
-
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
+<div id="sidebar"></div>
+
 <div class="main">
 
-<h2>🚍 Live Bus Tracking</h2>
+<!-- HEADER -->
+<div id="header"></div>
 
-<div class="top">
+<!-- CONTROLS -->
+<div class="controls">
 
-<input
-type="number"
-id="busIdInput"
-placeholder="Enter Bus ID"
-/>
+<input type="number" id="busIdInput" placeholder="Enter Bus ID">
 
-<button onclick="startTracking()">
-Track Bus
-</button>
+<button onclick="startTracking()">Track Bus</button>
 
 </div>
 
+<!-- INFO CARD -->
 <div class="card">
 
-<b>Bus:</b>
-<span id="busNo">-</span>
-
-<br>
-
-<b>Location:</b>
-<span id="location">Waiting...</span>
-
-<br>
-
-<b>Status:</b>
-<span id="status" class="error">
-Not Connected
-</span>
-
-<br>
-
-<b>Time:</b>
-<span id="time">-</span>
+<b>Bus:</b> <span id="busNo">-</span><br>
+<b>Location:</b> <span id="location">Waiting...</span><br>
+<b>Status:</b> <span id="status" class="error">Not Connected</span><br>
+<b>Time:</b> <span id="time">-</span>
 
 </div>
 
+<!-- MAP -->
 <div id="map"></div>
 
 </div>
@@ -125,29 +137,32 @@ Not Connected
 
 <script>
 
-// IMPORTANT
-const API_URL =
-"https://acceptable-solace-production-06f3.up.railway.app";
+// HEADER + SIDEBAR
+fetch("header.html")
+.then(r=>r.text())
+.then(d=>document.getElementById("header").innerHTML=d);
 
-let map = L.map('map').setView([30.1575,71.5249],13);
+fetch("student-sidebar.html")
+.then(r=>r.text())
+.then(d=>document.getElementById("sidebar").innerHTML=d);
 
-L.tileLayer(
-'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-{
+// API
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+let map = L.map('map').setView([30.1575,71.5249], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
 maxZoom:19
-}
-).addTo(map);
+}).addTo(map);
 
-let marker = L.marker([30.1575,71.5249])
-.addTo(map);
+let marker = L.marker([30.1575,71.5249]).addTo(map);
 
 let interval = null;
 let busId = null;
 
 function startTracking(){
 
-busId =
-document.getElementById("busIdInput").value;
+busId = document.getElementById("busIdInput").value;
 
 if(!busId){
 alert("Enter Bus ID");
@@ -159,82 +174,41 @@ clearInterval(interval);
 }
 
 loadLocation();
-
-interval = setInterval(loadLocation,5000);
-
+interval = setInterval(loadLocation,4000);
 }
 
 function loadLocation(){
 
 fetch(`${API_URL}/get_location/${busId}`)
+.then(res=>res.json())
+.then(data=>{
 
-.then(async response => {
-
-console.log("STATUS:", response.status);
-
-if(!response.ok){
-
-const text = await response.text();
-console.log("SERVER RESPONSE:", text);
-
-throw new Error("Server Error");
+if(data.message){
+document.getElementById("location").innerText="No Live Location";
+document.getElementById("status").innerText="Offline";
+document.getElementById("status").className="error";
+return;
 }
-
-return response.json();
-
-})
-
-.then(data => {
-
-console.log("DATA:", data);
 
 let lat = parseFloat(data.latitude);
 let lng = parseFloat(data.longitude);
 
-if(isNaN(lat) || isNaN(lng)){
+document.getElementById("busNo").innerText = data.bus_id;
+document.getElementById("location").innerText = `Live Location Received`;
+document.getElementById("time").innerText = data.last_updated;
 
-document.getElementById("location")
-.innerText = "Invalid Coordinates";
-
-return;
-}
-
-document.getElementById("busNo")
-.innerText = data.bus_id;
-
-document.getElementById("location")
-.innerText = lat + ", " + lng;
-
-document.getElementById("time")
-.innerText = data.last_updated;
-
-document.getElementById("status")
-.innerText = "🟢 LIVE";
-
-document.getElementById("status")
-.className = "live";
+document.getElementById("status").innerText = "🟢 LIVE";
+document.getElementById("status").className = "live";
 
 marker.setLatLng([lat,lng]);
-
-map.panTo([lat,lng],{
-animate:true,
-duration:1
-});
+map.panTo([lat,lng]);
 
 })
+.catch(err=>{
 
-.catch(error => {
-
-console.log("ERROR:", error);
-
-document.getElementById("location")
-.innerText = "Connection Failed";
-
-document.getElementById("status")
-.innerText = "❌ Server Error";
-
-document.getElementById("status")
-.className = "error";
+document.getElementById("location").innerText="Connection Failed";
+document.getElementById("status").innerText="❌ Server Error";
+document.getElementById("status").className="error";
 
 });
 

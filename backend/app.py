@@ -5,6 +5,39 @@ import os
 from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime
 from datetime import datetime, timedelta
+
+import sqlite3
+import os
+
+DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
+
+conn = sqlite3.connect(DB_NAME)
+cursor = conn.cursor()
+
+# add latitude
+try:
+    cursor.execute("""
+    ALTER TABLE stops
+    ADD COLUMN latitude REAL
+    """)
+    print("Latitude column added")
+except:
+    print("Latitude already exists")
+
+# add longitude
+try:
+    cursor.execute("""
+    ALTER TABLE stops
+    ADD COLUMN longitude REAL
+    """)
+    print("Longitude column added")
+except:
+    print("Longitude already exists")
+
+conn.commit()
+conn.close()
+
+print("Done ✅")
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -481,27 +514,31 @@ def get_stops(route_id):
 
     return jsonify([dict(s) for s in stops])
 
-@app.route('/add_stop', methods=['POST'])
+@app.route("/add_stop", methods=["POST"])
 def add_stop():
-    data = request.get_json()
-    route_id = data.get('route_id')
-    stop_name = data.get('stop_name')
 
-    if not route_id or not stop_name:
-        return jsonify({"message":"Route and stop name are required"}), 400
+    data = request.json
 
-    conn = get_db_connection()
+    route_id = data.get("route_id")
+    stop_name = data.get("stop_name")
+    latitude = data.get("latitude")
+    longitude = data.get("longitude")
+
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    cursor.execute(
-        "INSERT INTO stops (route_id, stop_name) VALUES (?, ?)",
-        (route_id, stop_name)
-    )
+    cursor.execute("""
+    INSERT INTO stops
+    (route_id, stop_name, latitude, longitude)
+    VALUES (?, ?, ?, ?)
+    """, (route_id, stop_name, latitude, longitude))
 
     conn.commit()
     conn.close()
 
-    return jsonify({"message":"Stop added successfully"})
+    return jsonify({
+        "message":"Stop added successfully"
+    })
 
 @app.route('/update_stop/<int:id>', methods=['PUT'])
 def update_stop(id):
