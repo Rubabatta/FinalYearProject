@@ -248,12 +248,13 @@ headers:{ "Content-Type":"application/json" },
 body: JSON.stringify(data)
 });
 
-const result = await res.json();
-
 if(!res.ok){
-alert(result.message || "Error");
+const text = await res.text();
+alert("Server Error: " + text);
 return;
 }
+
+const result = await res.json();
 
 alert(result.message);
 closeModal();

@@ -220,97 +220,163 @@ fetch("student-sidebar.html")
 document.getElementById("sidebar").innerHTML = data;
 });
 
-// ANNOUNCEMENTS ✔ FIXED
-fetch("http://192.168.100.145:5000/get-announcements")
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+// ANNOUNCEMENTS
+fetch(`${API_URL}/get-announcements`)
 .then(res => res.json())
 .then(data => {
-
-if(data.length > 0){
-const latest = data[0]; // because DESC order
-document.getElementById("announcement").textContent =
-latest.title + ": " + latest.message;
-}
-else{
-document.getElementById("announcement").textContent = "No announcements";
-}
-
+  if(data.length > 0){
+    const latest = data[0];
+    document.getElementById("announcement").textContent = latest.title + ": " + latest.message;
+  } else {
+    document.getElementById("announcement").textContent = "No announcements";
+  }
+})
+.catch(() => {
+  document.getElementById("announcement").textContent = "No announcements";
 });
+
+let selectedBusId = null;
+let routeStops = [];
+let intervalId = null;
 
 // BUS DATA
-fetch("http://192.168.100.145:5000/get_buses")
+fetch(`${API_URL}/get_buses`)
 .then(res=>res.json())
 .then(buses=>{
+  const busSelect = document.getElementById("busSelect");
 
-const busSelect = document.getElementById("busSelect");
+  buses.forEach(bus=>{
+    let option = document.createElement("option");
+    option.value = bus.id;
+    option.textContent = bus.bus_number;
+    option.dataset.routeId = bus.route_id;
+    option.dataset.startPoint = bus.start_point || "";
+    option.dataset.endPoint = bus.end_point || "";
+    busSelect.appendChild(option);
+  });
 
-buses.forEach(bus=>{
-let option = document.createElement("option");
-option.value = bus.id;
-option.textContent = bus.bus_number;
-busSelect.appendChild(option);
+  busSelect.addEventListener("change", function(){
+    selectBus(this.value, buses);
+  });
+})
+.catch(err => {
+  console.log("Error loading buses:", err);
 });
 
-busSelect.addEventListener("change",function(){
-updateAll(this.value,buses);
-});
+function selectBus(busId, buses){
+  if(intervalId){
+    clearInterval(intervalId);
+    intervalId = null;
+  }
 
-});
+  selectedBusId = busId;
+  const bus = buses.find(b => String(b.id) === String(busId));
 
-function updateAll(busId,buses){
-const bus = buses.find(b=>b.id==busId);
+  if(!bus){
+    document.getElementById("route").textContent = "--";
+    document.getElementById("busName").textContent = "--";
+    document.getElementById("currentStop").textContent = "--";
+    document.getElementById("nextStop").textContent = "--";
+    return;
+  }
 
-document.getElementById("route").textContent =
-bus ? `${bus.start_point} → ${bus.end_point}` : "--";
+  document.getElementById("route").textContent = `${bus.start_point || "--"} → ${bus.end_point || "--"}`;
+  document.getElementById("busName").textContent = bus.bus_number || "--";
+  document.getElementById("currentStop").textContent = bus.start_point || "--";
+  document.getElementById("nextStop").textContent = bus.end_point || "--";
 
-document.getElementById("busName").textContent =
-bus ? bus.bus_number : "--";
-
-document.getElementById("currentStop").textContent =
-bus ? bus.start_point : "--";
-
-document.getElementById("nextStop").textContent =
-bus ? bus.end_point : "--";
+  routeStops = [];
+  if(bus.route_id){
+    fetch(`${API_URL}/get_stops/${bus.route_id}`)
+    .then(res=>res.json())
+    .then(stops => {
+      routeStops = stops;
+      updateLocation();
+      intervalId = setInterval(updateLocation, 3000);
+    })
+    .catch(err => {
+      console.log("Error loading stops:", err);
+      updateLocation();
+      intervalId = setInterval(updateLocation, 3000);
+    });
+  } else {
+    updateLocation();
+    intervalId = setInterval(updateLocation, 3000);
+  }
 }
+
+function getNearestStop(lat, lng){
+  if(!routeStops || routeStops.length === 0) return null;
+
+  const dist = (a,b) => {
+    const dlat = a.lat - b.lat;
+    const dlng = a.lng - b.lng;
+    return dlat*dlat + dlng*dlng;
+  };
+
+  let nearestIndex = 0;
+  let nearestDist = Infinity;
+
+  routeStops.forEach((stop, idx) => {
+    if(stop.latitude != null && stop.longitude != null){
+      const currentDist = dist({lat:Number(stop.latitude), lng:Number(stop.longitude)}, {lat, lng});
+      if(currentDist < nearestDist){
+        nearestDist = currentDist;
+        nearestIndex = idx;
+      }
+    }
+  });
+
+  return { index: nearestIndex, stop: routeStops[nearestIndex] };
+}
+
+function updateLocation(){
+  if(!selectedBusId) return;
+
+  fetch(`${API_URL}/get_location/${selectedBusId}`)
+  .then(res => {
+    if(!res.ok) return res.text().then(text => { throw new Error(text || 'No location'); });
+    return res.json();
+  })
+  .then(data => {
+    if(data.message){
+      throw new Error(data.message);
+    }
+
+    const lat = Number(data.latitude || data.lat || 0);
+    const lng = Number(data.longitude || data.lng || 0);
+    if(isNaN(lat) || isNaN(lng)){
+      throw new Error('Invalid location');
+    }
+
+    marker.setLatLng([lat, lng]);
+    map.panTo([lat, lng]);
+
+    if(routeStops.length){
+      const nearest = getNearestStop(lat, lng);
+      if(nearest && nearest.stop){
+        document.getElementById("currentStop").textContent = nearest.stop.stop_name || "--";
+        const next = routeStops[nearest.index + 1];
+        document.getElementById("nextStop").textContent = next ? next.stop_name : (routeStops.length > 1 ? routeStops[routeStops.length-1].stop_name : "--");
+      }
+    }
+  })
+  .catch(err => {
+    console.log("Location fetch error:", err);
+    document.getElementById("currentStop").textContent = "Offline";
+    document.getElementById("nextStop").textContent = "--";
+  });
+}
+
 let map = L.map('map').setView([24.8607, 67.0011], 13);
 
-// OpenStreetMap tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// marker
 let marker = L.marker([24.8607, 67.0011]).addTo(map);
-
-// LIVE LOCATION UPDATE
-setInterval(() => {
-
-  fetch("https://frightful-skies-untrimmed.ngrok-free.dev/get_location")
-    .then(res => res.json())
-    .then(data => {
-
-      console.log("Location received:", data);
-
-      // SAFE CHECK
-      if (data && data.lat !== undefined && data.lng !== undefined) {
-
-        let lat = Number(data.lat);
-        let lng = Number(data.lng);
-
-        if (!isNaN(lat) && !isNaN(lng)) {
-
-          marker.setLatLng([lat, lng]);
-          map.setView([lat, lng]); // follow bus
-
-        }
-
-      }
-
-    })
-    .catch(err => {
-      console.log("Error fetching location:", err);
-    });
-
-}, 3000);
 
 </script>
 
