@@ -80,6 +80,7 @@ width:100%;padding:8px;margin:8px 0;
 <th>Name</th>
 <th>Email</th>
 <th>Contact</th>
+<th>Bus Number</th>
 <th>Route</th>
 <th>Actions</th>
 </tr>
@@ -194,6 +195,7 @@ rows+=`
 <td>${d.name}</td>
 <td>${d.email}</td>
 <td>${d.contact}</td>
+<td>${d.bus_number || "Not Assigned"}</td>
 <td>${d.route_number || "Not Assigned"}</td>
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
@@ -225,7 +227,7 @@ name: document.getElementById("name").value,
 email: document.getElementById("email").value,
 password: document.getElementById("password").value,
 contact: document.getElementById("contact").value,
-route_number: selectedRoute
+bus_id: busIdValue ? parseInt(busIdValue) : null
 };
 
 let url = `${API}/add_driver`;
@@ -239,6 +241,7 @@ method = "PUT";
 delete data.password;
 }
 
+try {
 const res = await fetch(url,{
 method,
 headers:{ "Content-Type":"application/json" },
@@ -255,6 +258,9 @@ return;
 alert(result.message);
 closeModal();
 load();
+} catch (error) {
+alert("Network error: " + error.message);
+}
 }
 
 </script>
