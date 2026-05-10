@@ -1021,6 +1021,30 @@ def delete_driver(id):
     conn.close()
 
     return jsonify({"message": "Driver deleted successfully"})
+
+
+
+    # =========================
+# ADD bus_id COLUMN
+# =========================
+
+try:
+
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    ALTER TABLE drivers
+    ADD COLUMN bus_id INTEGER
+    """)
+
+    conn.commit()
+    conn.close()
+
+    print("bus_id column added ✅")
+
+except Exception as e:
+    print("bus_id already exists OR error:", e)
     
 # -----------------------------
 # Run Server
