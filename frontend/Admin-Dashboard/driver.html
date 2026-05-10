@@ -80,7 +80,6 @@ width:100%;padding:8px;margin:8px 0;
 <th>Name</th>
 <th>Email</th>
 <th>Contact</th>
-<th>Bus Number</th>
 <th>Route</th>
 <th>Actions</th>
 </tr>
@@ -195,8 +194,7 @@ rows+=`
 <td>${d.name}</td>
 <td>${d.email}</td>
 <td>${d.contact}</td>
-<td>${d.bus_number || "Not Assigned"}</td>
-<td>${d.route_id || "Not Assigned"}</td>
+<td>${d.route_number || "Not Assigned"}</td>
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
 <i class="fa fa-pen"></i>
@@ -227,7 +225,7 @@ name: document.getElementById("name").value,
 email: document.getElementById("email").value,
 password: document.getElementById("password").value,
 contact: document.getElementById("contact").value,
-bus_id: busIdValue ? parseInt(busIdValue) : null
+route_number: selectedRoute
 };
 
 let url = `${API}/add_driver`;
@@ -237,12 +235,8 @@ if(id){
 url = `${API}/update_driver/${id}`;
 method = "PUT";
 
-data = {
-name: document.getElementById("name").value,
-email: document.getElementById("email").value,
-contact: document.getElementById("contact").value,
-bus_id: busIdValue ? parseInt(busIdValue) : null
-};
+// update me password include nahi ho raha tha → backend mismatch fix
+delete data.password;
 }
 
 const res = await fetch(url,{
