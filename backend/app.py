@@ -906,38 +906,43 @@ def driver_login():
 #......................
 @app.route('/add_driver', methods=['POST'])
 def add_driver():
-    data = request.get_json()
+    try:
+        data = request.get_json(silent=True)  # ✅ SAFE MODE
 
-    name = data.get('name')
-    email = data.get('email')
-    password = data.get('password')
-    contact = data.get('contact')
-    bus_id = data.get('bus_id')
+        if not data:
+            return jsonify({"message": "No JSON received"}), 400
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        contact = data.get('contact')
+        bus_id = data.get('bus_id')
 
-    # ❌ CHECK IF BUS ALREADY ASSIGNED
-    cursor.execute("SELECT * FROM drivers WHERE bus_id=?", (bus_id,))
-    existing = cursor.fetchone()
+        if not name or not email or not password:
+            return jsonify({"message": "Missing fields"}), 400
 
-    if existing:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        # optional safety (VERY IMPORTANT)
+        if bus_id:
+            cursor.execute("SELECT * FROM drivers WHERE bus_id=?", (bus_id,))
+            if cursor.fetchone():
+                return jsonify({"message": "Bus already assigned"}), 400
+
+        cursor.execute("""
+            INSERT INTO drivers (name, email, password, contact, bus_id)
+            VALUES (?, ?, ?, ?, ?)
+        """, (name, email, password, contact, bus_id))
+
+        conn.commit()
         conn.close()
-        return jsonify({
-            "message": "This bus is already assigned to another driver"
-        }), 400
 
-    cursor.execute("""
-        INSERT INTO drivers (name, email, password, contact, bus_id)
-        VALUES (?, ?, ?, ?, ?)
-    """, (name, email, password, contact, bus_id))
+        return jsonify({"message": "Driver added successfully"}), 200
 
-    conn.commit()
-    conn.close()
-
-    return jsonify({"message": "Driver added successfully"})
-
-
+    except Exception as e:
+        print("ADD DRIVER ERROR:", e)
+        return jsonify({"message": str(e)}), 500
 @app.route('/get_drivers', methods=['GET'])
 def get_drivers():
     conn = get_db_connection()

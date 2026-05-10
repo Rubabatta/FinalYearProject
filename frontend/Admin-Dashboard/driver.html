@@ -8,28 +8,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{display:flex;background:#f4f6fb;}
 
-body{
-display:flex;
-background:#f4f6fb;
-}
+.main{margin-left:240px;width:100%;padding:30px;}
 
-.main{
-margin-left:240px;
-width:100%;
-padding:30px;
-}
-
-h1{
-color:#1e3a8a;
-margin-bottom:20px;
-}
+h1{color:#1e3a8a;margin-bottom:20px;}
 
 .box{
 background:white;
@@ -48,69 +32,30 @@ cursor:pointer;
 margin-bottom:15px;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-}
+table{width:100%;border-collapse:collapse;}
+th{background:#3b82f6;color:white;padding:10px;text-align:left;}
+td{padding:10px;border-bottom:1px solid #eee;}
+tr:hover{background:#f1f5ff;}
 
-th{
-background:#3b82f6;
-color:white;
-padding:10px;
-text-align:left;
-}
-
-td{
-padding:10px;
-border-bottom:1px solid #eee;
-}
-
-tr:hover{
-background:#f1f5ff;
-}
-
-.icon-btn{
-border:none;
-padding:6px;
-border-radius:6px;
-cursor:pointer;
-margin-right:5px;
-color:white;
-}
-
+.icon-btn{border:none;padding:6px;border-radius:6px;cursor:pointer;margin-right:5px;color:white;}
 .edit{background:#f59e0b;}
 .delete{background:#ef4444;}
 
 .modal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
+display:none;position:fixed;top:0;left:0;width:100%;height:100%;
 background:rgba(0,0,0,0.5);
 }
 
 .modal-content{
-background:white;
-width:350px;
-margin:10% auto;
-padding:20px;
-border-radius:10px;
+background:white;width:350px;margin:10% auto;padding:20px;border-radius:10px;
 }
 
 .modal-content input,
 .modal-content select{
-width:100%;
-padding:8px;
-margin:8px 0;
+width:100%;padding:8px;margin:8px 0;
 }
 
-#route_show{
-font-size:13px;
-color:#1e3a8a;
-margin-top:5px;
-}
+#route_show{font-size:13px;color:#1e3a8a;margin-top:5px;}
 </style>
 </head>
 
@@ -136,7 +81,7 @@ margin-top:5px;
 <th>Email</th>
 <th>Contact</th>
 <th>Bus Number</th>
-<th>Route Number</th>
+<th>Route</th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -173,6 +118,7 @@ margin-top:5px;
 const API = "https://acceptable-solace-production-06f3.up.railway.app";
 
 let buses = [];
+let selectedRoute = null;
 
 /* SIDEBAR */
 fetch("sidebar.html")
@@ -202,66 +148,55 @@ document.getElementById("password").value="";
 document.getElementById("contact").value="";
 document.getElementById("bus_id").value="";
 document.getElementById("route_show").innerText="";
+selectedRoute=null;
 }
 
 /* LOAD BUSES */
-function loadBuses(){
-return fetch(`${API}/get_buses`)
-.then(r=>r.json())
-.then(data=>{
+async function loadBuses(){
+const res = await fetch(`${API}/get_buses`);
+const data = await res.json();
+
 buses = data;
 
-let html = "<option value=''>Select Bus</option>";
-
+let html = `<option value="">Select Bus</option>`;
 data.forEach(b=>{
-html += `<option value="${b.id}">
-Bus ${b.bus_number}
-</option>`;
+html += `<option value="${b.id}">Bus ${b.bus_number}</option>`;
 });
 
 document.getElementById("bus_id").innerHTML = html;
-});
 }
 
-/* SHOW ROUTE ON BUS SELECT */
-document.addEventListener("change", function(e){
-
+/* BUS CHANGE */
+document.addEventListener("change", (e)=>{
 if(e.target.id === "bus_id"){
-
-const bus = buses.find(b => b.id == e.target.value);
+const bus = buses.find(b=>b.id == e.target.value);
 
 if(bus){
-document.getElementById("route_show").innerText =
-"Route: " + bus.route_id;
+selectedRoute = bus.route_id;
+document.getElementById("route_show").innerText = "Route: " + bus.route_id;
 }else{
+selectedRoute = null;
 document.getElementById("route_show").innerText = "";
 }
 }
-
 });
 
 /* LOAD DRIVERS */
-function load(){
-
-fetch(`${API}/get_drivers`)
-.then(r=>r.json())
-.then(data=>{
+async function load(){
+const res = await fetch(`${API}/get_drivers`);
+const data = await res.json();
 
 let rows="";
 
 data.forEach(d=>{
-
 rows+=`
 <tr>
 <td>${d.id}</td>
 <td>${d.name}</td>
 <td>${d.email}</td>
 <td>${d.contact}</td>
-
-<td>${d.bus_number ? d.bus_number : "Not Assigned"}</td>
-
-<td>${d.route_id ? d.route_id : "Not Assigned"}</td>
-
+<td>${d.bus_number || "Not Assigned"}</td>
+<td>${d.route_id || "Not Assigned"}</td>
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
 <i class="fa fa-pen"></i>
@@ -271,80 +206,62 @@ rows+=`
 <i class="fa fa-trash"></i>
 </button>
 </td>
-</tr>
-`;
-
+</tr>`;
 });
 
-document.getElementById("table").innerHTML=rows;
-
-});
+document.getElementById("table").innerHTML = rows;
 }
 
 /* SAVE DRIVER */
-function save(){
+async function save(){
 
-let id=document.getElementById("id").value;
+let id = document.getElementById("id").value;
 
-let data={
-name:document.getElementById("name").value,
-email:document.getElementById("email").value,
-password:document.getElementById("password").value,
-contact:document.getElementById("contact").value,
-bus_id:document.getElementById("bus_id").value
+let busIdValue = document.getElementById("bus_id").value;
+
+// ✅ FIX: empty bus_id handle
+if(busIdValue === "") busIdValue = null;
+
+let data = {
+name: document.getElementById("name").value,
+email: document.getElementById("email").value,
+password: document.getElementById("password").value,
+contact: document.getElementById("contact").value,
+bus_id: busIdValue ? parseInt(busIdValue) : null
 };
 
-let url=`${API}/add_driver`;
-let method="POST";
+let url = `${API}/add_driver`;
+let method = "POST";
 
 if(id){
-url=`${API}/update_driver/${id}`;
-method="PUT";
+url = `${API}/update_driver/${id}`;
+method = "PUT";
+
+data = {
+name: document.getElementById("name").value,
+email: document.getElementById("email").value,
+contact: document.getElementById("contact").value,
+bus_id: busIdValue ? parseInt(busIdValue) : null
+};
 }
 
-fetch(url,{
-method:method,
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(data)
-})
-.then(r=>r.json())
-.then(res=>{
-alert(res.message);
+const res = await fetch(url,{
+method,
+headers:{ "Content-Type":"application/json" },
+body: JSON.stringify(data)
+});
+
+const result = await res.json();
+
+if(!res.ok){
+alert(result.message || "Error");
+return;
+}
+
+alert(result.message);
 closeModal();
 load();
-});
 }
-
-/* EDIT */
-function edit(d){
-
-document.getElementById("id").value=d.id;
-document.getElementById("name").value=d.name;
-document.getElementById("email").value=d.email;
-document.getElementById("contact").value=d.contact;
-
-loadBuses().then(()=>{
-document.getElementById("bus_id").value=d.bus_id;
-});
-
-document.getElementById("modal").style.display="block";
-}
-
-/* DELETE */
-function del(id){
-
-fetch(`${API}/delete_driver/${id}`,{
-method:"DELETE"
-})
-.then(r=>r.json())
-.then(res=>{
-alert(res.message);
-load();
-});
-}
-
-/* INIT */
-loadBuses().then(load);
 
 </script>
 

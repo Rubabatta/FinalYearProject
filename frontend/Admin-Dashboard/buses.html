@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Buses Management</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"> 
@@ -43,12 +44,18 @@ button{
     cursor:pointer;
     background:#3b82f6;
     color:white;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#1e40af;
 }
 
 .table-box{
     background:white;
     padding:25px;
     border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
 }
 
 table{
@@ -60,33 +67,43 @@ th{
     background:#3b82f6;
     color:white;
     padding:10px;
+    text-align:left;
 }
 
 td{
     padding:10px;
     border-bottom:1px solid #eee;
 }
+
+tr:hover{
+    background:#f1f5ff;
+}
 </style>
 </head>
 
 <body>
 
-<div id="sidebar"></div>
+<div id="sidebar-placeholder"></div>
 
 <div class="main">
 
 <h1>Buses Management</h1>
 
 <div class="action-row">
-<input type="text" id="searchInput" placeholder="Search bus...">
+<button onclick="window.location.href='add-bus.html'">Add Bus</button>
+<button onclick="deleteSelectedBus()">Delete Selected</button>
+
+<input type="text" id="searchInput" placeholder="Search bus or route...">
 <button onclick="searchBuses()">Search</button>
 </div>
 
 <div class="table-box">
 <table>
 <tr>
-<th>Bus No</th>
+<th>Select</th>
+<th>Bus Number</th>
 <th>Route</th>
+<th>Actions</th>
 </tr>
 <tbody id="busTable"></tbody>
 </table>
@@ -96,74 +113,111 @@ td{
 
 <script>
 
-const API = "https://acceptable-solace-production-06f3.up.railway.app";
+// Sidebar
+fetch('sidebar.html')
+.then(res => res.text())
+.then(html => {
+    document.getElementById('sidebar-placeholder').innerHTML = html;
+});
 
-let routes = [];
-let buses = [];
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
 
-/* SIDEBAR */
-fetch("sidebar.html")
-.then(r => r.text())
-.then(d => document.getElementById("sidebar").innerHTML = d);
+let allRoutes = [];
+let allBuses = [];
 
-/* LOAD ROUTES FIRST */
+// Load data
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadRoutes();
+    await loadBuses();
+});
+
+// Routes
 async function loadRoutes(){
-    try {
-        const res = await fetch(`${API}/get_routes`);
-        routes = await res.json();
-    } catch (e) {
-        console.log("Routes error", e);
-        alert("Routes load failed ❌");
+    try{
+        const res = await fetch(`${API_URL}/get_routes`);
+        allRoutes = await res.json();
+    }catch(err){
+        console.error("Routes error:", err);
+        alert("Routes load failed");
     }
 }
 
-/* LOAD BUSES */
+// Buses
 async function loadBuses(){
-    try {
-        const res = await fetch(`${API}/get_buses`);
-        buses = await res.json();
+    try{
+        const res = await fetch(`${API_URL}/get_buses`);
+        allBuses = await res.json();
 
         const table = document.getElementById("busTable");
         table.innerHTML = "";
 
-        buses.forEach(bus => {
+        allBuses.forEach(bus => {
 
-            const route = routes.find(r => String(r.id) === String(bus.route_id));
+            const route = allRoutes.find(r => r.id == bus.route_id);
 
-            const routeText = route
+            const routeName = route
                 ? `${route.start_point} → ${route.end_point}`
-                : "No Route";
+                : "N/A";
 
-            table.innerHTML += `
-                <tr>
-                    <td>${bus.bus_number}</td>
-                    <td>${routeText}</td>
-                </tr>
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td><input type="checkbox" data-id="${bus.id}"></td>
+                <td>${bus.bus_number}</td>
+                <td>${routeName}</td>
+                <td>
+                    <button onclick="updateBus(${bus.id})">Edit</button>
+                </td>
             `;
+
+            table.appendChild(row);
         });
 
-    } catch (e) {
-        console.log("Bus error", e);
-        alert("Bus load failed ❌");
+    }catch(err){
+        console.error("Buses error:", err);
+        alert("Failed to load buses");
     }
 }
 
-/* INIT (IMPORTANT ORDER FIX) */
-async function init(){
-    await loadRoutes();   // pehle routes
-    await loadBuses();    // phir buses
+// Delete
+function deleteSelectedBus(){
+
+    const selected = document.querySelectorAll('#busTable input[type="checkbox"]:checked');
+
+    if(selected.length === 0){
+        alert("Select bus first!");
+        return;
+    }
+
+    if(!confirm("Delete selected buses?")) return;
+
+    selected.forEach(async (box) => {
+        const id = box.getAttribute("data-id");
+
+        await fetch(`${API_URL}/delete_bus/${id}`,{
+            method:"DELETE"
+        });
+
+        loadBuses();
+    });
 }
 
-init();
-
-/* SEARCH */
+// Search
 function searchBuses(){
-    let q = document.getElementById("searchInput").value.toLowerCase();
-    let rows = document.querySelectorAll("#busTable tr");
+    const q = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#busTable tr");
 
-    rows.forEach(r=>{
-        r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+    rows.forEach(row=>{
+        row.style.display =
+        row.innerText.toLowerCase().includes(q)
+        ? ""
+        : "none";
     });
+}
+
+// Edit
+function updateBus(id){
+    window.location.href = `update-bus.html?id=${id}`;
 }
 
 </script>

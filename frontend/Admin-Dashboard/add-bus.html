@@ -6,136 +6,169 @@
 <title>Add Bus - Admin Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-/* Reset & Fonts */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{display:flex;background:#f4f6fb;}
 
-/* Sidebar Placeholder */
-#sidebar-placeholder{position:fixed;left:0;top:0;height:100%;z-index:10;}
+#sidebar-placeholder{
+    position:fixed;
+    left:0;
+    top:0;
+    height:100%;
+}
 
-/* Main Content */
-.main{margin-left:240px;padding:40px;width:100%;}
-.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.topbar h1{color:#1e3a8a;font-size:28px;}
-.topbar button{padding:8px 15px;background:#ef4444;color:white;border:none;border-radius:6px;cursor:pointer;}
-.topbar button:hover{background:#b91c1c;}
+.main{
+    margin-left:240px;
+    padding:40px;
+    width:100%;
+}
 
-/* Form Box */
-.form-box{background:white;padding:30px;border-radius:10px;width:450px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
-.form-box label{display:block;margin-top:15px;font-weight:500;color:#1e3a8a;}
-.form-box input,
-.form-box select{width:100%;padding:12px;margin-top:5px;border:1px solid #ccc;border-radius:6px;font-size:15px;}
-button.add-btn{margin-top:25px;padding:12px 20px;background:#3b82f6;color:white;border:none;border-radius:6px;cursor:pointer;font-size:16px;}
-button.add-btn:hover{background:#1e40af;}
+h1{color:#1e3a8a;margin-bottom:20px;}
+
+.form-box{
+    background:white;
+    padding:30px;
+    width:450px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+label{
+    display:block;
+    margin-top:15px;
+}
+
+input,select{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+button{
+    margin-top:20px;
+    padding:10px;
+    width:100%;
+    background:#3b82f6;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+button:hover{background:#1e40af;}
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar -->
 <div id="sidebar-placeholder"></div>
 
-<!-- Main Content -->
 <div class="main">
-<div class="topbar">
+
 <h1>Add New Bus</h1>
-<button onclick="logout()">Logout <i class="fas fa-sign-out-alt"></i></button>
-</div>
 
 <div class="form-box">
+
 <label>Bus Number</label>
-<input type="text" id="busNumber" placeholder="Enter Bus Number">
+<input type="text" id="busNumber">
 
 <label>Route</label>
 <select id="routeSelect">
-<option value="">Select Route</option>
+<option value="">Loading routes...</option>
 </select>
 
-<button class="add-btn" onclick="addBus()">Add Bus</button>
+<button onclick="addBus()">Add Bus</button>
+
 </div>
 </div>
 
 <script>
-// Fetch Sidebar
-fetch('sidebar.html')
-.then(res => res.text())
-.then(html => {
-    document.getElementById('sidebar-placeholder').innerHTML = html;
-});
 
-// Logout
-function logout(){
-    localStorage.removeItem("adminName");
-    window.location.href="admin-login.html";
-}
+fetch("sidebar.html")
+.then(r=>r.text())
+.then(d=>document.getElementById("sidebar-placeholder").innerHTML=d);
 
-const API_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://localhost:5000'
-    : 'https://acceptable-solace-production-06f3.up.railway.app';
+/* 🔥 IMPORTANT FIX: SINGLE API VARIABLE */
+const API = "https://acceptable-solace-production-06f3.up.railway.app";
 
-// Load Routes
+/* ======================
+   LOAD ROUTES (FIXED)
+====================== */
 async function loadRoutes(){
+
     try{
-        const resRoutes = await fetch(`${API_URL}/get_routes`);
-        const routes = await resRoutes.json();
+        const res = await fetch(`${API}/get_routes`);
 
-        const select = document.getElementById("routeSelect");
-        select.innerHTML = `<option value="">Select Route</option>`;
-
-        if(!Array.isArray(routes) || routes.length === 0){
-            select.innerHTML = `<option value="">No routes available</option>`;
-            return;
+        if(!res.ok){
+            throw new Error("API not responding");
         }
 
-        routes.forEach(route=>{
+        const routes = await res.json();
+
+        const select = document.getElementById("routeSelect");
+
+        select.innerHTML = `<option value="">Select Route</option>`;
+
+        routes.forEach(r=>{
             const option = document.createElement("option");
-            option.value = route.id;
-            option.textContent = `${route.start_point} → ${route.end_point}`;
+            option.value = r.id;
+            option.textContent = `${r.start_point} → ${r.end_point}`;
             select.appendChild(option);
         });
 
     }catch(err){
-        console.error("Error loading routes:", err);
-        alert("Failed to load routes. Check server or network.");
+        console.log("ROUTE ERROR:", err);
+        alert("Routes failed to load ❌ Check Railway server");
     }
 }
 
-// Add Bus
+/* ======================
+   ADD BUS (FIXED)
+====================== */
 async function addBus(){
-    const bus_number = document.getElementById("busNumber").value.trim();
-    const route_id = document.getElementById("routeSelect").value;
 
-    if(bus_number === "" || route_id === ""){
-        alert("Please fill all fields");
+    let bus_number = document.getElementById("busNumber").value;
+    let route_id = document.getElementById("routeSelect").value;
+
+    if(!bus_number || !route_id){
+        alert("Fill all fields");
         return;
     }
 
     try{
-        const res = await fetch(`${API_URL}/add_bus`,{
+        const res = await fetch(`${API}/add_bus`,{
             method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({bus_number, route_id})
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                bus_number,
+                route_id
+            })
         });
+
         const data = await res.json();
 
         if(res.ok){
-            alert(data.message || "Bus added successfully");
+            alert("Bus added successfully ✔️");
             document.getElementById("busNumber").value="";
             document.getElementById("routeSelect").value="";
         } else {
-            alert(data.message || "Unable to add bus. Please try again.");
+            alert(data.message || "Server error");
         }
+
     }catch(err){
-        console.error("Error adding bus:", err);
-        alert("Server error, check console for details.");
+        console.log("ADD BUS ERROR:", err);
+        alert("Backend not responding ❌");
     }
 }
 
-// Initial Load
+/* INIT */
 document.addEventListener("DOMContentLoaded", loadRoutes);
+
 </script>
 
 </body>
