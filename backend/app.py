@@ -761,8 +761,10 @@ def get_all_locations():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT * FROM bus_locations
-        ORDER BY id DESC
+        SELECT bl.id, bl.bus_id, bl.latitude, bl.longitude, bl.last_updated, b.route_id
+        FROM bus_locations bl
+        LEFT JOIN buses b ON bl.bus_id = b.id
+        ORDER BY bl.id DESC
     """)
 
     rows = cursor.fetchall()

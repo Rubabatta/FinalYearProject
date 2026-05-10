@@ -132,6 +132,20 @@ maxZoom:19
 let markers = {};
 
 // ==========================
+// DISTANCE CALCULATOR (Haversine Formula)
+// ==========================
+function calculateDistance(lat1, lon1, lat2, lon2){
+    const R = 6371; // Earth radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
+}
+
+// ==========================
 // MAIN LOAD
 // ==========================
 function loadAll(){
@@ -206,12 +220,36 @@ return;
 // ORDER FIX
 stops.sort((a,b)=>(a.stop_order||0)-(b.stop_order||0));
 
-// SIMPLE LOGIC (first stop = current)
-let current = stops[0]?.stop_name || "-";
-let next = stops[1]?.stop_name || "End";
+// ========== DISTANCE-BASED LOGIC ==========
+let stopsWithDistance = stops.map(stop=>{
+    let stopLat = parseFloat(stop.latitude);
+    let stopLng = parseFloat(stop.longitude);
+    
+    // Skip if stop has no coordinates
+    if(isNaN(stopLat) || isNaN(stopLng)){
+        return {...stop, distance: Infinity};
+    }
+    
+    let distance = calculateDistance(lat, lng, stopLat, stopLng);
+    return {...stop, distance: distance};
+});
 
-div.querySelectorAll(".small")[0].innerText="Current: "+current;
-div.querySelectorAll(".small")[1].innerText="Next: "+next;
+// Find closest stop (current)
+let currentStop = stopsWithDistance.reduce((prev, curr)=>
+    curr.distance < prev.distance ? curr : prev
+);
+
+// Find next stop (after current, or End if current is last)
+let currentIdx = stopsWithDistance.findIndex(s=>s.id === currentStop.id);
+let nextStop = currentIdx < stopsWithDistance.length - 1 
+    ? stopsWithDistance[currentIdx + 1]
+    : null;
+
+let currentText = currentStop.distance === Infinity ? "-" : currentStop.stop_name;
+let nextText = nextStop ? nextStop.stop_name : "End";
+
+div.querySelectorAll(".small")[0].innerText="Current: "+currentText;
+div.querySelectorAll(".small")[1].innerText="Next: "+nextText;
 
 });
 
