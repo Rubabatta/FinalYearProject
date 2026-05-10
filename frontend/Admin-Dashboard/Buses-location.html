@@ -17,11 +17,17 @@ background:#f4f6fb;
 
 /* SIDEBAR */
 .sidebar{
-width:300px;
+width:340px;
 background:#111827;
 color:white;
 padding:15px;
 overflow-y:auto;
+}
+
+.title{
+font-size:16px;
+margin-bottom:10px;
+font-weight:bold;
 }
 
 .bus-card{
@@ -32,12 +38,19 @@ border-radius:10px;
 cursor:pointer;
 }
 
-.bus-card:hover{
-background:#2563eb;
+.bus-id{
+font-weight:bold;
+margin-bottom:4px;
 }
 
-.online{color:lime;font-weight:bold;}
-.offline{color:red;font-weight:bold;}
+.online{color:lime;}
+.offline{color:red;}
+
+.small{
+font-size:12px;
+color:#cbd5e1;
+margin-top:3px;
+}
 
 /* MAIN */
 .main{
@@ -46,38 +59,35 @@ display:flex;
 flex-direction:column;
 }
 
-/* SINGLE CLEAN CONTAINER */
 .container{
-margin:15px;
+margin:10px;
 background:white;
 border-radius:12px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
 overflow:hidden;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
 display:flex;
 flex-direction:column;
 height:100%;
 }
 
 .header{
-padding:12px 15px;
+padding:12px;
 background:#2563eb;
 color:white;
 font-weight:bold;
 }
 
 .info{
-padding:12px 15px;
+padding:12px;
 border-bottom:1px solid #eee;
+font-size:14px;
 display:flex;
 gap:20px;
-flex-wrap:wrap;
-font-size:14px;
 }
 
 #map{
 flex:1;
 }
-
 </style>
 </head>
 
@@ -85,7 +95,7 @@ flex:1;
 
 <!-- SIDEBAR -->
 <div class="sidebar">
-<h3>🚍 Active Buses</h3>
+<div class="title">🚍 Active Buses</div>
 <div id="busList"></div>
 </div>
 
@@ -94,15 +104,11 @@ flex:1;
 
 <div class="container">
 
-<div class="header">
-Admin Live Tracking System
-</div>
+<div class="header">Admin Live Tracking</div>
 
 <div class="info">
 <div><b>Bus:</b> <span id="busId">-</span></div>
 <div><b>Status:</b> <span id="status">-</span></div>
-<div><b>Current Stop:</b> <span id="currentStop">-</span></div>
-<div><b>Next Stop:</b> <span id="nextStop">-</span></div>
 </div>
 
 <div id="map"></div>
@@ -124,31 +130,28 @@ maxZoom:19
 }).addTo(map);
 
 let markers = {};
-let selectedBus = null;
 
 // ==========================
-// LOAD LOCATIONS
+// MAIN LOAD
 // ==========================
-function loadAllLocations(){
+function loadAll(){
 
 fetch(`${API_URL}/get_all_locations`)
-.then(res => res.json())
-.then(data => {
+.then(res=>res.json())
+.then(data=>{
 
 let busList = document.getElementById("busList");
-busList.innerHTML = "";
+busList.innerHTML="";
 
-// latest per bus
-let latest = {};
+let latest={};
 
-data.forEach(item => {
+data.forEach(item=>{
 
-let id = item.bus_id;
+let id=item.bus_id;
+let time=new Date(item.last_updated+" UTC").getTime();
 
-let time = new Date(item.last_updated + " UTC").getTime();
-
-if(!latest[id] || time > latest[id].time){
-latest[id] = {data:item,time:time};
+if(!latest[id] || time>latest[id].time){
+latest[id]={data:item,time:time};
 }
 
 });
@@ -157,75 +160,78 @@ latest[id] = {data:item,time:time};
 Object.keys(markers).forEach(id=>{
 map.removeLayer(markers[id]);
 });
-markers = {};
+markers={};
 
 // render buses
 Object.keys(latest).forEach(id=>{
 
-let bus = latest[id].data;
+let bus=latest[id].data;
 
-let lat = parseFloat(bus.latitude);
-let lng = parseFloat(bus.longitude);
+let lat=parseFloat(bus.latitude);
+let lng=parseFloat(bus.longitude);
 
-if(isNaN(lat) || isNaN(lng)) return;
+if(isNaN(lat)||isNaN(lng)) return;
 
-let now = new Date().getTime();
-let diff = (now - new Date(bus.last_updated + " UTC").getTime())/1000;
+let now=new Date().getTime();
+let diff=(now-new Date(bus.last_updated+" UTC").getTime())/1000;
 
-let status = (diff < 60) ? "ONLINE" : "OFFLINE";
+let status=(diff<60)?"ONLINE":"OFFLINE";
 
-// SIDEBAR CARD
-let div = document.createElement("div");
-div.className = "bus-card";
+// ================= BUS CARD =================
+let div=document.createElement("div");
+div.className="bus-card";
 
-div.innerHTML = `
-<b>🚍 Bus ${id}</b><br>
-<span class="${status=='ONLINE'?'online':'offline'}">
-${status}
-</span>
+div.innerHTML=`
+<div class="bus-id">🚍 Bus ${id}</div>
+<div class="${status=='ONLINE'?'online':'offline'}">${status}</div>
+<div class="small">Current: -</div>
+<div class="small">Next: -</div>
 `;
-
-div.onclick = ()=>selectBus(bus,status);
 
 busList.appendChild(div);
 
-// marker
-markers[id] = L.marker([lat,lng])
-.addTo(map)
-.bindPopup(`Bus ${id}`);
+// ================= STOPS FETCH =================
+if(bus.route_id){
+
+fetch(`${API_URL}/get_stops/${bus.route_id}`)
+.then(r=>r.json())
+.then(stops=>{
+
+if(!stops || stops.length==0){
+div.querySelectorAll(".small")[0].innerText="Current: -";
+div.querySelectorAll(".small")[1].innerText="Next: -";
+return;
+}
+
+// ORDER FIX
+stops.sort((a,b)=>(a.stop_order||0)-(b.stop_order||0));
+
+// SIMPLE LOGIC (first stop = current)
+let current = stops[0]?.stop_name || "-";
+let next = stops[1]?.stop_name || "End";
+
+div.querySelectorAll(".small")[0].innerText="Current: "+current;
+div.querySelectorAll(".small")[1].innerText="Next: "+next;
 
 });
 
-})
-.catch(err=>console.log(err));
+}
 
+// ================= MARKER =================
+markers[id]=L.marker([lat,lng])
+.addTo(map)
+.bindPopup(`🚍 Bus ${id}`);
+
+});
+
+});
 }
 
 // ==========================
-// SELECT BUS
+// RUN
 // ==========================
-function selectBus(bus,status){
-
-selectedBus = bus;
-
-document.getElementById("busId").innerText = bus.bus_id;
-document.getElementById("status").innerText = status;
-
-// placeholders (abhi backend se stops nahi aa rahe)
-document.getElementById("currentStop").innerText = "Detecting...";
-document.getElementById("nextStop").innerText = "Loading...";
-
-map.setView([bus.latitude,bus.longitude],15);
-
-if(status=="OFFLINE"){
-alert("⚠ Bus is disconnected");
-}
-
-}
-
-// auto refresh
-setInterval(loadAllLocations,5000);
-loadAllLocations();
+setInterval(loadAll,5000);
+loadAll();
 
 </script>
 

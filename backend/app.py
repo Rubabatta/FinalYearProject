@@ -527,33 +527,46 @@ def add_stop():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
+    # 👉 get max order
+    cursor.execute("SELECT MAX(stop_order) FROM stops WHERE route_id=?", (route_id,))
+    max_order = cursor.fetchone()[0]
+    if max_order is None:
+        max_order = 0
+
     cursor.execute("""
     INSERT INTO stops
-    (route_id, stop_name, latitude, longitude)
-    VALUES (?, ?, ?, ?)
-    """, (route_id, stop_name, latitude, longitude))
+    (route_id, stop_name, latitude, longitude, stop_order)
+    VALUES (?, ?, ?, ?, ?)
+    """, (route_id, stop_name, latitude, longitude, max_order+1))
 
     conn.commit()
     conn.close()
 
-    return jsonify({
-        "message":"Stop added successfully"
-    })
+    return jsonify({"message":"Stop added successfully"})
 
 @app.route('/update_stop/<int:id>', methods=['PUT'])
 def update_stop(id):
-    data = request.get_json()
-    stop_name = data.get('stop_name')
-    if not stop_name:
-        return jsonify({"message":"Stop name is required"}), 400
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE stops SET stop_name=? WHERE id=?", (stop_name, id))
+    data = request.json
+
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+
+    cur.execute("""
+        UPDATE stops
+        SET stop_name=?, latitude=?, longitude=?
+        WHERE id=?
+    """, (
+        data['stop_name'],
+        data['latitude'],
+        data['longitude'],
+        id
+    ))
+
     conn.commit()
     conn.close()
-    return jsonify({"message":"Stop updated successfully"})
 
+    return jsonify({"message": "Stop updated"})
 @app.route('/delete_stop/<int:id>', methods=['DELETE'])
 def delete_stop(id):
     conn = get_db_connection()
