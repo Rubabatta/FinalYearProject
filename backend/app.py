@@ -973,18 +973,15 @@ def get_drivers():
             d.contact,
             d.bus_id,
             b.bus_number,
-            r.start_point,
-            r.end_point
+            b.route_id AS route_id
         FROM drivers d
         LEFT JOIN buses b ON d.bus_id = b.id
-        LEFT JOIN routes r ON b.route_id = r.id
     """)
 
     drivers = cursor.fetchall()
     conn.close()
 
     return jsonify([dict(d) for d in drivers])
-
 
 # UPDATE DRIVER
 @app.route('/update_driver/<int:id>', methods=['PUT'])
@@ -1014,16 +1011,23 @@ def update_driver(id):
 # DELETE DRIVER
 @app.route('/delete_driver/<int:id>', methods=['DELETE'])
 def delete_driver(id):
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM drivers WHERE id=?", (id,))
+    cursor.execute("SELECT * FROM drivers WHERE id=?", (id,))
+    row = cursor.fetchone()
 
+    if not row:
+        conn.close()
+        return jsonify({"message":"Driver not found"}),404
+
+    cursor.execute("DELETE FROM drivers WHERE id=?", (id,))
     conn.commit()
+
     conn.close()
 
-    return jsonify({"message": "Driver deleted successfully"})
-
+    return jsonify({"message":"Driver deleted successfully"})
 
 
     # =========================

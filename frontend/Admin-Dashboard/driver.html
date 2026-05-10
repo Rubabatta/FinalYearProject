@@ -117,8 +117,6 @@ width:100%;padding:8px;margin:8px 0;
 
 const API = "https://acceptable-solace-production-06f3.up.railway.app";
 
-let buses = [];
-
 /* SIDEBAR */
 fetch("sidebar.html")
 .then(r=>r.text())
@@ -126,6 +124,7 @@ fetch("sidebar.html")
     document.getElementById("sidebar").innerHTML=d;
 });
 
+/* OPEN MODAL */
 function openModal(){
     document.getElementById("modal").style.display="block";
     clear();
@@ -136,6 +135,7 @@ function closeModal(){
     document.getElementById("modal").style.display="none";
 }
 
+/* CLEAR FORM */
 function clear(){
     document.getElementById("id").value="";
     document.getElementById("name").value="";
@@ -143,91 +143,93 @@ function clear(){
     document.getElementById("password").value="";
     document.getElementById("contact").value="";
     document.getElementById("bus_id").value="";
+    document.getElementById("route_show").innerText="";
 }
 
-async function loadBuses(){
-    const res = await fetch(`${API}/get_buses`);
-    const data = await res.json();
-
-    buses = data;
-
-    let html = `<option value="">Select Bus</option>`;
-    data.forEach(b=>{
-        html += `<option value="${b.id}">Bus ${b.bus_number}</option>`;
-    });
-
-    document.getElementById("bus_id").innerHTML = html;
-}
-
-/* LOAD DRIVERS */
+/* LOAD BUSES */
 async function loadBuses(){
 
 const res = await fetch(`${API}/get_buses`);
 const data = await res.json();
 
-buses = data;
-
 let html = `<option value="">Select Bus</option>`;
 
 data.forEach(b=>{
-
 html += `
-
-<option 
-value="${b.id}" 
-data-route="${b.route_id}">
+<option value="${b.id}" data-route="${b.route_id}">
 Bus ${b.bus_number}
-</option>
-`;
-
+</option>`;
 });
 
 document.getElementById("bus_id").innerHTML = html;
-}
+
+/* AUTO ROUTE SHOW */
 document.getElementById("bus_id").addEventListener("change", function(){
 
 let selected = this.options[this.selectedIndex];
-
 let route = selected.getAttribute("data-route");
 
 document.getElementById("route_show").innerText =
-route ? "Route Number: " + route : "";
+route ? "Route: " + route : "";
 
 });
+}
 
+/* LOAD DRIVERS */
+async function load(){
+
+const res = await fetch(`${API}/get_drivers`);
+const data = await res.json();
+
+console.log("DRIVERS:", data);
+
+let rows="";
+
+data.forEach(d=>{
+rows+=`
+<tr>
+<td>${d.id}</td>
+<td>${d.name}</td>
+<td>${d.email}</td>
+<td>${d.contact}</td>
+<td>${d.bus_number || "Not Assigned"}</td>
+<td>${d.route_id || "Not Assigned"}</td>
+<td>
+<button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
+<i class="fa fa-pen"></i>
+</button>
+
+<button class="icon-btn delete" onclick='del(${d.id})'>
+<i class="fa fa-trash"></i>
+</button>
+</td>
+</tr>`;
+});
+
+document.getElementById("table").innerHTML = rows;
+}
+
+/* EDIT */
 function edit(d){
     document.getElementById("id").value = d.id;
     document.getElementById("name").value = d.name;
     document.getElementById("email").value = d.email;
-    document.getElementById("password").value = "";
     document.getElementById("contact").value = d.contact;
     document.getElementById("bus_id").value = d.bus_id || "";
-    document.getElementById("modal").style.display = "block";
+    document.getElementById("modal").style.display="block";
 }
 
+/* DELETE */
 async function del(id){
 
-if(!confirm("Delete this driver?")) return;
+if(!confirm("Delete driver?")) return;
 
-try{
-
-const res = await fetch(`${API}/delete_driver/${id}`,{
+await fetch(`${API}/delete_driver/${id}`,{
 method:"DELETE"
 });
 
-const data = await res.json();
-
-alert(data.message);
-
 load();
-
-}catch(err){
-alert("Delete failed");
 }
-
-}
-
-
 
 /* SAVE DRIVER */
 async function save(){
@@ -236,16 +238,12 @@ let id = document.getElementById("id").value;
 
 let busIdValue = document.getElementById("bus_id").value;
 
-// ✅ FIX: empty bus_id handle
-if(busIdValue === "") busIdValue = null;
-
 let data = {
 name: document.getElementById("name").value,
 email: document.getElementById("email").value,
 password: document.getElementById("password").value,
 contact: document.getElementById("contact").value,
 bus_id: busIdValue ? parseInt(busIdValue) : null
-
 };
 
 let url = `${API}/add_driver`;
@@ -254,34 +252,23 @@ let method = "POST";
 if(id){
 url = `${API}/update_driver/${id}`;
 method = "PUT";
-
-// update me password include nahi ho raha tha → backend mismatch fix
 delete data.password;
 }
 
-try {
-const res = await fetch(url,{
+await fetch(url,{
 method,
 headers:{ "Content-Type":"application/json" },
 body: JSON.stringify(data)
 });
 
-if(!res.ok){
-const text = await res.text();
-alert("Server Error: " + text);
-return;
-}
-
-const result = await res.json();
-
-alert(result.message);
 closeModal();
-load();
-} catch (error) {
-alert("Network error: " + error.message);
+
+/* IMPORTANT FIX */
+setTimeout(()=>load(),300);
 }
-}
+
 load();
+
 </script>
 
 </body>
