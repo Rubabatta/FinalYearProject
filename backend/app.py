@@ -426,26 +426,6 @@ def get_buses():
 
     return jsonify([dict(b) for b in buses])
 
-@app.route('/get_available_buses', methods=['GET'])
-def get_available_buses():
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT buses.*, routes.start_point, routes.end_point
-        FROM buses
-        LEFT JOIN routes
-        ON buses.route_id = routes.id
-        WHERE buses.id NOT IN (SELECT bus_id FROM drivers WHERE bus_id IS NOT NULL)
-    """)
-
-    buses = cursor.fetchall()
-
-    conn.close()
-
-    return jsonify([dict(b) for b in buses])
-
 @app.route('/add_bus', methods=['POST'])
 def add_bus():
 
@@ -930,37 +910,53 @@ def driver_login():
 
 @app.route('/add_driver', methods=['POST'])
 def add_driver():
-    data = request.get_json()
 
-    name = data.get('name')
-    email = data.get('email')
-    password = data.get('password')
-    contact = data.get('contact')
-    bus_id = data.get('bus_id')
+    try:
 
-    if not name or not email or not password:
-        return jsonify({"message": "Missing fields"}), 400
+        data = request.get_json()
 
-    conn = get_db_connection()
-    cursor = conn.cursor()
+        print("DATA RECEIVED:", data)
 
-    # check bus already assigned
-    if bus_id:
-        cursor.execute("SELECT * FROM drivers WHERE bus_id=?", (bus_id,))
-        if cursor.fetchone():
-            return jsonify({"message": "Bus already assigned"}), 400
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        contact = data.get('contact')
 
-    cursor.execute("""
-        INSERT INTO drivers (name, email, password, contact, bus_id)
-        VALUES (?, ?, ?, ?, ?)
-    """, (name, email, password, contact, bus_id))
+        bus_id = data.get('bus_id')
 
-    conn.commit()
-    conn.close()
+        # IMPORTANT FIX
+        if bus_id == "" or bus_id is None:
+            bus_id = None
 
-    return jsonify({"message": "Driver added successfully"})
+        conn = get_db_connection()
+        cursor = conn.cursor()
 
+        cursor.execute("""
+            INSERT INTO drivers
+            (name, email, password, contact, bus_id)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            name,
+            email,
+            password,
+            contact,
+            bus_id
+        ))
 
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "message": "Driver added successfully"
+        })
+
+    except Exception as e:
+
+        print("ADD DRIVER ERROR:", str(e))
+
+        return jsonify({
+            "message": str(e)
+        }), 500
 # GET DRIVERS
 @app.route('/get_drivers', methods=['GET'])
 def get_drivers():

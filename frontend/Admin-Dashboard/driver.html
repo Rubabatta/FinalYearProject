@@ -118,72 +118,46 @@ width:100%;padding:8px;margin:8px 0;
 const API = "https://acceptable-solace-production-06f3.up.railway.app";
 
 let buses = [];
-let selectedRoute = null;
 
 /* SIDEBAR */
 fetch("sidebar.html")
 .then(r=>r.text())
 .then(d=>{
-document.getElementById("sidebar").innerHTML=d;
+    document.getElementById("sidebar").innerHTML=d;
 });
 
-/* OPEN */
 function openModal(){
-document.getElementById("modal").style.display="block";
-clear();
-loadBuses(false);
+    document.getElementById("modal").style.display="block";
+    clear();
+    loadBuses();
 }
 
-/* CLOSE */
 function closeModal(){
-document.getElementById("modal").style.display="none";
+    document.getElementById("modal").style.display="none";
 }
 
-/* CLEAR */
 function clear(){
-document.getElementById("id").value="";
-document.getElementById("name").value="";
-document.getElementById("email").value="";
-document.getElementById("password").value="";
-document.getElementById("contact").value="";
-document.getElementById("bus_id").value="";
-document.getElementById("route_show").innerText="";
-selectedRoute=null;
+    document.getElementById("id").value="";
+    document.getElementById("name").value="";
+    document.getElementById("email").value="";
+    document.getElementById("password").value="";
+    document.getElementById("contact").value="";
+    document.getElementById("bus_id").value="";
 }
 
-/* LOAD BUSES */
-async function loadBuses(includeAssigned = false){
-const url = includeAssigned ? `${API}/get_buses` : `${API}/get_available_buses`;
-const res = await fetch(url);
-const data = await res.json();
+async function loadBuses(){
+    const res = await fetch(`${API}/get_buses`);
+    const data = await res.json();
 
-buses = data;
+    buses = data;
 
-let html = `<option value="">Select Bus</option>`;
-data.forEach(b=>{
-html += `<option value="${b.id}">Bus ${b.bus_number}</option>`;
-});
+    let html = `<option value="">Select Bus</option>`;
+    data.forEach(b=>{
+        html += `<option value="${b.id}">Bus ${b.bus_number}</option>`;
+    });
 
-document.getElementById("bus_id").innerHTML = html;
+    document.getElementById("bus_id").innerHTML = html;
 }
-
-/* BUS CHANGE */
-document.addEventListener("change", (e)=>{
-if(e.target.id === "bus_id"){
-const bus = buses.find(b=>b.id == e.target.value);
-
-if(bus){
-selectedRoute = bus.route_id;
-const routeText = bus.start_point && bus.end_point
-    ? `${bus.start_point} → ${bus.end_point}`
-    : bus.route_id;
-document.getElementById("route_show").innerText = "Route: " + routeText;
-}else{
-selectedRoute = null;
-document.getElementById("route_show").innerText = "";
-}
-}
-});
 
 /* LOAD DRIVERS */
 async function load(){
@@ -222,12 +196,7 @@ function edit(d){
     document.getElementById("email").value = d.email;
     document.getElementById("password").value = "";
     document.getElementById("contact").value = d.contact;
-
-    loadBuses(true).then(() => {
-        document.getElementById("bus_id").value = d.bus_id || "";
-        document.getElementById("bus_id").dispatchEvent(new Event("change"));
-    });
-
+    document.getElementById("bus_id").value = d.bus_id || "";
     document.getElementById("modal").style.display = "block";
 }
 
@@ -246,7 +215,7 @@ name: document.getElementById("name").value,
 email: document.getElementById("email").value,
 password: document.getElementById("password").value,
 contact: document.getElementById("contact").value,
-bus_id: busIdValue ? parseInt(busIdValue) : null
+bus_id: busIdValue || null
 };
 
 let url = `${API}/add_driver`;
@@ -282,7 +251,7 @@ load();
 alert("Network error: " + error.message);
 }
 }
-
+load();
 </script>
 
 </body>
