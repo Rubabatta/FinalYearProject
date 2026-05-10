@@ -11,7 +11,17 @@ import os
 
 DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
 
-conn = sqlite3.connect(DB_NAME)
+# -----------------------------
+# Database Connection
+# -----------------------------
+def get_db_connection():
+    conn = sqlite3.connect(DB_NAME, timeout=20)
+    conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA busy_timeout=5000")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+conn = get_db_connection()
 cursor = conn.cursor()
 
 # add latitude
@@ -49,20 +59,6 @@ PROFILE_FOLDER = "static/profile"
 
 print("🚀 SERVER STARTING")
 print("DB PATH:", DB_NAME)
-
-
-
-@app.route('/test')
-def test():
-    return "OK WORKING"
-
-# -----------------------------
-# Database Connection
-# -----------------------------
-def get_db_connection():
-    conn = sqlite3.connect(DB_NAME, timeout=10)
-    conn.row_factory = sqlite3.Row
-    return conn
 # -----------------------------
 # Home Route
 # -----------------------------
@@ -525,23 +521,25 @@ def add_stop():
     latitude = data.get("latitude")
     longitude = data.get("longitude")
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 👉 get max order
-    cursor.execute("SELECT MAX(stop_order) FROM stops WHERE route_id=?", (route_id,))
-    max_order = cursor.fetchone()[0]
-    if max_order is None:
-        max_order = 0
+    try:
+        # 👉 get max order
+        cursor.execute("SELECT MAX(stop_order) FROM stops WHERE route_id=?", (route_id,))
+        max_order = cursor.fetchone()[0]
+        if max_order is None:
+            max_order = 0
 
-    cursor.execute("""
-    INSERT INTO stops
-    (route_id, stop_name, latitude, longitude, stop_order)
-    VALUES (?, ?, ?, ?, ?)
-    """, (route_id, stop_name, latitude, longitude, max_order+1))
+        cursor.execute("""
+        INSERT INTO stops
+        (route_id, stop_name, latitude, longitude, stop_order)
+        VALUES (?, ?, ?, ?, ?)
+        """, (route_id, stop_name, latitude, longitude, max_order+1))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+    finally:
+        conn.close()
 
     return jsonify({"message":"Stop added successfully"})
 
@@ -550,22 +548,24 @@ def update_stop(id):
 
     data = request.json
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cur = conn.cursor()
 
-    cur.execute("""
-        UPDATE stops
-        SET stop_name=?, latitude=?, longitude=?
-        WHERE id=?
-    """, (
-        data['stop_name'],
-        data['latitude'],
-        data['longitude'],
-        id
-    ))
+    try:
+        cur.execute("""
+            UPDATE stops
+            SET stop_name=?, latitude=?, longitude=?
+            WHERE id=?
+        """, (
+            data['stop_name'],
+            data['latitude'],
+            data['longitude'],
+            id
+        ))
 
-    conn.commit()
-    conn.close()
+        conn.commit()
+    finally:
+        conn.close()
 
     return jsonify({"message": "Stop updated"})
 @app.route('/delete_stop/<int:id>', methods=['DELETE'])
@@ -931,20 +931,22 @@ def add_driver():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
-            INSERT INTO drivers
-            (name, email, password, contact, bus_id)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            name,
-            email,
-            password,
-            contact,
-            bus_id
-        ))
+        try:
+            cursor.execute("""
+                INSERT INTO drivers
+                (name, email, password, contact, bus_id)
+                VALUES (?, ?, ?, ?, ?)
+            """, (
+                name,
+                email,
+                password,
+                contact,
+                bus_id
+            ))
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+        finally:
+            conn.close()
 
         return jsonify({
             "message": "Driver added successfully"
@@ -1030,7 +1032,7 @@ def delete_driver(id):
 
 try:
 
-    conn = sqlite3.connect(DB_NAME)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
@@ -1045,6 +1047,8 @@ try:
 
 except Exception as e:
     print("bus_id already exists OR error:", e)
+
+    
     
 # -----------------------------
 # Run Server
