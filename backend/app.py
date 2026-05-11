@@ -20,33 +20,114 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-conn = get_db_connection()
-cursor = conn.cursor()
 
-# add latitude
-try:
-    cursor.execute("""
-    ALTER TABLE stops
-    ADD COLUMN latitude REAL
-    """)
-    print("Latitude column added")
-except:
-    print("Latitude already exists")
+def initialize_database():
+    conn = get_db_connection()
+    cursor = conn.cursor()
 
-# add longitude
-try:
-    cursor.execute("""
-    ALTER TABLE stops
-    ADD COLUMN longitude REAL
-    """)
-    print("Longitude column added")
-except:
-    print("Longitude already exists")
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS students (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL,
+        center TEXT,
+        studentID TEXT UNIQUE,
+        contact TEXT,
+        fees REAL,
+        image TEXT
+    )
+    ''')
 
-conn.commit()
-conn.close()
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS admins (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password TEXT NOT NULL
+    )
+    ''')
 
-print("Done ✅")
+    cursor.execute("INSERT OR IGNORE INTO admins (username, password) VALUES (?, ?)", (
+        "admin",
+        hashlib.sha256("123".encode()).hexdigest()
+    ))
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS routes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        start_point TEXT NOT NULL,
+        end_point TEXT NOT NULL,
+        stops TEXT
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS buses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bus_number TEXT UNIQUE NOT NULL,
+        driver_id INTEGER,
+        capacity INTEGER,
+        route_id INTEGER
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS bus_locations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        bus_id INTEGER NOT NULL,
+        latitude REAL,
+        longitude REAL,
+        last_updated TEXT
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS stops (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        route_id INTEGER,
+        stop_name TEXT,
+        latitude REAL,
+        longitude REAL,
+        stop_order INTEGER
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS announcements (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        message TEXT NOT NULL,
+        date TEXT
+    )
+    ''')
+
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS drivers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE,
+        password TEXT,
+        contact TEXT,
+        bus_id INTEGER,
+        route_id INTEGER
+    )
+    ''')
+
+    for statement in [
+        "ALTER TABLE students ADD COLUMN image TEXT",
+        "ALTER TABLE stops ADD COLUMN latitude REAL",
+        "ALTER TABLE stops ADD COLUMN longitude REAL",
+        "ALTER TABLE drivers ADD COLUMN bus_id INTEGER",
+        "ALTER TABLE drivers ADD COLUMN route_id INTEGER",
+    ]:
+        try:
+            cursor.execute(statement)
+        except sqlite3.OperationalError:
+            pass
+
+    conn.commit()
+    conn.close()
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -64,7 +145,15 @@ def auto_populate_if_empty():
     cursor = conn.cursor()
 
     # Check if students table has data
-    cursor.execute("SELECT COUNT(*) FROM students")
+    try:
+        cursor.execute("SELECT COUNT(*) FROM students")
+    except sqlite3.OperationalError:
+        conn.close()
+        initialize_database()
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM students")
+
     if cursor.fetchone()[0] == 0:
         print("DB is empty, populating with sample data...")
 
@@ -178,6 +267,7 @@ def auto_populate_if_empty():
 
     conn.close()
 
+initialize_database()
 auto_populate_if_empty()
 
 # -----------------------------
