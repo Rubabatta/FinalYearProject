@@ -954,16 +954,19 @@ def add_driver():
         contact = data.get('contact')
 
         bus_id = data.get('bus_id')
-        route_id = data.get('route_id')
 
-        # IMPORTANT FIX
         if bus_id == "" or bus_id is None:
             bus_id = None
-        if route_id == "" or route_id is None:
-            route_id = None
 
         conn = get_db_connection()
         cursor = conn.cursor()
+
+        route_id = None
+        if bus_id is not None:
+            cursor.execute("SELECT route_id FROM buses WHERE id=?", (bus_id,))
+            row = cursor.fetchone()
+            if row:
+                route_id = row["route_id"] if isinstance(row, dict) else row[0]
 
         try:
             cursor.execute("""
@@ -1000,26 +1003,51 @@ def get_drivers():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT 
-            d.id,
-            d.name,
-            d.email,
-            d.contact,
-            d.bus_id,
-            d.route_id,
-            b.bus_number,
-            b.route_id as bus_route_id,
-            routes.start_point,
-            routes.end_point,
-            CASE
-                WHEN routes.start_point IS NOT NULL THEN routes.start_point || ' - ' || routes.end_point
-                ELSE NULL
-            END AS route_name
-        FROM drivers d
-        LEFT JOIN buses b ON d.bus_id = b.id
-        LEFT JOIN routes ON d.route_id = routes.id
-    """)
+    cursor.execute("PRAGMA table_info(drivers)")
+    driver_columns = [row[1] for row in cursor.fetchall()]
+    has_route_id = 'route_id' in driver_columns
+
+    if has_route_id:
+        cursor.execute("""
+            SELECT 
+                d.id,
+                d.name,
+                d.email,
+                d.contact,
+                d.bus_id,
+                d.route_id,
+                b.bus_number,
+                b.route_id as bus_route_id,
+                routes.start_point,
+                routes.end_point,
+                CASE
+                    WHEN routes.start_point IS NOT NULL THEN routes.start_point || ' - ' || routes.end_point
+                    ELSE NULL
+                END AS route_name
+            FROM drivers d
+            LEFT JOIN buses b ON d.bus_id = b.id
+            LEFT JOIN routes ON COALESCE(d.route_id, b.route_id) = routes.id
+        """)
+    else:
+        cursor.execute("""
+            SELECT 
+                d.id,
+                d.name,
+                d.email,
+                d.contact,
+                d.bus_id,
+                b.bus_number,
+                b.route_id as bus_route_id,
+                routes.start_point,
+                routes.end_point,
+                CASE
+                    WHEN routes.start_point IS NOT NULL THEN routes.start_point || ' - ' || routes.end_point
+                    ELSE NULL
+                END AS route_name
+            FROM drivers d
+            LEFT JOIN buses b ON d.bus_id = b.id
+            LEFT JOIN routes ON b.route_id = routes.id
+        """)
 
     drivers = cursor.fetchall()
     conn.close()
@@ -1035,10 +1063,19 @@ def update_driver(id):
     email = data.get('email')
     contact = data.get('contact')
     bus_id = data.get('bus_id')
-    route_id = data.get('route_id')
+
+    if bus_id == "" or bus_id is None:
+        bus_id = None
 
     conn = get_db_connection()
     cursor = conn.cursor()
+
+    route_id = None
+    if bus_id is not None:
+        cursor.execute("SELECT route_id FROM buses WHERE id=?", (bus_id,))
+        row = cursor.fetchone()
+        if row:
+            route_id = row["route_id"] if isinstance(row, dict) else row[0]
 
     cursor.execute("""
         UPDATE drivers
