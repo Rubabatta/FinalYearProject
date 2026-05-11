@@ -1,407 +1,306 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Dashboard</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-background:#f4f6fb;
-}
-
-.main{
-margin-left:230px;
-padding:25px;
-}
-
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:linear-gradient(90deg,#2563eb,#1e3a8a);
-padding:18px 22px;
-border-radius:12px;
-color:white;
-margin-bottom:22px;
-box-shadow:0 4px 12px rgba(0,0,0,0.15);
-}
-
-.header h2{font-size:18px;}
-
-.header-right{
-display:flex;
-align-items:center;
-gap:15px;
-}
-
-.profile img{
-width:38px;
-height:38px;
-border-radius:50%;
-border:2px solid white;
-object-fit:cover;
-}
-
-.container{
-display:grid;
-grid-template-columns: 3fr 1.3fr;
-gap:18px;
-}
-
-.left{
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.top-row{
-display:flex;
-gap:12px;
-}
-
-.card-small{
-flex:1;
-background:white;
-padding:12px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,0.08);
-}
-
-.card-small h3{
-font-size:13px;
-color:#2563eb;
-margin-bottom:6px;
-}
-
-.card-small select{
-width:100%;
-padding:6px;
-border-radius:6px;
-border:1px solid #ccc;
-font-size:13px;
-}
-
-.map{
-height:340px;
-background:linear-gradient(135deg,#dbeafe,#eff6ff);
-display:flex;
-align-items:center;
-justify-content:center;
-border-radius:14px;
-font-size:15px;
-color:#2563eb;
-}
-
-.right{
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.status-box{
-background:white;
-padding:20px;
-border-radius:14px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
-border-left:5px solid #2563eb;
-flex:1;
-}
-
-.status-box h3{
-font-size:16px;
-color:#1e3a8a;
-}
-
-.status-box p{
-display:flex;
-justify-content:space-between;
-background:#f8fafc;
-padding:8px 10px;
-border-radius:8px;
-font-size:14px;
-}
-
-.announcement-box{
-background:white;
-padding:15px;
-border-radius:14px;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
-border-left:5px solid #10b981;
-}
-
-.announcement-box h3{
-font-size:15px;
-margin-bottom:8px;
-color:#10b981;
-}
-
-.announcement-box p{
-font-size:13px;
-color:#444;
-}
-</style>
-</head>
-
-<body>
-
-<div id="sidebar"></div>
-
-<div class="main">
-
-<div id="header"></div>
-
-<div class="container">
-
-<div class="left">
-
-<div class="top-row">
-
-<div class="card-small">
-<h3>Select Bus</h3>
-<select id="busSelect">
-<option value="">Select Bus</option>
-</select>
-</div>
-
-<div class="card-small">
-<h3>Route</h3>
-<p id="route">--</p>
-</div>
-
-</div>
-
-<div id="map" class="map"></div>
-
-</div>
-
-<div class="right">
-
-<div class="status-box">
-<h3>Bus Status 🚍</h3>
-<p><span>Bus</span> <span id="busName">--</span></p>
-<p><span>Current Stop</span> <span id="currentStop">--</span></p>
-<p><span>Next Stop</span> <span id="nextStop">--</span></p>
-</div>
-
-<div class="announcement-box">
-<h3>Announcement 📢</h3>
-<p id="announcement">Loading announcements...</p>
-</div>
-
-</div>
-
-</div>
-</div>
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+// ==========================
+// MAP
+// ==========================
+let map = L.map('map').setView([30.1575,71.5249], 13);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
+
+let marker = L.marker([30.1575,71.5249]).addTo(map);
+
+// ==========================
 // HEADER
+// ==========================
 fetch("header.html")
 .then(res => res.text())
 .then(data => {
 document.getElementById("header").innerHTML = data;
 });
 
+// ==========================
 // SIDEBAR
+// ==========================
 fetch("student-sidebar.html")
 .then(res=>res.text())
 .then(data=>{
 document.getElementById("sidebar").innerHTML = data;
 });
 
-const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
-
+// ==========================
 // ANNOUNCEMENTS
+// ==========================
 fetch(`${API_URL}/get-announcements`)
 .then(res => res.json())
 .then(data => {
+
   if(data.length > 0){
+
     const latest = data[0];
-    document.getElementById("announcement").textContent = latest.title + ": " + latest.message;
-  } else {
-    document.getElementById("announcement").textContent = "No announcements";
+
+    document.getElementById("announcement").textContent =
+      latest.title + ": " + latest.message;
+
+  }else{
+
+    document.getElementById("announcement").textContent =
+      "No announcements";
+
   }
+
 })
-.catch(() => {
-  document.getElementById("announcement").textContent = "No announcements";
+.catch(()=>{
+
+  document.getElementById("announcement").textContent =
+    "No announcements";
+
 });
 
+// ==========================
+// GLOBALS
+// ==========================
 let selectedBusId = null;
 let routeStops = [];
 let intervalId = null;
+let busesData = [];
 
-// BUS DATA
+// ==========================
+// LOAD BUSES
+// ==========================
 fetch(`${API_URL}/get_buses`)
 .then(res=>res.json())
 .then(buses=>{
+
+  busesData = buses;
+
   const busSelect = document.getElementById("busSelect");
 
   buses.forEach(bus=>{
+
     let option = document.createElement("option");
+
     option.value = bus.id;
-    option.textContent = bus.bus_number.split('-')[1] || bus.bus_number;
-    option.dataset.routeId = bus.route_id;
-    option.dataset.startPoint = bus.start_point || "";
-    option.dataset.endPoint = bus.end_point || "";
+
+    option.textContent =
+      bus.bus_number || `Bus ${bus.id}`;
+
     busSelect.appendChild(option);
+
   });
 
   busSelect.addEventListener("change", function(){
-    selectBus(this.value, buses);
+
+    selectBus(this.value);
+
   });
+
 })
-.catch(err => {
-  console.log("Error loading buses:", err);
+.catch(err=>{
+
+  console.log("BUS LOAD ERROR:", err);
+
 });
 
-function selectBus(busId, buses){
+// ==========================
+// SELECT BUS
+// ==========================
+function selectBus(busId){
+
   if(intervalId){
+
     clearInterval(intervalId);
     intervalId = null;
+
   }
 
   selectedBusId = busId;
-  const bus = buses.find(b => String(b.id) === String(busId));
+
+  let bus = busesData.find(
+    b => String(b.id) === String(busId)
+  );
 
   if(!bus){
+
     document.getElementById("route").textContent = "--";
     document.getElementById("busName").textContent = "--";
     document.getElementById("currentStop").textContent = "--";
     document.getElementById("nextStop").textContent = "--";
+
     return;
+
   }
 
-  document.getElementById("route").textContent = `${bus.start_point || "--"} → ${bus.end_point || "--"}`;
-  document.getElementById("busName").textContent = (bus.bus_number.split('-')[1] || bus.bus_number) || "--";
-  document.getElementById("currentStop").textContent = "--";
-  document.getElementById("nextStop").textContent = "--";
+  // ==========================
+  // BUS NAME
+  // ==========================
+  document.getElementById("busName").textContent =
+    bus.bus_number || "--";
 
+  // ==========================
+  // ROUTE
+  // ==========================
+  document.getElementById("route").textContent =
+    `${bus.start_point || "--"} → ${bus.end_point || "--"}`;
+
+  // ==========================
+  // LOAD STOPS
+  // ==========================
   routeStops = [];
+
   if(bus.route_id){
+
     fetch(`${API_URL}/get_stops/${bus.route_id}`)
+
     .then(res=>res.json())
-    .then(stops => {
+
+    .then(stops=>{
+
       routeStops = stops;
+
       updateLocation();
+
       intervalId = setInterval(updateLocation, 3000);
+
     })
-    .catch(err => {
-      console.log("Error loading stops:", err);
-      routeStops = [];
+
+    .catch(err=>{
+
+      console.log("STOP ERROR:", err);
+
       updateLocation();
+
       intervalId = setInterval(updateLocation, 3000);
+
     });
-  } else {
-    routeStops = [];
-    document.getElementById("currentStop").textContent = "No route assigned";
-    document.getElementById("nextStop").textContent = "--";
+
+  }else{
+
     updateLocation();
+
     intervalId = setInterval(updateLocation, 3000);
+
   }
+
 }
 
-function getNearestStop(lat, lng){
-  if(!routeStops || routeStops.length === 0) return null;
-
-  const dist = (a,b) => {
-    const dlat = a.lat - b.lat;
-    const dlng = a.lng - b.lng;
-    return dlat*dlat + dlng*dlng;
-  };
-
-  let nearestIndex = 0;
-  let nearestDist = Infinity;
-
-  routeStops.forEach((stop, idx) => {
-    if(stop.latitude != null && stop.longitude != null){
-      const currentDist = dist({lat:Number(stop.latitude), lng:Number(stop.longitude)}, {lat, lng});
-      if(currentDist < nearestDist){
-        nearestDist = currentDist;
-        nearestIndex = idx;
-      }
-    }
-  });
-
-  return { index: nearestIndex, stop: routeStops[nearestIndex] };
-}
-
-function isLiveLocation(timestamp){
-  if(!timestamp) return false;
-  const parsed = new Date(timestamp + ' UTC');
-  if(isNaN(parsed.getTime())) return false;
-  const seconds = (Date.now() - parsed.getTime()) / 1000;
-  return seconds <= 60;
-}
-
+// ==========================
+// UPDATE LOCATION
+// ==========================
 function updateLocation(){
+
   if(!selectedBusId) return;
 
   fetch(`${API_URL}/get_location/${selectedBusId}`)
-  .then(res => {
-    if(!res.ok) return res.text().then(text => { throw new Error(text || 'No location'); });
-    return res.json();
-  })
-  .then(data => {
+
+  .then(res=>res.json())
+
+  .then(data=>{
+
+    console.log("LIVE LOCATION:", data);
+
+    // ==========================
+    // OFFLINE
+    // ==========================
     if(data.message){
-      throw new Error(data.message);
-    }
 
-    const lastUpdated = data.last_updated || data.lastUpdated || data.updated_at;
-    // Removed live check to show location even if old
+      document.getElementById("currentStop").textContent =
+        "Bus Offline";
 
-    const lat = Number(data.latitude || data.lat || 0);
-    const lng = Number(data.longitude || data.lng || 0);
-    if(isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)){
-      document.getElementById("currentStop").textContent = "No location data";
-      document.getElementById("nextStop").textContent = "--";
+      document.getElementById("nextStop").textContent =
+        "--";
+
       return;
+
     }
 
+    let lat = parseFloat(data.latitude);
+    let lng = parseFloat(data.longitude);
+
+    if(isNaN(lat) || isNaN(lng)){
+
+      document.getElementById("currentStop").textContent =
+        "No location";
+
+      document.getElementById("nextStop").textContent =
+        "--";
+
+      return;
+
+    }
+
+    // ==========================
+    // UPDATE MARKER
+    // ==========================
     marker.setLatLng([lat, lng]);
-    map.panTo([lat, lng]);
 
-    if(routeStops.length){
-      const nearest = getNearestStop(lat, lng);
-      if(nearest && nearest.stop){
-        document.getElementById("currentStop").textContent = nearest.stop.stop_name || "--";
-        const next = routeStops[nearest.index + 1];
-        document.getElementById("nextStop").textContent = next ? next.stop_name : "--";
-      } else {
-        document.getElementById("currentStop").textContent = "No nearby stop";
-        document.getElementById("nextStop").textContent = "--";
-      }
-    } else {
-      document.getElementById("currentStop").textContent = "No stops available";
-      document.getElementById("nextStop").textContent = "--";
+    map.setView([lat, lng], 15);
+
+    // ==========================
+    // FIND CURRENT STOP
+    // ==========================
+    if(routeStops.length > 0){
+
+      let nearestIndex = 0;
+      let nearestDistance = Infinity;
+
+      routeStops.forEach((stop,index)=>{
+
+        let stopLat = parseFloat(stop.latitude);
+        let stopLng = parseFloat(stop.longitude);
+
+        if(isNaN(stopLat) || isNaN(stopLng)) return;
+
+        let distance =
+          Math.pow(lat - stopLat, 2) +
+          Math.pow(lng - stopLng, 2);
+
+        if(distance < nearestDistance){
+
+          nearestDistance = distance;
+          nearestIndex = index;
+
+        }
+
+      });
+
+      let currentStop = routeStops[nearestIndex];
+      let nextStop = routeStops[nearestIndex + 1];
+
+      document.getElementById("currentStop").textContent =
+        currentStop?.stop_name || "--";
+
+      document.getElementById("nextStop").textContent =
+        nextStop?.stop_name || "Route End";
+
     }
+    else{
+
+      document.getElementById("currentStop").textContent =
+        "No Stops";
+
+      document.getElementById("nextStop").textContent =
+        "--";
+
+    }
+
   })
-  .catch(err => {
-    console.log("Location fetch error:", err);
-    document.getElementById("currentStop").textContent = "Location unavailable";
-    document.getElementById("nextStop").textContent = "--";
+
+  .catch(err=>{
+
+    console.log("LOCATION ERROR:", err);
+
+    document.getElementById("currentStop").textContent =
+      "Bus Offline";
+
+    document.getElementById("nextStop").textContent =
+      "--";
+
   });
+
 }
 
-let map = L.map('map').setView([24.8607, 67.0011], 13);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap'
-}).addTo(map);
-
-let marker = L.marker([24.8607, 67.0011]).addTo(map);
-
 </script>
-
-</body>
-</html>
