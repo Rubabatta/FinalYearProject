@@ -159,7 +159,7 @@ async function loadBuses(){
             : b.route_id || "";
 
         html += `
-            <option value="${b.id}" data-route-id="${b.route_id || ''}">
+            <option value="${b.id}" data-route="${routeText}">
                 Bus ${b.bus_number}
             </option>`;
     });
@@ -169,10 +169,10 @@ async function loadBuses(){
 
     busSelect.onchange = function(){
         let selected = this.options[this.selectedIndex];
-        let routeId = selected.getAttribute("data-route-id");
+        let route = selected.getAttribute("data-route");
 
         document.getElementById("route_show").innerText =
-            routeId ? "Route ID: " + routeId : "";
+            route ? "Route: " + route : "";
     };
 }
 
@@ -194,7 +194,7 @@ rows+=`
 <td>${d.email}</td>
 <td>${d.contact}</td>
 <td>${d.bus_number || "Not Assigned"}</td>
-<td>${d.route_name || "Not Assigned"}</td>
+<td>${d.route_id || "Not Assigned"}</td>
 <td>
 <button class="icon-btn edit" onclick='edit(${JSON.stringify(d)})'>
 <i class="fa fa-pen"></i>
@@ -248,8 +248,7 @@ name: document.getElementById("name").value,
 email: document.getElementById("email").value,
 password: document.getElementById("password").value,
 contact: document.getElementById("contact").value,
-bus_id: busIdValue ? parseInt(busIdValue) : null,
-route_id: document.getElementById("bus_id").selectedOptions[0]?.getAttribute("data-route-id") || null
+bus_id: busIdValue ? parseInt(busIdValue) : null
 };
 
 let url = `${API}/add_driver`;

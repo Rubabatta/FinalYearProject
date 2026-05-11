@@ -128,6 +128,43 @@ def initialize_database():
     conn.commit()
     conn.close()
 
+
+def normalize_route_ids():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT id FROM routes ORDER BY id ASC")
+    rows = cursor.fetchall()
+
+    mapping = {}
+    next_id = 1
+    for row in rows:
+        old_id = row["id"]
+        if old_id != next_id:
+            mapping[old_id] = next_id
+        next_id += 1
+
+    if not mapping:
+        conn.close()
+        return
+
+    for old_id, new_id in mapping.items():
+        cursor.execute("UPDATE routes SET id = ? WHERE id = ?", (-new_id, old_id))
+
+    for table in ["buses", "stops", "drivers"]:
+        for old_id, new_id in mapping.items():
+            cursor.execute(f"UPDATE {table} SET route_id = ? WHERE route_id = ?", (-new_id, old_id))
+
+    for table in ["buses", "stops", "drivers"]:
+        for old_id, new_id in mapping.items():
+            cursor.execute(f"UPDATE {table} SET route_id = ? WHERE route_id = ?", (new_id, -new_id))
+
+    for old_id, new_id in mapping.items():
+        cursor.execute("UPDATE routes SET id = ? WHERE id = ?", (new_id, -new_id))
+
+    conn.commit()
+    conn.close()
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
@@ -268,6 +305,7 @@ def auto_populate_if_empty():
     conn.close()
 
 initialize_database()
+normalize_route_ids()
 auto_populate_if_empty()
 
 # -----------------------------
