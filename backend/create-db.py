@@ -147,10 +147,13 @@ routes_data = [
 for start, end, stops in routes_data:
     cursor.execute("INSERT OR IGNORE INTO routes (start_point, end_point, stops) VALUES (?, ?, ?)", (start, end, stops))
 
-# Sample Buses (2 buses, assigned to routes and drivers)
+# Sample Buses (5 buses, assigned to routes)
 buses_data = [
-    ("BUS-001", 1, 50),  # Assigned to route 1, capacity 50
+    ("BUS-001", 1, 50),  # Route 1
     ("BUS-002", 2, 45),  # Route 2
+    ("BUS-003", 3, 40),  # Route 3
+    ("BUS-004", 1, 55),  # Route 1
+    ("BUS-005", 2, 35),  # Route 2
 ]
 
 for bus_num, route_id, capacity in buses_data:
@@ -158,7 +161,7 @@ for bus_num, route_id, capacity in buses_data:
 
 # Sample Drivers (2 drivers, assigned to buses)
 drivers_data = [
-    ("Ahmed Khan", "ahmed@example.com", "123", "03001234567", 1),  # Assigned to bus 1
+    ("Ahmed Khan", "ahmed@example.com", "123", "03001234567", 1),  # Bus 1
     ("Sara Ali", "sara@example.com", "123", "03009876543", 2),     # Bus 2
 ]
 

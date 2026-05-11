@@ -332,6 +332,14 @@ function getNearestStop(lat, lng){
   return { index: nearestIndex, stop: routeStops[nearestIndex] };
 }
 
+function isLiveLocation(timestamp){
+  if(!timestamp) return false;
+  const parsed = new Date(timestamp + ' UTC');
+  if(isNaN(parsed.getTime())) return false;
+  const seconds = (Date.now() - parsed.getTime()) / 1000;
+  return seconds <= 60;
+}
+
 function updateLocation(){
   if(!selectedBusId) return;
 
@@ -343,6 +351,11 @@ function updateLocation(){
   .then(data => {
     if(data.message){
       throw new Error(data.message);
+    }
+
+    const lastUpdated = data.last_updated || data.lastUpdated || data.updated_at;
+    if(!isLiveLocation(lastUpdated)){
+      throw new Error('Offline');
     }
 
     const lat = Number(data.latitude || data.lat || 0);
@@ -359,7 +372,7 @@ function updateLocation(){
       if(nearest && nearest.stop){
         document.getElementById("currentStop").textContent = nearest.stop.stop_name || "--";
         const next = routeStops[nearest.index + 1];
-        document.getElementById("nextStop").textContent = next ? next.stop_name : (routeStops.length > 1 ? routeStops[routeStops.length-1].stop_name : "--");
+        document.getElementById("nextStop").textContent = next ? next.stop_name : "--";
       }
     }
   })
