@@ -968,19 +968,37 @@ def add_driver():
             if row:
                 route_id = row["route_id"] if isinstance(row, dict) else row[0]
 
+        # Check if drivers table supports route_id
+        cursor.execute("PRAGMA table_info(drivers)")
+        driver_columns = [row[1] for row in cursor.fetchall()]
+        has_route_id = 'route_id' in driver_columns
+
         try:
-            cursor.execute("""
-                INSERT INTO drivers
-                (name, email, password, contact, bus_id, route_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                name,
-                email,
-                password,
-                contact,
-                bus_id,
-                route_id
-            ))
+            if has_route_id:
+                cursor.execute("""
+                    INSERT INTO drivers
+                    (name, email, password, contact, bus_id, route_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (
+                    name,
+                    email,
+                    password,
+                    contact,
+                    bus_id,
+                    route_id
+                ))
+            else:
+                cursor.execute("""
+                    INSERT INTO drivers
+                    (name, email, password, contact, bus_id)
+                    VALUES (?, ?, ?, ?, ?)
+                """, (
+                    name,
+                    email,
+                    password,
+                    contact,
+                    bus_id
+                ))
 
             conn.commit()
         finally:
@@ -1077,11 +1095,23 @@ def update_driver(id):
         if row:
             route_id = row["route_id"] if isinstance(row, dict) else row[0]
 
-    cursor.execute("""
-        UPDATE drivers
-        SET name=?, email=?, contact=?, bus_id=?, route_id=?
-        WHERE id=?
-    """, (name, email, contact, bus_id, route_id, id))
+    # Check if drivers table supports route_id
+    cursor.execute("PRAGMA table_info(drivers)")
+    driver_columns = [row[1] for row in cursor.fetchall()]
+    has_route_id = 'route_id' in driver_columns
+
+    if has_route_id:
+        cursor.execute("""
+            UPDATE drivers
+            SET name=?, email=?, contact=?, bus_id=?, route_id=?
+            WHERE id=?
+        """, (name, email, contact, bus_id, route_id, id))
+    else:
+        cursor.execute("""
+            UPDATE drivers
+            SET name=?, email=?, contact=?, bus_id=?
+            WHERE id=?
+        """, (name, email, contact, bus_id, id))
 
     conn.commit()
     conn.close()
