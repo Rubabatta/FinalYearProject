@@ -9,7 +9,10 @@ from datetime import datetime, timedelta
 import sqlite3
 import os
 
-DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
+if os.path.exists("/data"):
+    DB_NAME = "/data/database.db"
+else:
+    DB_NAME = os.path.join(os.path.dirname(__file__), "database.db")
 
 # -----------------------------
 # Database Connection

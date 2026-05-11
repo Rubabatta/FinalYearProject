@@ -191,6 +191,8 @@ let diff=(now-new Date(bus.last_updated+" UTC").getTime())/1000;
 
 let status=(diff<60)?"ONLINE":"OFFLINE";
 
+if(status !== "ONLINE") return;
+
 // ================= BUS CARD =================
 let div=document.createElement("div");
 div.className="bus-card";
