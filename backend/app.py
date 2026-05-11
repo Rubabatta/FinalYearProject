@@ -162,6 +162,10 @@ def normalize_route_ids():
     for old_id, new_id in mapping.items():
         cursor.execute("UPDATE routes SET id = ? WHERE id = ?", (new_id, -new_id))
 
+    cursor.execute("SELECT MAX(id) as max_id FROM routes")
+    max_id = cursor.fetchone()["max_id"] or 0
+    cursor.execute("INSERT OR REPLACE INTO sqlite_sequence (name, seq) VALUES ('routes', ?)", (max_id,))
+
     conn.commit()
     conn.close()
 
@@ -649,6 +653,19 @@ def get_buses():
 
     return jsonify([dict(b) for b in buses])
 
+@app.route('/get_bus/<int:id>', methods=['GET'])
+def get_bus(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM buses WHERE id = ?", (id,))
+    bus = cursor.fetchone()
+    conn.close()
+
+    if bus:
+        return jsonify(dict(bus))
+    return jsonify({"message": "Bus not found"}), 404
+
 @app.route('/add_bus', methods=['POST'])
 def add_bus():
 
@@ -693,16 +710,26 @@ def update_bus(id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM buses WHERE bus_number=? AND id!=?", (bus_number,id))
+    cursor.execute("SELECT * FROM buses WHERE id = ?", (id,))
+    existing_bus = cursor.fetchone()
+    if not existing_bus:
+        conn.close()
+        return jsonify({"message": "Bus not found"}), 404
+
+    cursor.execute("SELECT * FROM buses WHERE bus_number=? AND id!=?", (bus_number, id))
     if cursor.fetchone():
         conn.close()
         return jsonify({"message":"Bus number already exists"}),400
 
+    driver_id = driver_id if driver_id is not None else existing_bus["driver_id"]
+    capacity = capacity if capacity is not None else existing_bus["capacity"]
+    route_id = route_id if route_id is not None else existing_bus["route_id"]
+
     cursor.execute("""
         UPDATE buses
-        SET bus_number=?,driver_id=?,capacity=?,route_id=?
+        SET bus_number=?, driver_id=?, capacity=?, route_id=?
         WHERE id=?
-    """,(bus_number,driver_id,capacity,route_id,id))
+    """, (bus_number, driver_id, capacity, route_id, id))
 
     conn.commit()
     conn.close()
