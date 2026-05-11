@@ -30,12 +30,23 @@ margin-bottom:10px;
 font-weight:bold;
 }
 
+.back-button{
+display:inline-block;
+margin-bottom:15px;
+padding:10px 14px;
+border-radius:10px;
+background:#2563eb;
+color:#fff;
+text-decoration:none;
+font-size:14px;
+font-weight:600;
+}
+
 .bus-card{
 background:#1f2937;
 padding:12px;
 margin-bottom:10px;
 border-radius:10px;
-cursor:pointer;
 }
 
 .bus-id{
@@ -95,6 +106,7 @@ flex:1;
 
 <!-- SIDEBAR -->
 <div class="sidebar">
+<a href="admin.html" class="back-button">← Back to Dashboard</a>
 <div class="title">🚍 Active Buses</div>
 <div id="busList"></div>
 </div>
@@ -105,11 +117,6 @@ flex:1;
 <div class="container">
 
 <div class="header">Admin Live Tracking</div>
-
-<div class="info">
-<div><b>Bus:</b> <span id="busId">-</span></div>
-<div><b>Status:</b> <span id="status">-</span></div>
-</div>
 
 <div id="map"></div>
 
@@ -145,6 +152,15 @@ function calculateDistance(lat1, lon1, lat2, lon2){
     return R * c; // Distance in km
 }
 
+function parseTimestamp(timestamp){
+    if(!timestamp) return NaN;
+    let parsed = Date.parse(timestamp);
+    if(isNaN(parsed)){
+        parsed = Date.parse(timestamp + ' UTC');
+    }
+    return parsed;
+}
+
 // ==========================
 // MAIN LOAD
 // ==========================
@@ -160,19 +176,20 @@ busList.innerHTML="";
 let latest={};
 
 data.forEach(item=>{
+    let id=item.bus_id;
+    let time=parseTimestamp(item.last_updated);
 
-let id=item.bus_id;
-let time=new Date(item.last_updated+" UTC").getTime();
+    if(isNaN(time)) return;
 
-if(!latest[id] || time>latest[id].time){
-latest[id]={data:item,time:time};
-}
+    if(!latest[id] || time>latest[id].time){
+        latest[id]={data:item,time:time};
+    }
 
 });
 
 // clear markers
 Object.keys(markers).forEach(id=>{
-map.removeLayer(markers[id]);
+    map.removeLayer(markers[id]);
 });
 markers={};
 
@@ -187,9 +204,10 @@ let lng=parseFloat(bus.longitude);
 if(isNaN(lat)||isNaN(lng)) return;
 
 let now=new Date().getTime();
-let diff=(now-new Date(bus.last_updated+" UTC").getTime())/1000;
+let lastUpdate=parseTimestamp(bus.last_updated);
+let diff=(isNaN(lastUpdate)) ? Infinity : (now-lastUpdate)/1000;
 
-let status=(diff<60)?"ONLINE":"OFFLINE";
+let status=(diff < 60) ? "ONLINE" : "OFFLINE";
 
 if(status !== "ONLINE") return;
 
@@ -259,10 +277,14 @@ div.querySelectorAll(".small")[1].innerText="Next: "+nextText;
 
 // ================= MARKER =================
 markers[id]=L.marker([lat,lng])
-.addTo(map)
-.bindPopup(`🚍 Bus ${id}`);
+    .addTo(map)
+    .bindPopup(`🚍 Bus ${id}`);
 
 });
+
+if(Object.keys(markers).length === 0){
+    busList.innerHTML = '<div style="color:#cbd5e1; padding:12px;">No live buses are currently online.</div>';
+}
 
 });
 }
