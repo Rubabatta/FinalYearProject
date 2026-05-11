@@ -203,16 +203,6 @@ color:#111;
 </div>
 
 <div class="info-box">
-<span>Center</span>
-<input type="text" id="center" disabled>
-</div>
-
-<div class="info-box">
-<span>Student ID</span>
-<input type="text" id="studentID" disabled>
-</div>
-
-<div class="info-box">
 <span>Password</span>
 <input type="text" id="password" disabled>
 </div>
@@ -252,8 +242,6 @@ document.getElementById("showEmail").innerText=data.email;
 document.getElementById("name").value=data.name;
 document.getElementById("email").value=data.email;
 document.getElementById("contact").value=data.contact;
-document.getElementById("center").value=data.center;
-document.getElementById("studentID").value=data.studentID;
 document.getElementById("password").value=data.password;
 
 if(data.image){
@@ -291,8 +279,6 @@ body:JSON.stringify({
 name:document.getElementById("name").value,
 email:document.getElementById("email").value,
 contact:document.getElementById("contact").value,
-center:document.getElementById("center").value,
-studentID:document.getElementById("studentID").value,
 password:document.getElementById("password").value
 })
 })

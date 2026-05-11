@@ -333,26 +333,24 @@ def student_signup():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
-    center = data.get('center')
-    studentID = data.get('studentID')
     contact = data.get('contact')
     fees = data.get('fees')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM students WHERE studentID=?", (studentID,))
+    cursor.execute("SELECT * FROM students WHERE email=?", (email,))
     existing = cursor.fetchone()
 
     if existing:
         conn.close()
-        return jsonify({"message":"Student ID already exists"}),400
+        return jsonify({"message":"Email already exists"}),400
 
     try:
         cursor.execute("""
-            INSERT INTO students (name,email,password,center,studentID,contact,fees)
-            VALUES (?,?,?,?,?,?,?)
-        """, (name,email,password,center,studentID,contact,fees))
+            INSERT INTO students (name,email,password,contact,fees)
+            VALUES (?,?,?,?,?)
+        """, (name,email,password,contact,fees))
 
         conn.commit()
 
@@ -489,8 +487,6 @@ def get_students():
         id,
         name,
         email,
-        studentID,
-        center,
         contact,
         fees,
         image
@@ -528,19 +524,24 @@ def update_student(id):
 
     name = data.get('name')
     email = data.get('email')
-    studentID = data.get('studentID')
-    center = data.get('center')
     contact = data.get('contact')
     password = data.get('password')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE students
-        SET name=?, email=?, studentID=?, center=?, contact=?, password=?
-        WHERE id=?
-    """, (name, email, studentID, center, contact, password, id))
+    if password:
+        cursor.execute("""
+            UPDATE students
+            SET name=?, email=?, contact=?, password=?
+            WHERE id=?
+        """, (name, email, contact, password, id))
+    else:
+        cursor.execute("""
+            UPDATE students
+            SET name=?, email=?, contact=?
+            WHERE id=?
+        """, (name, email, contact, id))
 
     conn.commit()
     conn.close()

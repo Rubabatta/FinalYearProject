@@ -77,28 +77,13 @@ button:hover{background:#1e40af;}
 </div>
 
 <div class="input-group">
-<i class="fa fa-id-card"></i>
-<input type="text" id="studentID" placeholder="Student ID" required>
-</div>
-
-<div class="input-group">
-<i class="fa fa-building"></i>
-<select id="center" required>
-<option value="">Select Center / Campus</option>
-<option value="Main Campus">Main Campus</option>
-<option value="City Campus">City Campus</option>
-<option value="North Campus">North Campus</option>
-</select>
-</div>
-
-<div class="input-group">
 <i class="fa fa-phone"></i>
 <input type="text" id="contact" placeholder="Contact Number (Optional)">
 </div>
 
 <div class="input-group">
 <i class="fa fa-lock"></i>
-<input type="password" id="password" placeholder="Password" required>
+<input type="password" id="password" placeholder="Password (min 6 chars, include number & special char)" required>
 </div>
 
 <div class="input-group">
@@ -139,9 +124,11 @@ form.addEventListener("submit", function(e){
         return;
     }
 
-    if(center === ""){
-        message.style.color="red";
-        message.innerText="❌ Please select a center";
+    // Password validation: at least 6 chars, include number and special char
+    const passwordRegex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/;
+    if (!passwordRegex.test(password)) {
+        message.style.color = "red";
+        message.innerText = "❌ Password must be at least 6 characters, include a number and a special character (!@#$%^&*)";
         return;
     }
 
@@ -152,8 +139,6 @@ form.addEventListener("submit", function(e){
             name: firstName + " " + lastName,
             email: email,
             password: password,
-            center: center,
-            studentID: studentID,   // ✅ fixed
             contact: contact,
             fees: 0
         })

@@ -18,10 +18,9 @@ CREATE TABLE IF NOT EXISTS students (
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    center TEXT NOT NULL,
-    studentID TEXT UNIQUE,
     contact TEXT,
-    fees REAL
+    fees REAL,
+    image TEXT
 )
 ''')
 

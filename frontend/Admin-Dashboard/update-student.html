@@ -59,8 +59,6 @@ cursor:pointer;
 
 <input type="text" id="name" placeholder="Name">
 <input type="email" id="email" placeholder="Email">
-<input type="text" id="studentID" placeholder="Student ID">
-<input type="text" id="center" placeholder="Center">
 <input type="text" id="contact" placeholder="Contact">
 <input type="text" id="password" placeholder="Password">
 
@@ -81,8 +79,6 @@ fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_student/${st
 
 document.getElementById("name").value=data.name;
 document.getElementById("email").value=data.email;
-document.getElementById("studentID").value=data.studentID;
-document.getElementById("center").value=data.center;
 document.getElementById("contact").value=data.contact;
 document.getElementById("password").value=data.password;
 
@@ -96,8 +92,6 @@ let data={
 
 name:document.getElementById("name").value,
 email:document.getElementById("email").value,
-studentID:document.getElementById("studentID").value,
-center:document.getElementById("center").value,
 contact:document.getElementById("contact").value,
 password:document.getElementById("password").value
 
