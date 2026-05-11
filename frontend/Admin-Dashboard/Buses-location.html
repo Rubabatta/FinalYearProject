@@ -294,11 +294,8 @@ markers[id]=L.marker([lat,lng])
 
 if(Object.keys(markers).length === 0){
     busList.innerHTML = '<div style="color:#cbd5e1; padding:12px;">No live buses are currently online.</div>';
-} else {
-    const group = L.featureGroup(Object.values(markers));
-    map.fitBounds(group.getBounds(), { padding: [50, 50] });
-    setTimeout(()=> map.invalidateSize(), 100);
 }
+setTimeout(()=> map.invalidateSize(), 100);
 
 });
 }
