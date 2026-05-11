@@ -1007,6 +1007,9 @@ def get_latest_location(bus_id):
         return jsonify({"message": "No location found"}), 404
 
 
+# =========================
+# UPDATE LOCATION
+# =========================
 @app.route('/update_location', methods=['POST'])
 def update_location():
 
@@ -1031,13 +1034,10 @@ def update_location():
     conn.close()
 
     return jsonify({"message": "Location updated"})
-    #.......................
-    #  All Location
-    #========================
 
 
-    # =========================
-# GET ALL BUSES LOCATION
+# =========================
+# GET ALL LOCATIONS
 # =========================
 @app.route('/get_all_locations', methods=['GET'])
 def get_all_locations():
@@ -1046,42 +1046,37 @@ def get_all_locations():
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT 
-        bl.bus_id,
-        bl.latitude,
-        bl.longitude,
-        bl.last_updated,
-        b.bus_number
-    FROM bus_locations bl
-    LEFT JOIN buses b ON bl.bus_id = b.id
-    ORDER BY bl.id DESC
-""")
+        SELECT 
+            bl.bus_id,
+            bl.latitude,
+            bl.longitude,
+            bl.last_updated,
+            b.bus_number
+        FROM bus_locations bl
+        LEFT JOIN buses b
+        ON bl.bus_id = b.id
+        ORDER BY bl.id DESC
+    """)
+
     rows = cursor.fetchall()
+
     conn.close()
 
     result = []
     seen = set()
-    now = datetime.now()
-
-    def parse_time(t):
-        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
-            try:
-                return datetime.strptime(t, fmt)
-            except:
-                pass
-        return None
 
     for row in rows:
 
-        bus_id = row["bus_id"]
-
-        if bus_id in seen:
+        if row["bus_id"] in seen:
             continue
 
-        seen.add(bus_id)
+        seen.add(row["bus_id"])
+
         result.append(dict(row))
 
     return jsonify(result)
+
+
 # =========================
 # GET SINGLE BUS LOCATION
 # =========================
@@ -1094,7 +1089,7 @@ def get_location(bus_id):
     cursor.execute("""
         SELECT *
         FROM bus_locations
-        WHERE bus_id = ?
+        WHERE bus_id=?
         ORDER BY id DESC
         LIMIT 1
     """, (bus_id,))
@@ -1104,11 +1099,12 @@ def get_location(bus_id):
     conn.close()
 
     if row:
+
         return jsonify(dict(row))
-    else:
-        return jsonify({
-            "message": "No location found"
-        }), 404
+
+    return jsonify({
+        "message":"No location found"
+    }),404
 #==================================student get loc by route================
 
 
