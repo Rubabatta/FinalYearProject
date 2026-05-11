@@ -164,7 +164,11 @@ def normalize_route_ids():
 
     cursor.execute("SELECT MAX(id) as max_id FROM routes")
     max_id = cursor.fetchone()["max_id"] or 0
-    cursor.execute("INSERT OR REPLACE INTO sqlite_sequence (name, seq) VALUES ('routes', ?)", (max_id,))
+    try:
+        cursor.execute("INSERT OR REPLACE INTO sqlite_sequence (name, seq) VALUES ('routes', ?)", (max_id,))
+    except sqlite3.OperationalError:
+        # Skip if sqlite_sequence does not exist yet
+        pass
 
     conn.commit()
     conn.close()
@@ -593,6 +597,8 @@ def add_route():
     conn.commit()
     conn.close()
 
+    normalize_route_ids()
+
     return jsonify({"message":"Route added successfully"})
 
 @app.route('/update_route/<int:id>', methods=['PUT'])
@@ -628,6 +634,8 @@ def delete_route(id):
 
     conn.commit()
     conn.close()
+
+    normalize_route_ids()
 
     return jsonify({"message":"Route deleted successfully"})
 
