@@ -137,19 +137,18 @@ maxZoom:19
 }).addTo(map);
 
 let markers = {};
+let busMap = {}; // ✅ FIX ADDED
 
-// ==========================
-// DISTANCE CALCULATOR (Haversine Formula)
-// ==========================
+// ================= DISTANCE =================
 function calculateDistance(lat1, lon1, lat2, lon2){
-    const R = 6371; // Earth radius in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
               Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
               Math.sin(dLon/2) * Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c; // Distance in km
+    return R * c;
 }
 
 function parseTimestamp(timestamp){
@@ -171,11 +170,21 @@ function parseTimestamp(timestamp){
     return parsed;
 }
 
-// ==========================
-// MAIN LOAD
-// ==========================
+// ================= MAIN LOAD =================
 function loadAll(){
 
+// 🔥 STEP 1: GET BUSES (NEW FIX)
+fetch(`${API_URL}/get_buses`)
+.then(res=>res.json())
+.then(buses=>{
+
+busMap = {};
+
+buses.forEach(b=>{
+    busMap[b.id] = b.bus_number; // ✅ FIX HERE
+});
+
+// 🔥 STEP 2: GET LOCATIONS
 fetch(`${API_URL}/get_all_locations`)
 .then(res=>res.json())
 .then(data=>{
@@ -194,7 +203,6 @@ data.forEach(item=>{
     if(!latest[id] || time>latest[id].time){
         latest[id]={data:item,time:time};
     }
-
 });
 
 // clear markers
@@ -221,12 +229,15 @@ let status=(diff < 300) ? "ONLINE" : "OFFLINE";
 
 if(status !== "ONLINE") return;
 
+// 🔥 FIXED BUS NUMBER
+let busNumber = busMap[id] || ("Bus " + id);
+
 // ================= BUS CARD =================
 let div=document.createElement("div");
 div.className="bus-card";
 
 div.innerHTML=`
-<div class="bus-id">🚍 Bus ${id}</div>
+<div class="bus-id">🚍 ${busNumber}</div>
 <div class="${status=='ONLINE'?'online':'offline'}">${status}</div>
 <div class="small">Current: -</div>
 <div class="small">Next: -</div>
@@ -247,15 +258,12 @@ div.querySelectorAll(".small")[1].innerText="Next: -";
 return;
 }
 
-// ORDER FIX
 stops.sort((a,b)=>(a.stop_order||0)-(b.stop_order||0));
 
-// ========== DISTANCE-BASED LOGIC ==========
 let stopsWithDistance = stops.map(stop=>{
     let stopLat = parseFloat(stop.latitude);
     let stopLng = parseFloat(stop.longitude);
     
-    // Skip if stop has no coordinates
     if(isNaN(stopLat) || isNaN(stopLng)){
         return {...stop, distance: Infinity};
     }
@@ -264,12 +272,10 @@ let stopsWithDistance = stops.map(stop=>{
     return {...stop, distance: distance};
 });
 
-// Find closest stop (current)
 let currentStop = stopsWithDistance.reduce((prev, curr)=>
     curr.distance < prev.distance ? curr : prev
 );
 
-// Find next stop (after current, or End if current is last)
 let currentIdx = stopsWithDistance.findIndex(s=>s.id === currentStop.id);
 let nextStop = currentIdx < stopsWithDistance.length - 1 
     ? stopsWithDistance[currentIdx + 1]
@@ -288,7 +294,7 @@ div.querySelectorAll(".small")[1].innerText="Next: "+nextText;
 // ================= MARKER =================
 markers[id]=L.marker([lat,lng])
     .addTo(map)
-    .bindPopup(`🚍 Bus ${id}`);
+    .bindPopup(`🚍 ${busNumber}`);
 
 });
 
@@ -298,11 +304,12 @@ if(Object.keys(markers).length === 0){
 setTimeout(()=> map.invalidateSize(), 100);
 
 });
+
+});
+
 }
 
-// ==========================
-// RUN
-// ==========================
+// ================= RUN =================
 setInterval(loadAll,5000);
 loadAll();
 
