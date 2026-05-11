@@ -162,11 +162,11 @@ function parseTimestamp(timestamp){
         const hour = parseInt(match[4], 10);
         const minute = parseInt(match[5], 10);
         const second = parseInt(match[6], 10);
-        return new Date(year, month, day, hour, minute, second).getTime();
+        return Date.UTC(year, month, day, hour, minute, second);
     }
     let parsed = Date.parse(timestamp);
     if(isNaN(parsed)){
-        parsed = Date.parse(timestamp + ' UTC');
+        parsed = Date.parse(timestamp.replace(' ', 'T') + 'Z');
     }
     return parsed;
 }
@@ -217,7 +217,7 @@ let now=new Date().getTime();
 let lastUpdate=parseTimestamp(bus.last_updated);
 let diff=(isNaN(lastUpdate)) ? Infinity : (now-lastUpdate)/1000;
 
-let status=(diff < 180) ? "ONLINE" : "OFFLINE";
+let status=(diff < 300) ? "ONLINE" : "OFFLINE";
 
 if(status !== "ONLINE") return;
 
@@ -297,6 +297,7 @@ if(Object.keys(markers).length === 0){
 } else {
     const group = L.featureGroup(Object.values(markers));
     map.fitBounds(group.getBounds(), { padding: [50, 50] });
+    setTimeout(()=> map.invalidateSize(), 100);
 }
 
 });
