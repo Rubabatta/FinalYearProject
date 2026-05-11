@@ -1162,8 +1162,12 @@ def driver_login():
 
         # ✅ FIX: email OR name both check
         cursor.execute("""
-            SELECT * FROM drivers 
-            WHERE LOWER(email)=? OR LOWER(name)=?
+            SELECT 
+    drivers.*,
+    buses.bus_number
+FROM drivers
+LEFT JOIN buses ON drivers.bus_id = buses.id
+WHERE LOWER(drivers.email)=? OR LOWER(drivers.name)=?
         """, (identifier, identifier))
 
         driver = cursor.fetchone()
