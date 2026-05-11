@@ -3,11 +3,7 @@ import sqlite3
 import hashlib
 import os
 from flask import Flask, request, jsonify, send_from_directory
-from datetime import datetime
 from datetime import datetime, timedelta
-
-import sqlite3
-import os
 
 if os.path.exists("/data"):
     DB_NAME = "/data/database.db"
@@ -366,28 +362,6 @@ def get_students():
     """)
 
     students = cursor.fetchall()
-    conn.close()
-
-    return jsonify([dict(s) for s in students])
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT
-        id,
-        name,
-        email,
-        studentID,
-        center,
-        contact,
-        password,
-        fees
-        FROM students
-    """)
-
-    students = cursor.fetchall()
-
     conn.close()
 
     return jsonify([dict(s) for s in students])
@@ -844,12 +818,6 @@ def upload_profile_img():
 def static_files(filename):
     return send_from_directory(STATIC_FOLDER, filename)
 
-
-
-from datetime import datetime
-
-
-
 #============location traking root=============================
 
 
@@ -977,8 +945,8 @@ def get_location(bus_id):
 #==================================student get loc by route================
 
 
-@app.route('/get_bus_by_route/<route_number>')
-def get_bus_by_route(route_number):
+@app.route('/get_bus_by_route/<int:route_id>')
+def get_bus_by_route(route_id):
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -987,7 +955,7 @@ def get_bus_by_route(route_number):
         SELECT * FROM buses
         WHERE route_id = ?
         LIMIT 1
-    """, (route_number,))
+    """, (route_id,))
 
     bus = cursor.fetchone()
     conn.close()
