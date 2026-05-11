@@ -253,47 +253,53 @@ fetch(`${API_URL}/get_stops/${bus.route_id}`)
 .then(stops=>{
 
 if(!stops || stops.length==0){
-div.querySelectorAll(".small")[0].innerText="Current: -";
-div.querySelectorAll(".small")[1].innerText="Next: -";
-return;
+    div.querySelectorAll(".small")[0].innerText="Current: -";
+    div.querySelectorAll(".small")[1].innerText="Next: -";
+    return;
 }
 
-stops.sort((a,b)=>(a.stop_order||0)-(b.stop_order||0));
+stops.sort((a,b) => {
+    const orderA = Number(a.stop_order) || 0;
+    const orderB = Number(b.stop_order) || 0;
+    if(orderA !== orderB) return orderA - orderB;
+    return (Number(a.id) || 0) - (Number(b.id) || 0);
+});
 
-let stopsWithDistance = stops.map(stop=>{
+let stopsWithDistance = stops.map(stop => {
     let stopLat = parseFloat(stop.latitude);
     let stopLng = parseFloat(stop.longitude);
-    
-    if(isNaN(stopLat) || isNaN(stopLng)){
-        return {...stop, distance: Infinity};
+    let distance = Infinity;
+    if(!isNaN(stopLat) && !isNaN(stopLng)){
+        distance = calculateDistance(lat, lng, stopLat, stopLng);
     }
-    
-    let distance = calculateDistance(lat, lng, stopLat, stopLng);
-    return {...stop, distance: distance};
+    return {...stop, distance};
 });
 
-let nearestIdx = 0;
-let minDist = Infinity;
+let nearestIdx = stopsWithDistance.reduce((bestIdx, stop, idx) => {
+    return stop.distance < stopsWithDistance[bestIdx].distance ? idx : bestIdx;
+}, 0);
 
-stopsWithDistance.forEach((s, i) => {
-    if (s.distance < minDist) {
-        minDist = s.distance;
-        nearestIdx = i;
+let nearestStop = stopsWithDistance[nearestIdx];
+let currentStop = nearestStop;
+
+// If bus is very close to the previous stop and the next stop is even closer, pick the next stop as current.
+const closeThreshold = 0.12; // km
+if(nearestStop.distance > closeThreshold && nearestIdx > 0){
+    const previousStop = stopsWithDistance[nearestIdx - 1];
+    if(previousStop.distance < nearestStop.distance && previousStop.distance <= closeThreshold){
+        currentStop = previousStop;
+        nearestIdx = nearestIdx - 1;
     }
-});
+}
 
-let currentStop = stopsWithDistance[nearestIdx];
 let nextStop = (nearestIdx < stopsWithDistance.length - 1)
     ? stopsWithDistance[nearestIdx + 1]
     : null;
 
-// ✅ SAFE TEXT LOGIC
-let currentText = currentStop ? currentStop.stop_name : "-";
-let nextText = nextStop ? nextStop.stop_name : "End";
+let currentText = currentStop && currentStop.stop_name ? currentStop.stop_name : "-";
+let nextText = nextStop && nextStop.stop_name ? nextStop.stop_name : "End";
 
-// update UI
 let smalls = div.querySelectorAll(".small");
-
 if(smalls.length >= 2){
     smalls[0].innerText = "Current: " + currentText;
     smalls[1].innerText = "Next: " + nextText;

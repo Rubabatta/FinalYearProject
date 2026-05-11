@@ -191,7 +191,7 @@ color:#444;
 <h3>Bus Status 🚍</h3>
 <p><span>Bus</span> <span id="busName">--</span></p>
 <p><span>Status</span> <span id="status">--</span></p>
-<p><span>Last Seen</span> <span id="location">--</span></p>
+<p><span>Location</span> <span id="location">--</span></p>
 <p><span>Current Stop</span> <span id="currentStop">--</span></p>
 <p><span>Next Stop</span> <span id="nextStop">--</span></p>
 </div>
@@ -259,9 +259,8 @@ function resetMap(){
   marker.setLatLng([24.8607, 67.0011]);
   document.getElementById("currentStop").textContent = "--";
   document.getElementById("nextStop").textContent = "--";
-  document.getElementById("location").textContent = "No live location";
-  document.getElementById("status").textContent = "Offline";
-  document.getElementById("status").className = "error";
+  document.getElementById("location").textContent = "--";
+  document.getElementById("status").textContent = "OFFLINE";
 }
 
 // BUS DATA
@@ -378,9 +377,8 @@ function updateStopsFromLocation(location){
 }
 
 function handleNoLocation(){
-  document.getElementById("location").textContent = "No live location";
-  document.getElementById("status").textContent = "🔴 OFFLINE";
-  document.getElementById("status").className = "error";
+  document.getElementById("location").textContent = "--";
+  document.getElementById("status").textContent = "OFFLINE";
 
   if(lastLocation && Number.isFinite(lastLocation.lat) && Number.isFinite(lastLocation.lng)){
     marker.setLatLng([lastLocation.lat, lastLocation.lng]);
@@ -421,11 +419,8 @@ function updateLocation(){
       marker.setLatLng([lat, lng]);
       map.panTo([lat, lng]);
 
-      document.getElementById("location").textContent = online
-        ? `Live location received at ${formatTime(data.last_updated)}`
-        : `Last known location (${formatAge(ageSeconds)})`;
-      document.getElementById("status").textContent = online ? "🟢 LIVE" : `🔴 OFFLINE (${formatAge(ageSeconds)})`;
-      document.getElementById("status").className = online ? "live" : "error";
+      document.getElementById("location").textContent = online ? "Live" : "Last known";
+      document.getElementById("status").textContent = online ? "ONLINE" : "OFFLINE";
 
       updateStopsFromLocation({ lat, lng });
     })

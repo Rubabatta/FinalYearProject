@@ -1051,7 +1051,8 @@ def get_all_locations():
         bl.latitude,
         bl.longitude,
         bl.last_updated,
-        b.bus_number
+        b.bus_number,
+        b.route_id
     FROM bus_locations bl
     LEFT JOIN buses b ON bl.bus_id = b.id
     ORDER BY bl.id DESC
