@@ -237,7 +237,7 @@ let div=document.createElement("div");
 div.className="bus-card";
 
 div.innerHTML=`
-<div class="bus-id">🚍 ${bus.bus_number || ("Bus " + id)}</div>
+<div class="bus-id">🚍Bus ${bus.bus_number || ("Bus " + id)}</div>
 <div class="${status=='ONLINE'?'online':'offline'}">${status}</div>
 <div class="small">Current: -</div>
 <div class="small">Next: -</div>
@@ -272,21 +272,32 @@ let stopsWithDistance = stops.map(stop=>{
     return {...stop, distance: distance};
 });
 
-let currentStop = stopsWithDistance.reduce((prev, curr)=>
-    curr.distance < prev.distance ? curr : prev
-);
+let nearestIdx = 0;
+let minDist = Infinity;
 
-let currentIdx = stopsWithDistance.findIndex(s=>s.id === currentStop.id);
-let nextStop = currentIdx < stopsWithDistance.length - 1 
-    ? stopsWithDistance[currentIdx + 1]
+stopsWithDistance.forEach((s, i) => {
+    if (s.distance < minDist) {
+        minDist = s.distance;
+        nearestIdx = i;
+    }
+});
+
+let currentStop = stopsWithDistance[nearestIdx];
+let nextStop = (nearestIdx < stopsWithDistance.length - 1)
+    ? stopsWithDistance[nearestIdx + 1]
     : null;
 
-let currentText = currentStop.distance === Infinity ? "-" : currentStop.stop_name;
+// ✅ SAFE TEXT LOGIC
+let currentText = currentStop ? currentStop.stop_name : "-";
 let nextText = nextStop ? nextStop.stop_name : "End";
 
-div.querySelectorAll(".small")[0].innerText="Current: "+currentText;
-div.querySelectorAll(".small")[1].innerText="Next: "+nextText;
+// update UI
+let smalls = div.querySelectorAll(".small");
 
+if(smalls.length >= 2){
+    smalls[0].innerText = "Current: " + currentText;
+    smalls[1].innerText = "Next: " + nextText;
+}
 });
 
 }
