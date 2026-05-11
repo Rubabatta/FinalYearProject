@@ -284,8 +284,8 @@ function selectBus(busId, buses){
 
   document.getElementById("route").textContent = `${bus.start_point || "--"} → ${bus.end_point || "--"}`;
   document.getElementById("busName").textContent = bus.bus_number || "--";
-  document.getElementById("currentStop").textContent = bus.start_point || "--";
-  document.getElementById("nextStop").textContent = bus.end_point || "--";
+  document.getElementById("currentStop").textContent = "--";
+  document.getElementById("nextStop").textContent = "--";
 
   routeStops = [];
   if(bus.route_id){

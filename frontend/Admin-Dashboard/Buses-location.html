@@ -7,271 +7,387 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
 <style>
-body{
-margin:0;
-font-family:Poppins;
-display:flex;
-height:100vh;
-background:#f4f6fb;
+:root {
+  font-family: 'Poppins', sans-serif;
 }
-
-/* SIDEBAR */
-.sidebar{
-width:340px;
-background:#111827;
-color:white;
-padding:15px;
-overflow-y:auto;
+body {
+  margin: 0;
+  background: #eef2ff;
 }
-
-.title{
-font-size:16px;
-margin-bottom:10px;
-font-weight:bold;
+.page {
+  display: flex;
+  min-height: 100vh;
 }
-
-.bus-card{
-background:#1f2937;
-padding:12px;
-margin-bottom:10px;
-border-radius:10px;
-cursor:pointer;
+.sidebar {
+  width: 320px;
+  background: #111827;
+  color: #e2e8f0;
+  padding: 28px 22px;
+  box-shadow: 2px 0 24px rgba(15, 23, 42, 0.16);
 }
-
-.bus-id{
-font-weight:bold;
-margin-bottom:4px;
+.sidebar .title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
-
-.online{color:lime;}
-.offline{color:red;}
-
-.small{
-font-size:12px;
-color:#cbd5e1;
-margin-top:3px;
+.sidebar .subtitle {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin-bottom: 22px;
 }
-
-/* MAIN */
-.main{
-flex:1;
-display:flex;
-flex-direction:column;
+.bus-card {
+  background: #1f2937;
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.container{
-margin:10px;
-background:white;
-border-radius:12px;
-overflow:hidden;
-box-shadow:0 4px 12px rgba(0,0,0,0.1);
-display:flex;
-flex-direction:column;
-height:100%;
+.bus-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
 }
-
-.header{
-padding:12px;
-background:#2563eb;
-color:white;
-font-weight:bold;
+.bus-card .bus-id {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #f8fafc;
 }
-
-.info{
-padding:12px;
-border-bottom:1px solid #eee;
-font-size:14px;
-display:flex;
-gap:20px;
+.bus-card .status {
+  display: inline-flex;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
 }
-
-#map{
-flex:1;
+.bus-card .status.online {
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.12);
+}
+.bus-card .status.offline {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+.bus-card .stop-line {
+  color: #cbd5e1;
+  font-size: 13px;
+  margin-top: 8px;
+}
+.sidebar .empty {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(148, 163, 184, 0.35);
+  border-radius: 18px;
+  color: #cbd5e1;
+  padding: 18px;
+  font-size: 14px;
+}
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+}
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.topbar h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 26px;
+}
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.button {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+.button:hover {
+  transform: translateY(-1px);
+}
+.button.primary {
+  background: #2563eb;
+  color: white;
+}
+.button.secondary {
+  background: white;
+  color: #0f172a;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 22px 24px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+.card strong {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.card span {
+  display: block;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 800;
+}
+.container {
+  flex: 1;
+  background: white;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  padding: 24px 28px;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.header small {
+  color: rgba(255, 255, 255, 0.78);
+}
+.info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.info-item {
+  min-width: 180px;
+}
+.info-item label {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.info-item .value {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+}
+#map {
+  flex: 1;
+  min-height: 420px;
 }
 </style>
 </head>
 
 <body>
-
-<!-- SIDEBAR -->
-<div class="sidebar">
-<div class="title">🚍 Active Buses</div>
-<div id="busList"></div>
+<div class="page">
+  <div class="sidebar">
+    <div class="title">🚍 Active Bus Tracker</div>
+    <div class="subtitle">Showing only buses currently sharing live location. Offline or old records are hidden.</div>
+    <div id="busList"></div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <h1>Admin Live Tracking</h1>
+      <div class="actions">
+        <button class="button secondary" onclick="window.location.href='admin.html'">← Back to Dashboard</button>
+        <button class="button primary" onclick="loadAll()">Refresh</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="card"><strong>Live Buses</strong><span id="onlineCount">0</span></div>
+      <div class="card"><strong>Offline Buses</strong><span id="offlineCount">0</span></div>
+      <div class="card"><strong>Last Refresh</strong><span id="lastUpdated">--:--:--</span></div>
+    </div>
+    <div class="container">
+      <div class="header">
+        <h2>Live map</h2>
+        <small>Data refreshes automatically every 5 seconds.</small>
+      </div>
+      <div class="info">
+        <div class="info-item"><label>Selected Bus</label><div class="value" id="busId">-</div></div>
+        <div class="info-item"><label>Status</label><div class="value" id="status">-</div></div>
+        <div class="info-item"><label>Current Location</label><div class="value" id="currentPos">-</div></div>
+      </div>
+      <div id="map"></div>
+    </div>
+  </div>
 </div>
-
-<!-- MAIN -->
-<div class="main">
-
-<div class="container">
-
-<div class="header">Admin Live Tracking</div>
-
-<div class="info">
-<div><b>Bus:</b> <span id="busId">-</span></div>
-<div><b>Status:</b> <span id="status">-</span></div>
-</div>
-
-<div id="map"></div>
-
-</div>
-
-</div>
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
-
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
-
-let map = L.map('map').setView([30.1575,71.5249], 12);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-maxZoom:19
-}).addTo(map);
-
+let map = L.map('map').setView([30.1575, 71.5249], 12);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
 let markers = {};
+let selectedBusId = null;
 
-// ==========================
-// DISTANCE CALCULATOR (Haversine Formula)
-// ==========================
-function calculateDistance(lat1, lon1, lat2, lon2){
-    const R = 6371; // Earth radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c; // Distance in km
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
-// ==========================
-// MAIN LOAD
-// ==========================
-function loadAll(){
-
-fetch(`${API_URL}/get_all_locations`)
-.then(res=>res.json())
-.then(data=>{
-
-let busList = document.getElementById("busList");
-busList.innerHTML="";
-
-let latest={};
-
-data.forEach(item=>{
-
-let id=item.bus_id;
-let time=new Date(item.last_updated+" UTC").getTime();
-
-if(!latest[id] || time>latest[id].time){
-latest[id]={data:item,time:time};
+function formatTime(date) {
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
-});
-
-// clear markers
-Object.keys(markers).forEach(id=>{
-map.removeLayer(markers[id]);
-});
-markers={};
-
-// render buses
-Object.keys(latest).forEach(id=>{
-
-let bus=latest[id].data;
-
-let lat=parseFloat(bus.latitude);
-let lng=parseFloat(bus.longitude);
-
-if(isNaN(lat)||isNaN(lng)) return;
-
-let now=new Date().getTime();
-let diff=(now-new Date(bus.last_updated+" UTC").getTime())/1000;
-
-let status=(diff<60)?"ONLINE":"OFFLINE";
-
-// ================= BUS CARD =================
-let div=document.createElement("div");
-div.className="bus-card";
-
-div.innerHTML=`
-<div class="bus-id">🚍 Bus ${id}</div>
-<div class="${status=='ONLINE'?'online':'offline'}">${status}</div>
-<div class="small">Current: -</div>
-<div class="small">Next: -</div>
-`;
-
-busList.appendChild(div);
-
-// ================= STOPS FETCH =================
-if(bus.route_id){
-
-fetch(`${API_URL}/get_stops/${bus.route_id}`)
-.then(r=>r.json())
-.then(stops=>{
-
-if(!stops || stops.length==0){
-div.querySelectorAll(".small")[0].innerText="Current: -";
-div.querySelectorAll(".small")[1].innerText="Next: -";
-return;
+function setSelectedBus(busId, label, status, lat, lng) {
+  document.getElementById('busId').innerText = label || '-';
+  document.getElementById('status').innerText = status || '-';
+  document.getElementById('currentPos').innerText = (lat != null && lng != null)
+    ? `${lat.toFixed(5)}, ${lng.toFixed(5)}`
+    : '-';
+  selectedBusId = String(busId);
 }
 
-// ORDER FIX
-stops.sort((a,b)=>(a.stop_order||0)-(b.stop_order||0));
+function loadAll() {
+  fetch(`${API_URL}/get_all_locations`)
+    .then(res => res.json())
+    .then(data => {
+      const busList = document.getElementById('busList');
+      const onlineCountEl = document.getElementById('onlineCount');
+      const offlineCountEl = document.getElementById('offlineCount');
+      const lastUpdatedEl = document.getElementById('lastUpdated');
+      busList.innerHTML = '';
 
-// ========== DISTANCE-BASED LOGIC ==========
-let stopsWithDistance = stops.map(stop=>{
-    let stopLat = parseFloat(stop.latitude);
-    let stopLng = parseFloat(stop.longitude);
-    
-    // Skip if stop has no coordinates
-    if(isNaN(stopLat) || isNaN(stopLng)){
-        return {...stop, distance: Infinity};
-    }
-    
-    let distance = calculateDistance(lat, lng, stopLat, stopLng);
-    return {...stop, distance: distance};
-});
+      const latest = {};
+      data.forEach(item => {
+        const id = item.bus_id;
+        const time = new Date(item.last_updated + ' UTC').getTime();
+        if (!latest[id] || time > latest[id].time) {
+          latest[id] = { data: item, time };
+        }
+      });
 
-// Find closest stop (current)
-let currentStop = stopsWithDistance.reduce((prev, curr)=>
-    curr.distance < prev.distance ? curr : prev
-);
+      Object.keys(markers).forEach(key => {
+        map.removeLayer(markers[key]);
+      });
+      markers = {};
 
-// Find next stop (after current, or End if current is last)
-let currentIdx = stopsWithDistance.findIndex(s=>s.id === currentStop.id);
-let nextStop = currentIdx < stopsWithDistance.length - 1 
-    ? stopsWithDistance[currentIdx + 1]
-    : null;
+      let onlineCount = 0;
+      let offlineCount = 0;
+      const activeBuses = [];
 
-let currentText = currentStop.distance === Infinity ? "-" : currentStop.stop_name;
-let nextText = nextStop ? nextStop.stop_name : "End";
+      Object.values(latest).forEach(item => {
+        const bus = item.data;
+        const lat = parseFloat(bus.latitude);
+        const lng = parseFloat(bus.longitude);
+        if (isNaN(lat) || isNaN(lng)) return;
 
-div.querySelectorAll(".small")[0].innerText="Current: "+currentText;
-div.querySelectorAll(".small")[1].innerText="Next: "+nextText;
+        const diff = (Date.now() - new Date(bus.last_updated + ' UTC').getTime()) / 1000;
+        const status = diff < 60 ? 'ONLINE' : 'OFFLINE';
+        if (status === 'OFFLINE') {
+          offlineCount += 1;
+          return;
+        }
 
-});
+        onlineCount += 1;
+        activeBuses.push({ bus, lat, lng, status });
+        const busLabel = bus.bus_number ? `Bus ${bus.bus_number}` : `Bus ${bus.bus_id}`;
 
+        const card = document.createElement('div');
+        card.className = 'bus-card';
+        card.innerHTML = `
+          <div class="bus-id">🚍 ${busLabel}</div>
+          <div class="status online">ONLINE</div>
+          <div class="stop-line">Current: -</div>
+          <div class="stop-line">Next: -</div>
+        `;
+
+        card.addEventListener('click', () => {
+          setSelectedBus(bus.bus_id, busLabel, 'ONLINE', lat, lng);
+          map.setView([lat, lng], 13, { animate: true });
+          if (markers[bus.bus_id]) {
+            markers[bus.bus_id].openPopup();
+          }
+        });
+
+        busList.appendChild(card);
+
+        markers[bus.bus_id] = L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(`🚍 ${bus.bus_number ? `Bus ${bus.bus_number}` : `Bus ${bus.bus_id}`}`);
+
+        if (bus.route_id) {
+          fetch(`${API_URL}/get_stops/${bus.route_id}`)
+            .then(r => r.json())
+            .then(stops => {
+              if (!stops || stops.length === 0) return;
+              stops.sort((a, b) => (a.stop_order || 0) - (b.stop_order || 0));
+              const stopsWithDistance = stops.map(stop => {
+                const stopLat = parseFloat(stop.latitude);
+                const stopLng = parseFloat(stop.longitude);
+                return {
+                  ...stop,
+                  distance: isNaN(stopLat) || isNaN(stopLng)
+                    ? Infinity
+                    : calculateDistance(lat, lng, stopLat, stopLng)
+                };
+              });
+              const currentStop = stopsWithDistance.reduce((prev, curr) =>
+                curr.distance < prev.distance ? curr : prev
+              );
+              const currentIdx = stopsWithDistance.findIndex(s => s.id === currentStop.id);
+              const nextStop = currentIdx < stopsWithDistance.length - 1
+                ? stopsWithDistance[currentIdx + 1]
+                : null;
+              card.querySelectorAll('.stop-line')[0].innerText = `Current: ${currentStop.distance === Infinity ? '-' : currentStop.stop_name}`;
+              card.querySelectorAll('.stop-line')[1].innerText = `Next: ${nextStop ? nextStop.stop_name : 'End'}`;
+            });
+        }
+      });
+
+      if (activeBuses.length === 0) {
+        busList.innerHTML = '<div class="empty">No active buses currently sharing live location.</div>';
+        setSelectedBus('-', '-', '-', null, null);
+      } else if (!selectedBusId || !markers[selectedBusId]) {
+        const first = activeBuses[0];
+        const firstLabel = first.bus.bus_number ? `Bus ${first.bus.bus_number}` : `Bus ${first.bus.bus_id}`;
+        setSelectedBus(first.bus.bus_id, firstLabel, 'ONLINE', first.lat, first.lng);
+        map.setView([first.lat, first.lng], 13);
+      }
+
+      onlineCountEl.innerText = onlineCount;
+      offlineCountEl.innerText = offlineCount;
+      lastUpdatedEl.innerText = formatTime(new Date());
+    })
+    .catch(err => {
+      console.error('Load error:', err);
+    });
 }
 
-// ================= MARKER =================
-markers[id]=L.marker([lat,lng])
-.addTo(map)
-.bindPopup(`🚍 Bus ${id}`);
-
-});
-
-});
-}
-
-// ==========================
-// RUN
-// ==========================
-setInterval(loadAll,5000);
+setInterval(loadAll, 5000);
 loadAll();
-
 </script>
-
 </body>
 </html>

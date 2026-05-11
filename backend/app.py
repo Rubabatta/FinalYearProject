@@ -790,9 +790,11 @@ def get_all_locations():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT bl.id, bl.bus_id, bl.latitude, bl.longitude, bl.last_updated, b.route_id
+        SELECT bl.id, bl.bus_id, bl.latitude, bl.longitude, bl.last_updated,
+               b.route_id, b.bus_number, d.name AS driver_name
         FROM bus_locations bl
         LEFT JOIN buses b ON bl.bus_id = b.id
+        LEFT JOIN drivers d ON b.driver_id = d.id
         ORDER BY bl.id DESC
     """)
 
