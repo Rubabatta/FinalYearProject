@@ -154,6 +154,16 @@ function calculateDistance(lat1, lon1, lat2, lon2){
 
 function parseTimestamp(timestamp){
     if(!timestamp) return NaN;
+    const match = timestamp.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+    if(match){
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const hour = parseInt(match[4], 10);
+        const minute = parseInt(match[5], 10);
+        const second = parseInt(match[6], 10);
+        return new Date(year, month, day, hour, minute, second).getTime();
+    }
     let parsed = Date.parse(timestamp);
     if(isNaN(parsed)){
         parsed = Date.parse(timestamp + ' UTC');
@@ -284,6 +294,9 @@ markers[id]=L.marker([lat,lng])
 
 if(Object.keys(markers).length === 0){
     busList.innerHTML = '<div style="color:#cbd5e1; padding:12px;">No live buses are currently online.</div>';
+} else {
+    const group = L.featureGroup(Object.values(markers));
+    map.fitBounds(group.getBounds(), { padding: [50, 50] });
 }
 
 });
