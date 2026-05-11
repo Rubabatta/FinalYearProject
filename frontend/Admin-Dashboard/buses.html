@@ -163,7 +163,7 @@ async function loadBuses(){
 
             row.innerHTML = `
                 <td><input type="checkbox" data-id="${bus.id}"></td>
-                <td>${bus.bus_number}</td>
+                <td>${bus.bus_number.split('-')[1] || bus.bus_number}</td>
                 <td>${routeName}</td>
                 <td>
                     <button onclick="updateBus(${bus.id})">Edit</button>

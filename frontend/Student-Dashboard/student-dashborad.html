@@ -250,7 +250,7 @@ fetch(`${API_URL}/get_buses`)
   buses.forEach(bus=>{
     let option = document.createElement("option");
     option.value = bus.id;
-    option.textContent = bus.bus_number;
+    option.textContent = bus.bus_number.split('-')[1] || bus.bus_number;
     option.dataset.routeId = bus.route_id;
     option.dataset.startPoint = bus.start_point || "";
     option.dataset.endPoint = bus.end_point || "";
@@ -283,7 +283,7 @@ function selectBus(busId, buses){
   }
 
   document.getElementById("route").textContent = `${bus.start_point || "--"} → ${bus.end_point || "--"}`;
-  document.getElementById("busName").textContent = bus.bus_number || "--";
+  document.getElementById("busName").textContent = (bus.bus_number.split('-')[1] || bus.bus_number) || "--";
   document.getElementById("currentStop").textContent = "--";
   document.getElementById("nextStop").textContent = "--";
 
@@ -298,10 +298,14 @@ function selectBus(busId, buses){
     })
     .catch(err => {
       console.log("Error loading stops:", err);
+      routeStops = [];
       updateLocation();
       intervalId = setInterval(updateLocation, 3000);
     });
   } else {
+    routeStops = [];
+    document.getElementById("currentStop").textContent = "No route assigned";
+    document.getElementById("nextStop").textContent = "--";
     updateLocation();
     intervalId = setInterval(updateLocation, 3000);
   }
@@ -354,14 +358,14 @@ function updateLocation(){
     }
 
     const lastUpdated = data.last_updated || data.lastUpdated || data.updated_at;
-    if(!isLiveLocation(lastUpdated)){
-      throw new Error('Offline');
-    }
+    // Removed live check to show location even if old
 
     const lat = Number(data.latitude || data.lat || 0);
     const lng = Number(data.longitude || data.lng || 0);
-    if(isNaN(lat) || isNaN(lng)){
-      throw new Error('Invalid location');
+    if(isNaN(lat) || isNaN(lng) || (lat === 0 && lng === 0)){
+      document.getElementById("currentStop").textContent = "No location data";
+      document.getElementById("nextStop").textContent = "--";
+      return;
     }
 
     marker.setLatLng([lat, lng]);
@@ -373,12 +377,18 @@ function updateLocation(){
         document.getElementById("currentStop").textContent = nearest.stop.stop_name || "--";
         const next = routeStops[nearest.index + 1];
         document.getElementById("nextStop").textContent = next ? next.stop_name : "--";
+      } else {
+        document.getElementById("currentStop").textContent = "No nearby stop";
+        document.getElementById("nextStop").textContent = "--";
       }
+    } else {
+      document.getElementById("currentStop").textContent = "No stops available";
+      document.getElementById("nextStop").textContent = "--";
     }
   })
   .catch(err => {
     console.log("Location fetch error:", err);
-    document.getElementById("currentStop").textContent = "Offline";
+    document.getElementById("currentStop").textContent = "Location unavailable";
     document.getElementById("nextStop").textContent = "--";
   });
 }
