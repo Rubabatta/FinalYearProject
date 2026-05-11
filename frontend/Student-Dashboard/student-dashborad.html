@@ -432,7 +432,8 @@ function updateLocation(){
       const lng = Number(data.longitude);
       const timestamp = parseTimestamp(data.last_updated);
       const ageSeconds = Number.isFinite(timestamp) ? Math.round((Date.now() - timestamp) / 1000) : null;
-      const online = ageSeconds === null ? true : ageSeconds <= 1200;
+      console.log("Age Seconds:", ageSeconds);
+      const online = ageSeconds === null ? true : ageSeconds <= 60;
 
       lastLocation = { lat, lng, last_updated: data.last_updated };
 
