@@ -765,7 +765,7 @@ def get_stops(route_id):
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM stops WHERE route_id=? ORDER BY id ASC", (route_id,))
+    cursor.execute("SELECT * FROM stops WHERE route_id=? ORDER BY stop_order ASC, id ASC", (route_id,))
 
     stops = cursor.fetchall()
 

@@ -190,6 +190,8 @@ color:#444;
 <div class="status-box">
 <h3>Bus Status 🚍</h3>
 <p><span>Bus</span> <span id="busName">--</span></p>
+<p><span>Status</span> <span id="status">--</span></p>
+<p><span>Last Seen</span> <span id="location">--</span></p>
 <p><span>Current Stop</span> <span id="currentStop">--</span></p>
 <p><span>Next Stop</span> <span id="nextStop">--</span></p>
 </div>
@@ -240,6 +242,7 @@ fetch(`${API_URL}/get-announcements`)
 
 let selectedBusId = null;
 let routeStops = [];
+let lastLocation = null;
 let intervalId = null;
 
 // MAP INIT (FIXED ZOOM & RESET SAFE)
@@ -252,10 +255,13 @@ let marker = L.marker([24.8607, 67.0011]).addTo(map);
 
 // RESET FUNCTION (NEW FIX)
 function resetMap(){
-map.setView([24.8607, 67.0011], 13);
-marker.setLatLng([24.8607, 67.0011]);
-document.getElementById("currentStop").textContent = "--";
-document.getElementById("nextStop").textContent = "--";
+  map.setView([24.8607, 67.0011], 13);
+  marker.setLatLng([24.8607, 67.0011]);
+  document.getElementById("currentStop").textContent = "--";
+  document.getElementById("nextStop").textContent = "--";
+  document.getElementById("location").textContent = "No live location";
+  document.getElementById("status").textContent = "Offline";
+  document.getElementById("status").className = "error";
 }
 
 // BUS DATA
@@ -278,71 +284,154 @@ fetch(`${API_URL}/get_buses`)
 });
 
 function selectBus(busId, buses){
+  if(intervalId){
+    clearInterval(intervalId);
+    intervalId = null;
+  }
 
-if(intervalId){
-clearInterval(intervalId);
-intervalId = null;
+  selectedBusId = busId;
+  const bus = buses.find(b => String(b.id) === String(busId));
+
+  if(!bus){
+    resetMap();
+    return;
+  }
+
+  document.getElementById("route").textContent =
+    `${bus.start_point || "--"} → ${bus.end_point || "--"}`;
+
+  document.getElementById("busName").textContent = bus.bus_number || "--";
+  routeStops = [];
+  lastLocation = null;
+
+  if(bus.route_id){
+    fetch(`${API_URL}/get_stops/${bus.route_id}`)
+      .then(res=>res.json())
+      .then(stops=>{
+        routeStops = stops.sort((a, b) => {
+          const orderA = Number(a.stop_order) || 0;
+          const orderB = Number(b.stop_order) || 0;
+          if(orderA !== orderB) return orderA - orderB;
+          return (Number(a.id) || 0) - (Number(b.id) || 0);
+        });
+        updateLocation();
+        intervalId = setInterval(updateLocation, 3000);
+      })
+      .catch(() => {
+        updateLocation();
+        intervalId = setInterval(updateLocation, 3000);
+      });
+  } else {
+    updateLocation();
+    intervalId = setInterval(updateLocation, 3000);
+  }
 }
 
-selectedBusId = busId;
-const bus = buses.find(b => String(b.id) === String(busId));
-
-if(!bus){
-resetMap();
-return;
+function formatTime(value){
+  if(!value) return "--";
+  const date = new Date(value.replace(' ', 'T'));
+  return isNaN(date.getTime()) ? "--" : date.toLocaleString();
 }
 
-document.getElementById("route").textContent =
-`${bus.start_point || "--"} → ${bus.end_point || "--"}`;
-
-document.getElementById("busName").textContent = bus.bus_number || "--";
-
-routeStops = [];
-
-if(bus.route_id){
-fetch(`${API_URL}/get_stops/${bus.route_id}`)
-.then(res=>res.json())
-.then(stops=>{
-routeStops = stops;
-updateLocation();
-intervalId = setInterval(updateLocation, 3000);
-});
-}
+function formatAge(seconds){
+  if(seconds < 60) return `${seconds}s ago`;
+  if(seconds < 3600) return `${Math.floor(seconds/60)}m ago`;
+  return `${Math.floor(seconds/3600)}h ago`;
 }
 
-// FIXED LOCATION FUNCTION
+function calculateDistance(lat1, lng1, lat2, lng2){
+  const rad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * rad;
+  const dLon = (lng2 - lng1) * rad;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return 6371 * c * 1000;
+}
+
+function updateStopsFromLocation(location){
+  if(!routeStops.length || !location || location.lat == null || location.lng == null){
+    document.getElementById("currentStop").textContent = "--";
+    document.getElementById("nextStop").textContent = "--";
+    return;
+  }
+
+  let nearestIndex = 0;
+  let minDistance = Number.POSITIVE_INFINITY;
+
+  routeStops.forEach((stop, index) => {
+    const stopLat = Number(stop.latitude);
+    const stopLng = Number(stop.longitude);
+    if(Number.isFinite(stopLat) && Number.isFinite(stopLng)){
+      const distance = calculateDistance(location.lat, location.lng, stopLat, stopLng);
+      if(distance < minDistance){
+        minDistance = distance;
+        nearestIndex = index;
+      }
+    }
+  });
+
+  const current = routeStops[nearestIndex];
+  const next = routeStops[nearestIndex + 1];
+
+  document.getElementById("currentStop").textContent = current?.stop_name || "--";
+  document.getElementById("nextStop").textContent = next?.stop_name || "End of route";
+}
+
+function handleNoLocation(){
+  document.getElementById("location").textContent = "No live location";
+  document.getElementById("status").textContent = "🔴 OFFLINE";
+  document.getElementById("status").className = "error";
+
+  if(lastLocation && Number.isFinite(lastLocation.lat) && Number.isFinite(lastLocation.lng)){
+    marker.setLatLng([lastLocation.lat, lastLocation.lng]);
+    map.panTo([lastLocation.lat, lastLocation.lng]);
+    updateStopsFromLocation(lastLocation);
+    return;
+  }
+
+  document.getElementById("currentStop").textContent = "--";
+  document.getElementById("nextStop").textContent = "--";
+}
+
 function updateLocation(){
+  if(!selectedBusId) return;
 
-if(!selectedBusId) return;
+  fetch(`${API_URL}/get_location/${selectedBusId}`)
+    .then(async res => {
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok || data.message){
+        throw data;
+      }
+      return data;
+    })
+    .then(data => {
+      if(!data || data.latitude == null || data.longitude == null){
+        handleNoLocation();
+        return;
+      }
 
-fetch(`${API_URL}/get_location/${selectedBusId}`)
-.then(res=>res.json())
-.then(data=>{
+      const lat = Number(data.latitude);
+      const lng = Number(data.longitude);
+      const updatedTime = new Date(data.last_updated?.replace(' ', 'T'));
+      const ageSeconds = Number.isFinite(updatedTime.getTime()) ? Math.round((Date.now() - updatedTime.getTime()) / 1000) : Infinity;
+      const online = ageSeconds <= 300;
 
-// ❌ NO LOCATION FIX
-if(!data || !data.latitude || !data.longitude){
-resetMap();
-return;
-}
+      lastLocation = { lat, lng, last_updated: data.last_updated };
 
-const lat = Number(data.latitude);
-const lng = Number(data.longitude);
+      marker.setLatLng([lat, lng]);
+      map.panTo([lat, lng]);
 
-// update map
-marker.setLatLng([lat, lng]);
-map.panTo([lat, lng]);
+      document.getElementById("location").textContent = online
+        ? `Live location received at ${formatTime(data.last_updated)}`
+        : `Last known location (${formatAge(ageSeconds)})`;
+      document.getElementById("status").textContent = online ? "🟢 LIVE" : `🔴 OFFLINE (${formatAge(ageSeconds)})`;
+      document.getElementById("status").className = online ? "live" : "error";
 
-// stops
-if(routeStops.length){
-let nearest = routeStops[0];
-document.getElementById("currentStop").textContent = nearest.stop_name || "--";
-document.getElementById("nextStop").textContent = "--";
-}
-
-})
-.catch(()=>{
-resetMap();
-});
+      updateStopsFromLocation({ lat, lng });
+    })
+    .catch(() => {
+      handleNoLocation();
+    });
 }
 
 </script>
