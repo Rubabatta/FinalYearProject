@@ -237,7 +237,7 @@ let div=document.createElement("div");
 div.className="bus-card";
 
 div.innerHTML=`
-<div class="bus-id">🚍 ${busNumber}</div>
+<div class="bus-id">🚍 ${bus.bus_number || ("Bus " + id)}</div>
 <div class="${status=='ONLINE'?'online':'offline'}">${status}</div>
 <div class="small">Current: -</div>
 <div class="small">Next: -</div>
