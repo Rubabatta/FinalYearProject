@@ -121,7 +121,9 @@ CREATE TABLE IF NOT EXISTS drivers (
     password TEXT,
     contact TEXT,
     bus_id INTEGER,
-    FOREIGN KEY (bus_id) REFERENCES buses(id)
+    route_id INTEGER,
+    FOREIGN KEY (bus_id) REFERENCES buses(id),
+    FOREIGN KEY (route_id) REFERENCES routes(id)
 )
 ''')
 # -----------------------------

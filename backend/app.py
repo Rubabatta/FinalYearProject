@@ -1087,11 +1087,20 @@ try:
     ALTER TABLE drivers
     ADD COLUMN bus_id INTEGER
     """)
-
     conn.commit()
-    conn.close()
-
     print("bus_id column added ✅")
+
+    try:
+        cursor.execute("""
+        ALTER TABLE drivers
+        ADD COLUMN route_id INTEGER
+        """)
+        conn.commit()
+        print("route_id column added ✅")
+    except Exception as e:
+        print("route_id already exists OR error:", e)
+
+    conn.close()
 
 except Exception as e:
     print("bus_id already exists OR error:", e)
@@ -1112,6 +1121,12 @@ def populate_db():
             pass
         try:
             cursor.execute("ALTER TABLE stops ADD COLUMN longitude REAL")
+        except:
+            pass
+
+        # Add route_id column to drivers if not exists
+        try:
+            cursor.execute("ALTER TABLE drivers ADD COLUMN route_id INTEGER")
         except:
             pass
 
