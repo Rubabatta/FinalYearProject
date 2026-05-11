@@ -338,6 +338,26 @@ function formatAge(seconds){
   return `${Math.floor(seconds/3600)}h ago`;
 }
 
+function parseTimestamp(value){
+  if(!value) return NaN;
+  const normalized = String(value).trim().replace(' ', 'T');
+  const time = Date.parse(normalized + 'Z');
+  if(!isNaN(time)) return time;
+
+  const match = normalized.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):(\d{2})/);
+  if(match){
+    const year = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+    const second = Number(match[6]);
+    return Date.UTC(year, month, day, hour, minute, second);
+  }
+
+  return NaN;
+}
+
 function calculateDistance(lat1, lng1, lat2, lng2){
   const rad = Math.PI / 180;
   const dLat = (lat2 - lat1) * rad;
@@ -410,16 +430,16 @@ function updateLocation(){
 
       const lat = Number(data.latitude);
       const lng = Number(data.longitude);
-      const updatedTime = new Date(data.last_updated?.replace(' ', 'T'));
-      const ageSeconds = Number.isFinite(updatedTime.getTime()) ? Math.round((Date.now() - updatedTime.getTime()) / 1000) : Infinity;
-      const online = ageSeconds <= 300;
+      const timestamp = parseTimestamp(data.last_updated);
+      const ageSeconds = Number.isFinite(timestamp) ? Math.round((Date.now() - timestamp) / 1000) : null;
+      const online = ageSeconds === null ? true : ageSeconds <= 1200;
 
       lastLocation = { lat, lng, last_updated: data.last_updated };
 
       marker.setLatLng([lat, lng]);
       map.panTo([lat, lng]);
 
-      document.getElementById("location").textContent = online ? "Live" : "Last known";
+      document.getElementById("location").textContent = online ? "Live" : `Last known (${formatAge(ageSeconds)})`;
       document.getElementById("status").textContent = online ? "ONLINE" : "OFFLINE";
 
       updateStopsFromLocation({ lat, lng });
