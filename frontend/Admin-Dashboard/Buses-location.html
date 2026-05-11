@@ -17,7 +17,7 @@ background:#f4f6fb;
 
 /* SIDEBAR */
 .sidebar{
-width:340px;
+width:280px;
 background:#111827;
 color:white;
 padding:15px;
@@ -207,7 +207,7 @@ let now=new Date().getTime();
 let lastUpdate=parseTimestamp(bus.last_updated);
 let diff=(isNaN(lastUpdate)) ? Infinity : (now-lastUpdate)/1000;
 
-let status=(diff < 60) ? "ONLINE" : "OFFLINE";
+let status=(diff < 180) ? "ONLINE" : "OFFLINE";
 
 if(status !== "ONLINE") return;
 
