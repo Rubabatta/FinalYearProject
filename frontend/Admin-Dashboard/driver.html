@@ -159,7 +159,7 @@ async function loadBuses(){
             : b.route_id || "";
 
         html += `
-            <option value="${b.id}" data-route="${routeText}">
+            <option value="${b.id}" data-route-id="${b.route_id || ''}">
                 Bus ${b.bus_number}
             </option>`;
     });
@@ -169,10 +169,10 @@ async function loadBuses(){
 
     busSelect.onchange = function(){
         let selected = this.options[this.selectedIndex];
-        let route = selected.getAttribute("data-route");
+        let routeId = selected.getAttribute("data-route-id");
 
         document.getElementById("route_show").innerText =
-            route ? "Route: " + route : "";
+            routeId ? "Route ID: " + routeId : "";
     };
 }
 
@@ -248,7 +248,8 @@ name: document.getElementById("name").value,
 email: document.getElementById("email").value,
 password: document.getElementById("password").value,
 contact: document.getElementById("contact").value,
-bus_id: busIdValue ? parseInt(busIdValue) : null
+bus_id: busIdValue ? parseInt(busIdValue) : null,
+route_id: document.getElementById("bus_id").selectedOptions[0]?.getAttribute("data-route-id") || null
 };
 
 let url = `${API}/add_driver`;

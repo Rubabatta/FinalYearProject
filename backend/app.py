@@ -954,10 +954,13 @@ def add_driver():
         contact = data.get('contact')
 
         bus_id = data.get('bus_id')
+        route_id = data.get('route_id')
 
         # IMPORTANT FIX
         if bus_id == "" or bus_id is None:
             bus_id = None
+        if route_id == "" or route_id is None:
+            route_id = None
 
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -965,14 +968,15 @@ def add_driver():
         try:
             cursor.execute("""
                 INSERT INTO drivers
-                (name, email, password, contact, bus_id)
-                VALUES (?, ?, ?, ?, ?)
+                (name, email, password, contact, bus_id, route_id)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 name,
                 email,
                 password,
                 contact,
-                bus_id
+                bus_id,
+                route_id
             ))
 
             conn.commit()
@@ -1003,8 +1007,9 @@ def get_drivers():
             d.email,
             d.contact,
             d.bus_id,
+            d.route_id,
             b.bus_number,
-            b.route_id,
+            b.route_id as bus_route_id,
             routes.start_point,
             routes.end_point,
             CASE
@@ -1013,7 +1018,7 @@ def get_drivers():
             END AS route_name
         FROM drivers d
         LEFT JOIN buses b ON d.bus_id = b.id
-        LEFT JOIN routes ON b.route_id = routes.id
+        LEFT JOIN routes ON d.route_id = routes.id
     """)
 
     drivers = cursor.fetchall()
@@ -1030,15 +1035,16 @@ def update_driver(id):
     email = data.get('email')
     contact = data.get('contact')
     bus_id = data.get('bus_id')
+    route_id = data.get('route_id')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
         UPDATE drivers
-        SET name=?, email=?, contact=?, bus_id=?
+        SET name=?, email=?, contact=?, bus_id=?, route_id=?
         WHERE id=?
-    """, (name, email, contact, bus_id, id))
+    """, (name, email, contact, bus_id, route_id, id))
 
     conn.commit()
     conn.close()
