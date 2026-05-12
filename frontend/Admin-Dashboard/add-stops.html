@@ -10,34 +10,43 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{display:flex;background:#f4f6fb;}
-.main{margin-left:240px;width:100%;padding:30px;}
-h1{color:#1e3a8a;margin-bottom:20px;}
-.form-box{background:white;padding:30px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);max-width:600px;}
-label{display:block;margin-top:15px;font-weight:500;}
-select,input{width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:6px;}
-button.add-stop{margin-top:20px;padding:10px 20px;border:none;border-radius:6px;background:#3b82f6;color:white;cursor:pointer;transition:0.3s;}
-button.add-stop:hover{background:#1e40af;}
-.stop-list{margin-top:15px;}
-.table-box{background:white;padding:20px;border-radius:10px;margin-top:20px;box-shadow:0 5px 15px rgba(0,0,0,0.1);}
-.table-box table{width:100%;border-collapse:collapse;}
-.table-box th{background:#3b82f6;color:white;padding:10px;text-align:left;}
-.table-box td{padding:10px;border-bottom:1px solid #eee;}
-
-.icon-btn{
-background:none;
-border:none;
-cursor:pointer;
-font-size:16px;
-margin-right:8px;
+body{
+    background:
+    radial-gradient(circle at top left,#dbeafe,#eef2ff 40%),
+    radial-gradient(circle at bottom right,#bfdbfe,#eef2ff 45%);
+    min-height:100vh;
+    overflow-x:hidden;
 }
+#sidebar-placeholder{position:fixed;left:0;top:0;bottom:0;width:240px;z-index:100;}
+.main{margin-left:240px;min-height:100vh;display:flex;flex-direction:column;align-items:center;gap:24px;padding:20px;}
+.page-title{width:100%;max-width:640px;}
+.page-title h1{color:#1e3a8a;margin-bottom:20px;font-size:2rem;}
+.add-card{background:rgba(255,255,255,0.95);padding:22px;border-radius:24px;width:100%;max-width:520px;backdrop-filter:blur(14px);box-shadow:0 18px 40px rgba(37,99,235,0.10),0 6px 16px rgba(15,23,42,0.08);}
+.form-top{text-align:center;margin-bottom:18px;}
+.form-icon{width:56px;height:56px;border-radius:16px;margin:auto;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2563eb,#1e40af);color:white;font-size:22px;margin-bottom:12px;}
+.form-top h1{color:#1e3a8a;font-size:22px;margin-bottom:4px;font-weight:700;}
+.form-top p{color:#64748b;font-size:12px;}
+.input-group{position:relative;margin-bottom:13px;}
+.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;}
+.input-group input,
+.input-group select{width:100%;padding:12px 14px 12px 40px;border:none;outline:none;border-radius:12px;background:#f8fafc;font-size:13px;color:#0f172a;border:1.5px solid transparent;transition:0.3s;}
+.input-group input:focus,
+.input-group select:focus{background:white;border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,0.10);}
+button.add-stop{width:100%;border:none;padding:13px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:0.3s;box-shadow:0 14px 30px rgba(37,99,235,0.14);}
+button.add-stop:hover{transform:translateY(-2px);}
+button.add-stop:disabled{opacity:0.6;cursor:not-allowed;transform:none;box-shadow:none;}
+.table-box{background:white;padding:24px;border-radius:18px;margin-top:20px;box-shadow:0 18px 40px rgba(15,23,42,0.08);width:100%;max-width:640px;}
+.table-box h3{margin:0 0 14px;color:#1e3a8a;}
+.table-box table{width:100%;border-collapse:collapse;}
+.table-box th{background:#2563eb;color:white;padding:12px;text-align:left;border-radius:12px 12px 0 0;}
+.table-box td{padding:12px;border-bottom:1px solid #e2e8f0;color:#334155;}
+.icon-btn{border:none;border-radius:10px;cursor:pointer;margin-right:6px;color:white;font-size:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:0.3s;}
+.icon-btn:hover{transform:scale(1.08);}
+.icon-btn.edit{background:#f59e0b;}
+.icon-btn.delete{background:#ef4444;}
 
-.icon-btn.edit{color:#f59e0b;}
-.icon-btn.edit:hover{color:#b45309;}
-
-.icon-btn.delete{color:#ef4444;}
-.icon-btn.delete:hover{color:#dc2626;}
-
+td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+@media(max-width:768px){#sidebar-placeholder{position:relative;width:100%;height:auto;} .main{margin-left:0;padding:20px;} .add-card{max-width:100%;padding:24px;}}
 </style>
 </head>
 <body>
@@ -45,11 +54,23 @@ margin-right:8px;
 <div id="sidebar-placeholder"></div>
 
 <div class="main">
-<h1>Add / Manage Stops</h1>
+<div class="page-title">
+    <h1>Add / Manage Stops</h1>
+</div>
 
-<div class="form-box">
-<label>Select Route</label>
+<div class="add-card">
+<div class="form-top">
+    <div class="form-icon">
+        <i class="fa-solid fa-map-pin"></i>
+    </div>
+    <h1>Add Stops</h1>
+    <p>Select a route and enter stop names</p>
+</div>
+
+<div class="input-group">
+<i class="fa-solid fa-route"></i>
 <select id="routeSelect"></select>
+</div>
 
 <div class="stop-list">
 <label>Stop 1</label><input type="text" class="stop">
@@ -59,7 +80,7 @@ margin-right:8px;
 <label>Stop 5</label><input type="text" class="stop">
 </div>
 
-<button class="add-stop" onclick="addStops()">Add Stops</button>
+<button type="button" class="add-stop" onclick="addStops()">Add Stops</button>
 </div>
 
 <div class="table-box">
@@ -95,6 +116,18 @@ document.getElementById("routeSelect").innerHTML = options;
 }
 loadRoutes();
 
+const addButton = document.querySelector(".add-stop");
+const stopInputs = Array.from(document.querySelectorAll(".stop"));
+
+function updateAddButtonState(){
+    const hasStop = stopInputs.some(stop => stop.value.trim().length > 0);
+    addButton.disabled = !hasStop;
+}
+
+stopInputs.forEach(stop => stop.addEventListener("input", updateAddButtonState));
+
+updateAddButtonState();
+
 document.getElementById("routeSelect").addEventListener("change", loadStops);
 
 async function loadStops(){
@@ -112,7 +145,8 @@ const data = await res.json();
 let rows = '';
 let count = 1;
 
-data.forEach(stop=>{
+const visibleStops = data.filter(stop => stop.stop_name && stop.stop_name.trim().length > 0);
+visibleStops.forEach(stop=>{
 
 rows += `<tr>
 
@@ -123,11 +157,11 @@ rows += `<tr>
 <td>
 
 <button class="icon-btn edit" onclick="editStop(${stop.id},\`${stop.stop_name}\`)">
-<i class="fa-solid fa-pen"></i>
+<i class="fa-solid fa-pen-to-square"></i>
 </button>
 
 <button class="icon-btn delete" onclick="deleteStop(${stop.id})">
-<i class="fa-solid fa-trash"></i>
+<i class="fa-solid fa-trash-can"></i>
 </button>
 
 </td>
@@ -149,43 +183,36 @@ alert("Select a route first!");
 return;
 }
 
-const stops = document.querySelectorAll(".stop");
+const stops = Array.from(document.querySelectorAll(".stop"));
+const stopNames = stops
+.map(stop => stop.value.trim())
+.filter(name => name.length > 0);
 
-const promises = [];
-
-stops.forEach(stop=>{
-
-const name = stop.value.trim();
-
-if(name !== ""){
-
-promises.push(
-
-fetch("https://acceptable-solace-production-06f3.up.railway.app/add_stop",{
-
-method:"POST",
-
-headers:{"Content-Type":"application/json"},
-
-body:JSON.stringify({route_id:routeId, stop_name:name})
-
-})
-
-.then(res=>res.json())
-
-.then(data=>console.log(data.message))
-
-.catch(err=>console.error(err))
-
-);
-
-stop.value = "";
-
+const hasSpacesOnly = stops.some(stop => stop.value.length > 0 && stop.value.trim().length === 0);
+if(hasSpacesOnly){
+alert("Please remove blank stop entries or type a stop name.");
+return;
 }
 
-});
+if(stopNames.length === 0){
+alert("Enter at least one stop name before adding.");
+return;
+}
+
+const promises = stopNames.map(name =>
+fetch("https://acceptable-solace-production-06f3.up.railway.app/add_stop",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({route_id:routeId, stop_name:name})
+})
+.then(res=>res.json())
+.then(data=>console.log(data.message))
+.catch(err=>console.error(err))
+);
 
 await Promise.all(promises);
+
+stops.forEach(stop => stop.value = "");
 
 loadStops();
 

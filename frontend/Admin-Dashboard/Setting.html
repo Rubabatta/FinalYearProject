@@ -242,18 +242,6 @@ transform:scale(1);
 <button class="btn red" onclick="clearCache()">Clear</button>
 </div>
 
-<!-- Logout -->
-<div class="setting-item">
-<div class="left">
-<i class="fa fa-right-from-bracket"></i>
-<div>
-<h3>Logout</h3>
-<p>Sign out from admin panel</p>
-</div>
-</div>
-<button class="btn red" onclick="logout()">Logout</button>
-</div>
-
 </div>
 </div>
 
@@ -273,58 +261,33 @@ transform:scale(1);
 </div>
 </div>
 
-<!-- LOGOUT POPUP (NEW ADD) -->
-<div class="popup" id="logoutPopup">
-<div class="popup-box">
-<h3>Confirm Logout</h3>
-<p>Are you sure you want to logout?</p>
-
-<button class="btn red" onclick="confirmLogout()">Yes</button>
-<button class="btn blue" onclick="closeLogoutPopup()">No</button>
-
-</div>
-</div>
-
 <script>
 
 // sidebar
 fetch("sidebar.html")
 .then(r=>r.text())
 .then(d=>{
-document.getElementById("sidebar").innerHTML=d;
+    document.getElementById("sidebar").innerHTML=d;
 });
 
 // popup
 function openPopup(){
-document.getElementById("popup").style.display="flex";
+    document.getElementById("popup").style.display="flex";
 }
 
 function closePopup(){
-document.getElementById("popup").style.display="none";
-}
-
-// logout (UPDATED)
-function logout(){
-document.getElementById("logoutPopup").style.display="flex";
-}
-
-function closeLogoutPopup(){
-document.getElementById("logoutPopup").style.display="none";
-}
-
-function confirmLogout(){
-window.location.href="../Home-page/login.html";
+    document.getElementById("popup").style.display="none";
 }
 
 // cache clear
 function clearCache(){
-localStorage.clear();
-alert("Cache cleared successfully!");
+    localStorage.clear();
+    alert("Cache cleared successfully!");
 }
 
 // profile
 function showProfile(){
-window.location.href="admin_profile.html";
+    window.location.href="admin_profile.html";
 }
 
 // password API

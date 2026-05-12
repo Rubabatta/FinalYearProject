@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Student Announcements | Shuttle System</title>
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
@@ -16,14 +17,17 @@
 }
 
 body{
-    display:flex;
     background:#f4f6fb;
+}
+
+/* MAIN LAYOUT */
+.main{
+    margin-left:230px;
+    padding:25px;
 }
 
 /* CONTENT */
 .content{
-    margin-left:240px;
-    padding:40px;
     width:100%;
 }
 
@@ -33,125 +37,237 @@ body{
     font-size:24px;
 }
 
-/* ANNOUNCEMENTS CARDS */
+/* ANNOUNCEMENT CARDS */
 .announcement-card{
     background:white;
     padding:20px;
     margin-bottom:20px;
-    border-radius:10px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.1);
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
     transition:0.3s;
+    border-left:5px solid #2563eb;
 }
 
 .announcement-card:hover{
-    background:#f0f4ff;
+    background:#f8fbff;
+    transform:translateY(-2px);
 }
 
 .announcement-card h3{
     color:#2563eb;
     margin-bottom:10px;
+    font-size:18px;
 }
 
 .announcement-card p{
     color:#333;
+    font-size:14px;
+    line-height:1.6;
 }
 
 .announcement-card span{
     display:block;
-    margin-top:10px;
+    margin-top:12px;
     font-size:12px;
     color:#888;
 }
 
-/* TOAST NOTIFICATION */
+/* TOAST */
 .toast{
     position:fixed;
     top:20px;
     right:20px;
-    background:#3b82f6;
+    background:#2563eb;
     color:white;
     padding:15px 20px;
-    border-radius:8px;
+    border-radius:10px;
     box-shadow:0 4px 15px rgba(0,0,0,0.2);
     display:none;
     z-index:999;
+    font-size:14px;
+    font-weight:500;
 }
 </style>
 </head>
+
 <body>
 
 <!-- SIDEBAR -->
 <div id="sidebar"></div>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
+<div class="main">
+
+<!-- HEADER -->
+<div id="header"></div>
+
+<!-- CONTENT -->
 <div class="content">
-<h1><i class="fas fa-bullhorn"></i> Announcements</h1>
+
+<h1>
+<i class="fas fa-bullhorn"></i>
+Announcements
+</h1>
+
 <div id="announcement-body">
-<!-- Dynamic announcements will load here -->
+<!-- Announcements will load here -->
 </div>
+
+</div>
+
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ----------------- SIDEBAR -----------------
+
+function checkAuth(){
+    if(!localStorage.getItem("student_id")){
+        window.location.replace("../Home-page/login.html");
+    }
+}
+window.addEventListener("pageshow", checkAuth);
+checkAuth();
+
+function logout(){
+    localStorage.clear();
+    window.location.replace("../Home-page/home.html");
+}
+
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+// ================= HEADER =================
+fetch("header.html")
+.then(res => res.text())
+.then(data => {
+    document.getElementById("header").innerHTML = data;
+    refreshHeaderImage();
+})
+.catch(err => console.error("Header fetch error:", err));
+
+// ================= SIDEBAR =================
 fetch("student-sidebar.html")
 .then(res => res.text())
-.then(data=>{
+.then(data => {
     document.getElementById("sidebar").innerHTML = data;
 })
 .catch(err => console.error("Sidebar fetch error:", err));
 
-// ----------------- ANNOUNCEMENTS -----------------
+// ================= HEADER IMAGE =================
+function refreshHeaderImage(){
+
+    const studentId = localStorage.getItem("student_id");
+
+    if(!studentId) return;
+
+    fetch(`${API_URL}/get_student/${studentId}`)
+    .then(res => res.json())
+    .then(data => {
+
+        const headerImg = document.getElementById("headerImg");
+
+        if(headerImg && data.image){
+            headerImg.src = API_URL + data.image + "?t=" + Date.now();
+        }
+
+    })
+    .catch(() => {});
+}
+
+// ================= ANNOUNCEMENTS =================
 let latestAnnouncements = [];
 
 async function loadAnnouncements(){
-    try {
-        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/get-announcements");
-        const data = await res.json();
-        const container = document.getElementById("announcement-body");
-        container.innerHTML="";
 
-        data.forEach(a=>{
+    try{
+
+        const res = await fetch(`${API_URL}/get-announcements`);
+        const data = await res.json();
+
+        const container = document.getElementById("announcement-body");
+
+        container.innerHTML = "";
+
+        if(data.length === 0){
+
+            container.innerHTML = `
+            <div class="announcement-card">
+                <h3>No Announcements</h3>
+                <p>No announcements available right now.</p>
+            </div>
+            `;
+
+            return;
+        }
+
+        data.forEach(a => {
+
             container.innerHTML += `
             <div class="announcement-card">
+
                 <h3>${a.title}</h3>
+
                 <p>${a.message}</p>
-                <span>${a.date}</span>
-            </div>`;
+
+                <span>
+                <i class="fa-regular fa-clock"></i>
+                ${a.date}
+                </span>
+
+            </div>
+            `;
         });
 
-        // ----------------- Show Toast if new announcement -----------------
+        // ================= TOAST FOR NEW ANNOUNCEMENT =================
         if(latestAnnouncements.length > 0){
-            let newAnns = data.filter(d=>!latestAnnouncements.some(l=>l.id === d.id));
-            if(newAnns.length>0){
-                newAnns.forEach(ann=>{
+
+            let newAnns = data.filter(
+                d => !latestAnnouncements.some(l => l.id === d.id)
+            );
+
+            if(newAnns.length > 0){
+
+                newAnns.forEach(ann => {
                     showToast(`New Announcement: ${ann.title}`);
                 });
+
             }
         }
 
-        latestAnnouncements = data; // update latest announcements
+        latestAnnouncements = data;
 
-    } catch(e){
+    }
+    catch(e){
+
         console.error("Load announcements error:", e);
+
     }
 }
 
-// ----------------- TOAST -----------------
+// ================= TOAST =================
 function showToast(msg){
+
     const toast = document.getElementById("toast");
+
     toast.innerText = msg;
-    toast.style.display="block";
-    setTimeout(()=>{ toast.style.display="none"; }, 4000);
+
+    toast.style.display = "block";
+
+    setTimeout(() => {
+
+        toast.style.display = "none";
+
+    }, 4000);
 }
 
-// ----------------- AUTO REFRESH -----------------
-setInterval(loadAnnouncements, 5000); // fetch every 5 seconds
+// ================= AUTO REFRESH =================
+setInterval(loadAnnouncements, 5000);
 
-// Initial load
+// INITIAL LOAD
 loadAnnouncements();
+
 </script>
+
 </body>
 </html>

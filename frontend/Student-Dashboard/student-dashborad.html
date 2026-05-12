@@ -209,21 +209,50 @@ color:#444;
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
 
+function checkAuth(){
+  if(!localStorage.getItem("student_id")){
+    window.location.replace("../Home-page/login.html");
+  }
+}
+window.addEventListener("pageshow", checkAuth);
+checkAuth();
+
+function logout(){
+    localStorage.clear();
+    window.location.replace("../Home-page/home.html");
+}
+
 // HEADER
 fetch("header.html")
 .then(res => res.text())
 .then(data => {
-document.getElementById("header").innerHTML = data;
+  document.getElementById("header").innerHTML = data;
+  refreshHeaderImage();
 });
 
 // SIDEBAR
 fetch("student-sidebar.html")
 .then(res=>res.text())
 .then(data=>{
-document.getElementById("sidebar").innerHTML = data;
+  document.getElementById("sidebar").innerHTML = data;
 });
 
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+function refreshHeaderImage(){
+  const studentId = localStorage.getItem("student_id");
+  if(!studentId) return;
+
+  fetch(`${API_URL}/get_student/${studentId}`)
+    .then(res=>res.json())
+    .then(data => {
+      const headerImg = document.getElementById("headerImg");
+      if(headerImg && data.image){
+        headerImg.src = API_URL + data.image + "?t=" + Date.now();
+      }
+    })
+    .catch(() => {});
+}
 
 // ANNOUNCEMENTS
 fetch(`${API_URL}/get-announcements`)

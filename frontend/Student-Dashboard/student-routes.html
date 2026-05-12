@@ -7,168 +7,287 @@
 <title>Shuttle Routes</title>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{background:#f4f6fb;}
-.main{margin-left:240px;padding:30px;}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
 
-/* Header */
+body{
+background:linear-gradient(135deg,#eef2ff,#f8fafc);
+display:flex;
+}
+
+/* SIDEBAR FIX */
+#sidebar{
+width:240px;
+position:fixed;
+left:0;
+top:0;
+height:100vh;
+background:#2563eb;
+z-index:1000;
+}
+
+/* MAIN */
+.main{
+margin-left:240px;
+padding:45px;
+width:100%;
+}
+
+/* HEADER */
 .header{
 display:flex;
 align-items:center;
 gap:10px;
-margin-bottom:30px;
+margin-bottom:35px;
 }
-.header h1{color:#1e3a8a;}
 
-/* Routes Cards */
+.header i{
+color:#2563eb;
+font-size:22px;
+}
+
+.header h1{
+font-size:28px;
+font-weight:700;
+color:#0f172a;
+}
+
+/* ROUTES */
 .routes{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
+grid-template-columns:repeat(auto-fit,minmax(270px,1fr));
+gap:22px;
 }
+
+/* CARD */
 .route-card{
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 3px 10px rgba(0,0,0,0.1);
+background:#fff;
+padding:24px;
+border-radius:18px;
+border:1px solid #eef2ff;
+box-shadow:0 8px 20px rgba(0,0,0,0.06);
 transition:0.3s;
-position:relative;
 }
+
 .route-card:hover{
-transform:translateY(-5px);
-box-shadow:0 6px 15px rgba(0,0,0,0.15);
+transform:translateY(-6px);
+box-shadow:0 18px 35px rgba(0,0,0,0.12);
 }
-.route-card h3{
-color:#2563eb;
-margin-bottom:8px;
-}
-.route-card p{
-color:#555;
-font-size:14px;
-margin-bottom:5px;
-}
+
 .icon{
-font-size:22px;
-color:#2563eb;
-margin-bottom:8px;
 display:flex;
 align-items:center;
-gap:8px;
+gap:10px;
+color:#2563eb;
+font-weight:600;
+font-size:14px;
+margin-bottom:10px;
 }
 
-/* View Stops Button */
+.route-card h3{
+font-size:15px;
+color:#1e293b;
+margin-bottom:10px;
+}
+
+/* BUTTON */
 .view-stops-btn{
-padding:6px 12px;
-background:#3b82f6;
-color:white;
+padding:9px 14px;
 border:none;
-border-radius:6px;
+border-radius:10px;
 cursor:pointer;
-transition:0.3s;
-font-size:14px;
-}
-.view-stops-btn:hover{
-background:#1e40af;
+font-size:13px;
+font-weight:600;
+color:white;
+background:linear-gradient(135deg,#2563eb,#1e40af);
+transition:0.25s;
 }
 
-/* Stops List */
-.stops-list{
-margin-top:10px;
-padding-left:15px;
-display:none;
+.view-stops-btn:hover{
+transform:scale(1.05);
 }
-.stops-list li{
-padding:3px 0;
-font-size:14px;
-color:#333;
+
+/* POPUP */
+.overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(15,23,42,0.55);
+display:none;
+justify-content:center;
+align-items:center;
+z-index:999;
+}
+
+.popup{
+background:white;
+width:360px;
+max-width:90%;
+border-radius:18px;
+padding:22px;
+box-shadow:0 20px 50px rgba(0,0,0,0.25);
+}
+
+.popup-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+.popup-header h2{
+font-size:18px;
+color:#1e293b;
+}
+
+.close-btn{
+border:none;
+background:#ef4444;
+color:white;
+width:32px;
+height:32px;
+border-radius:8px;
+cursor:pointer;
+}
+
+.stop-item{
+padding:10px;
+border-radius:10px;
+background:#f1f5f9;
+margin-bottom:8px;
+font-size:13px;
+}
+
+.stop-item:hover{
+background:#e2e8f0;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+.main{
+margin-left:0;
+padding:20px;
+}
+
+#sidebar{
+position:relative;
+width:100%;
+height:auto;
+}
 }
 </style>
 </head>
 
 <body>
 
-<!-- Sidebar -->
+<!-- SIDEBAR FIXED -->
 <div id="sidebar"></div>
 
 <div class="main">
 
 <div class="header">
-<i class="fas fa-route"></i>
+<i class="fa-solid fa-route"></i>
 <h1>Shuttle Routes</h1>
 </div>
 
-<div class="routes" id="routesContainer">
-<!-- Routes will load here -->
+<div class="routes" id="routesContainer"></div>
+
 </div>
 
+<!-- POPUP -->
+<div class="overlay" id="overlay">
+<div class="popup">
+
+<div class="popup-header">
+<h2>Route Stops</h2>
+<button class="close-btn" onclick="closePopup()">
+<i class="fa fa-xmark"></i>
+</button>
+</div>
+
+<div id="stopList"></div>
+
+</div>
 </div>
 
 <script>
-// Load Sidebar
+
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+/* ✅ SIDEBAR FIX (IMPORTANT) */
 fetch("student-sidebar.html")
 .then(res => res.text())
-.then(data =>{
-document.getElementById("sidebar").innerHTML=data;
+.then(data => {
+document.getElementById("sidebar").innerHTML = data;
 });
 
-// Load Routes and Stops
+/* LOAD ROUTES */
 function loadRoutes(){
-fetch("https://acceptable-solace-production-06f3.up.railway.app/get_routes")
+fetch(`${API_URL}/get_routes`)
 .then(res => res.json())
 .then(data => {
+
 const container = document.getElementById("routesContainer");
 container.innerHTML = "";
+
 data.forEach(route => {
+
 const card = document.createElement("div");
 card.className = "route-card";
 
 card.innerHTML = `
-<div class="icon"><i class="fas fa-bus"></i> Route #${route.id}</div>
+<div class="icon"><i class="fa-solid fa-bus"></i> Route #${route.id}</div>
 <h3>${route.start_point} → ${route.end_point}</h3>
-<button class="view-stops-btn" onclick="toggleStops(${route.id}, this)">View Stops</button>
-<ul class="stops-list" id="stops-${route.id}"></ul>
+
+<button class="view-stops-btn" onclick="openStops(${route.id})">
+View Stops
+</button>
 `;
 
 container.appendChild(card);
 });
-})
-.catch(err => console.log("Error loading routes:", err));
-}
-
-// Toggle Stops List
-function toggleStops(routeId, btn){
-const listEl = document.getElementById(`stops-${routeId}`);
-if(listEl.style.display === "block"){
-listEl.style.display = "none";
-btn.textContent = "View Stops";
-return;
-}
-
-// Fetch stops for this route
-fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${routeId}`)
-.then(res => res.json())
-.then(data => {
-listEl.innerHTML = "";
-if(data.length === 0){
-listEl.innerHTML = "<li>No stops added yet</li>";
-}else{
-data.forEach(stop => {
-const li = document.createElement("li");
-li.textContent = stop.stop_name;
-listEl.appendChild(li);
 });
 }
-listEl.style.display = "block";
-btn.textContent = "Hide Stops";
-})
-.catch(err => console.log("Error loading stops:", err));
+
+/* POPUP */
+function openStops(routeId){
+
+fetch(`${API_URL}/get_stops/${routeId}`)
+.then(res => res.json())
+.then(data => {
+
+let html = "";
+
+if(data.length === 0){
+html = `<div class="stop-item">No stops found</div>`;
+}
+else{
+data.forEach(stop => {
+html += `<div class="stop-item">${stop.stop_name}</div>`;
+});
 }
 
-// Load routes on page load
+document.getElementById("stopList").innerHTML = html;
+document.getElementById("overlay").style.display = "flex";
+
+});
+}
+
+function closePopup(){
+document.getElementById("overlay").style.display = "none";
+}
+
 document.addEventListener("DOMContentLoaded", loadRoutes);
+
 </script>
 
 </body>

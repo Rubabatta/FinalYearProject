@@ -10,142 +10,151 @@
 
 <style>
 *{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
 }
 
 body{
-background:#eef2f7;
-display:flex;
+    background:#eef2f7;
+    display:flex;
 }
 
 .content{
-margin-left:240px;
-padding:40px;
-width:100%;
+    margin-left:240px;
+    padding:0 26px 30px;
+    width:100%;
 }
 
 .page-title{
-font-size:24px;
-font-weight:600;
-margin-bottom:20px;
-color:#111;
+    font-size:20px;
+    font-weight:700;
+    margin:0 0 20px;
+    color:#111;
 }
 
 .profile-card{
-background:white;
-padding:25px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.08);
-max-width:900px;
+    background:white;
+    padding:24px;
+    border-radius:18px;
+    box-shadow:0 18px 35px rgba(15,23,42,0.08);
+    max-width:980px;
+    margin:auto;
 }
 
 .profile-header{
-display:flex;
-align-items:center;
-gap:18px;
-margin-bottom:25px;
+    display:flex;
+    align-items:center;
+    gap:18px;
+    margin-bottom:28px;
+    padding-bottom:10px;
+    border-bottom:1px solid #e2e8f0;
 }
 
 .avatar-box{
-position:relative;
+    position:relative;
 }
 
 .avatar-box img{
-width:95px;
-height:95px;
-border-radius:50%;
-object-fit:cover;
-border:3px solid #2563eb;
+    width:96px;
+    height:96px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #2563eb;
+    background:#eef2f7;
 }
 
 .upload-btn{
-position:absolute;
-bottom:0;
-right:0;
-background:#2563eb;
-color:white;
-width:28px;
-height:28px;
-border-radius:50%;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-font-size:12px;
+    position:absolute;
+    bottom:0;
+    right:0;
+    background:#2563eb;
+    color:white;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    font-size:12px;
 }
 
 .profile-info h2{
-font-size:22px;
-margin-bottom:5px;
+    font-size:20px;
+    margin-bottom:5px;
 }
 
 .profile-info p{
-font-size:13px;
-color:#666;
+    font-size:14px;
+    color:#5f6f8a;
+    margin:0;
 }
 
 .btns{
-margin-left:auto;
-display:flex;
-gap:10px;
+    margin-left:auto;
+    display:flex;
+    gap:10px;
 }
 
 button{
-border:none;
-padding:10px 16px;
-border-radius:8px;
-cursor:pointer;
-font-size:14px;
+    border:none;
+    padding:10px 18px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:14px;
+    min-width:110px;
 }
 
 .edit-btn{
-background:#2563eb;
-color:white;
+    background:#2563eb;
+    color:white;
 }
 
 .save-btn{
-background:#10b981;
-color:white;
-display:none;
+    background:#10b981;
+    color:white;
+    display:none;
 }
 
 .profile-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:15px;
-margin-top:10px;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(220px,1fr));
+    gap:18px;
+    margin-top:8px;
 }
 
 .info-box{
-background:#f8fafc;
-padding:14px;
-border-radius:10px;
+    background:#f8fafc;
+    padding:16px;
+    border-radius:14px;
 }
 
 .info-box span{
-display:block;
-font-size:12px;
-color:#777;
-margin-bottom:5px;
+    display:block;
+    font-size:12px;
+    color:#64748b;
+    margin-bottom:8px;
+    font-weight:600;
 }
 
 .info-box input{
-width:100%;
-padding:10px;
-border:1px solid #ddd;
-border-radius:8px;
-font-size:14px;
-outline:none;
+    width:100%;
+    padding:12px;
+    border:1px solid #e2e8f0;
+    border-radius:10px;
+    font-size:14px;
+    outline:none;
+    color:#0f172a;
 }
 
 .info-box input:disabled{
-background:#f8fafc;
-border:none;
-color:#111;
+    background:#f8fafc;
+    border:none;
+    color:#334155;
 }
+
 </style>
 </head>
 
@@ -212,50 +221,64 @@ color:#111;
 </div>
 
 <script>
+function checkAuth(){
+    if(!localStorage.getItem("student_id")){
+        window.location.replace("../Home-page/login.html");
+    }
+}
+window.addEventListener("pageshow", checkAuth);
+checkAuth();
+
+function logout(){
+    localStorage.clear();
+    window.location.replace("../Home-page/home.html");
+}
+
 const API = "https://acceptable-solace-production-06f3.up.railway.app";
 const student_id = localStorage.getItem("student_id");
 
-/* header */
-fetch("header.html")
-.then(res=>res.text())
-.then(data=>{
-document.getElementById("header").innerHTML=data;
-});
+function loadHeader(){
+    return fetch("header.html")
+        .then(res=>res.text())
+        .then(data=>{
+            document.getElementById("header").innerHTML=data;
+        });
+}
 
-/* sidebar */
-fetch("student-sidebar.html")
-.then(res=>res.text())
-.then(data=>{
-document.getElementById("sidebar").innerHTML=data;
-});
+function loadSidebar(){
+    return fetch("student-sidebar.html")
+        .then(res=>res.text())
+        .then(data=>{
+            document.getElementById("sidebar").innerHTML=data;
+        });
+}
 
-/* load profile */
+Promise.all([loadHeader(), loadSidebar()])
+    .then(() => loadProfile())
+    .catch(err => console.error("Header/Sidebar load error:", err));
+
 function loadProfile(){
+    fetch(`${API}/get_student/${student_id}`)
+    .then(res=>res.json())
+    .then(data=>{
+        document.getElementById("showName").innerText=data.name;
+        document.getElementById("showEmail").innerText=data.email;
 
-fetch(`${API}/get_student/${student_id}`)
-.then(res=>res.json())
-.then(data=>{
+        document.getElementById("name").value=data.name;
+        document.getElementById("email").value=data.email;
+        document.getElementById("contact").value=data.contact;
+        document.getElementById("password").value=data.password;
 
-document.getElementById("showName").innerText=data.name;
-document.getElementById("showEmail").innerText=data.email;
+        if(data.image){
+            let img = API + data.image + "?t=" + Date.now();
+            document.getElementById("profileImg").src=img;
 
-document.getElementById("name").value=data.name;
-document.getElementById("email").value=data.email;
-document.getElementById("contact").value=data.contact;
-document.getElementById("password").value=data.password;
-
-if(data.image){
-let img = API + data.image + "?t=" + Date.now();
-document.getElementById("profileImg").src=img;
-
-let headerImg=document.getElementById("headerImg");
-if(headerImg) headerImg.src=img;
+            let headerImg=document.getElementById("headerImg");
+            if(headerImg) headerImg.src=img;
+        }
+    })
+    .catch(err => console.error("Profile load error:", err));
 }
-
-});
-}
-
-loadProfile();
 
 /* enable edit */
 function enableEdit(){

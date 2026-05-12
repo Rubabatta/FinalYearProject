@@ -10,13 +10,27 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{display:flex;background:#f4f6fb;}
-.main{margin-left:240px;width:100%;padding:30px;}
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-form{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);max-width:500px;}
-input{width:100%;padding:10px;margin:10px 0;border-radius:6px;border:1px solid #ccc;}
-button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;background:#3b82f6;color:white;margin-top:10px;}
-button:hover{background:#1e40af;}
+body{
+    background:
+    radial-gradient(circle at top left,#dbeafe,#eef2ff 40%),
+    radial-gradient(circle at bottom right,#bfdbfe,#eef2ff 45%);
+    min-height:100vh;
+    overflow-x:hidden;
+}
+#sidebar-placeholder{position:fixed;left:0;top:0;bottom:0;width:240px;z-index:100;}
+.main{margin-left:240px;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.add-card{width:100%;max-width:390px;padding:22px;border-radius:24px;background:rgba(255,255,255,0.95);backdrop-filter:blur(14px);box-shadow:0 18px 40px rgba(37,99,235,0.10),0 6px 16px rgba(15,23,42,0.08);}
+.form-top{text-align:center;margin-bottom:18px;}
+.form-icon{width:56px;height:56px;border-radius:16px;margin:auto;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2563eb,#1e40af);color:white;font-size:22px;margin-bottom:12px;}
+.form-top h1{color:#1e3a8a;font-size:22px;margin-bottom:4px;font-weight:700;}
+.form-top p{color:#64748b;font-size:12px;}
+.input-group{position:relative;margin-bottom:13px;}
+.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;}
+.input-group input{width:100%;padding:12px 14px 12px 40px;border:none;outline:none;border-radius:12px;background:#f8fafc;font-size:13px;color:#0f172a;border:1.5px solid transparent;transition:0.3s;}
+.input-group input:focus{background:white;border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,0.10);}
+button{width:100%;border:none;padding:13px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:0.3s;}
+button:hover{transform:translateY(-2px);}
+@media(max-width:768px){#sidebar-placeholder{position:relative;width:100%;height:auto;} .main{margin-left:0;padding:20px;} .add-card{max-width:100%;padding:24px;}}
 </style>
 </head>
 
@@ -25,21 +39,29 @@ button:hover{background:#1e40af;}
 <div id="sidebar-placeholder"></div>
 
 <div class="main">
-<div class="topbar">
-<h1>Add Route</h1>
+<div class="add-card">
+<div class="form-top">
+    <div class="form-icon">
+        <i class="fa-solid fa-route"></i>
+    </div>
+    <h1>Add Route</h1>
+    <p>Create a new route path</p>
 </div>
 
 <form id="addRouteForm">
-<label>Start Point</label>
-<input type="text" id="start_point" required>
+<div class="input-group">
+<i class="fa fa-location-dot"></i>
+<input type="text" id="start_point" placeholder="Start Point" required>
+</div>
 
-<label>End Point</label>
-<input type="text" id="end_point" required>
-
-<!-- Stops field removed as requested -->
+<div class="input-group">
+<i class="fa fa-location-dot"></i>
+<input type="text" id="end_point" placeholder="End Point" required>
+</div>
 
 <button type="submit">Add Route</button>
 </form>
+</div>
 </div>
 
 <script>

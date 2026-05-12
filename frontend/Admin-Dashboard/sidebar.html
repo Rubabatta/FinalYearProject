@@ -3,96 +3,299 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <div class="sidebar">
-    <h2>Admin Panel</h2>
 
+    <!-- LOGO -->
+    <div class="logo-section">
+
+        <div class="logo-icon">
+            <i class="fa-solid fa-bus"></i>
+        </div>
+
+        <div>
+            <h2>Admin Panel</h2>
+            <p>Shuttle Management System</p>
+        </div>
+
+    </div>
+
+    <!-- MENU -->
     <ul>
 
-        <li onclick="window.location.href='admin.html'">
-            <i class="fa-solid fa-chart-line"></i> Dashboard
+        <li onclick="window.location.href='./admin.html'">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
         </li>
 
-        <li onclick="window.location.href='student-data.html'">
-            <i class="fa-solid fa-user-graduate"></i> Students
+        <li onclick="window.location.href='./student-data.html'">
+            <i class="fa-solid fa-user-graduate"></i>
+            <span>Students</span>
         </li>
 
-        <li onclick="window.location.href='driver.html'">
-            <i class="fa-solid fa-id-card"></i> Drivers
+        <li onclick="window.location.href='./driver.html'">
+            <i class="fa-solid fa-id-card"></i>
+            <span>Drivers</span>
         </li>
 
-        <li onclick="window.location.href='buses.html'">
-            <i class="fa-solid fa-bus"></i> Buses
+        <li onclick="window.location.href='./buses.html'">
+            <i class="fa-solid fa-bus"></i>
+            <span>Buses</span>
         </li>
 
-        <li onclick="window.location.href='routes.html'">
-            <i class="fa-solid fa-route"></i> Routes
+        <li onclick="window.location.href='./routes.html'">
+            <i class="fa-solid fa-route"></i>
+            <span>Routes</span>
         </li>
 
-        <li onclick="window.location.href='admin-announcements.html'">
-            <i class="fa-solid fa-bullhorn"></i> Announcements
+        <li onclick="window.location.href='./admin-announcements.html'">
+            <i class="fa-solid fa-bullhorn"></i>
+            <span>Announcements</span>
         </li>
 
-        <li onclick="window.location.href='Buses-location.html'">
-            <i class="fa-solid fa-location-dot"></i> GPS Tracking
+        <li onclick="window.location.href='./Buses-location.html'">
+            <i class="fa-solid fa-location-dot"></i>
+            <span>GPS Tracking</span>
         </li>
 
-        <li onclick="window.location.href='Setting.html'">
-            <i class="fa-solid fa-gear"></i> Settings
+        <li onclick="window.location.href='./Setting.html'">
+            <i class="fa-solid fa-gear"></i>
+            <span>Settings</span>
+        </li>
+
+        <li class="logout" onclick="logout()">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
         </li>
 
     </ul>
+
 </div>
 
 <style>
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
 .sidebar{
-    width:240px;
+    width:250px;
     height:100vh;
-    background:#1e3a8a;
+    background:linear-gradient(180deg,#0f172a 0%, #1e293b 100%);
     color:white;
-    padding:25px;
+    padding:24px 18px;
     position:fixed;
     top:0;
     left:0;
     z-index:1000;
+    box-shadow:8px 0 30px rgba(0,0,0,0.18);
 }
 
-.sidebar h2{
-    text-align:center;
-    margin-bottom:35px;
-    font-size:24px;
-    font-weight:600;
+/* Glow Effects */
+
+.sidebar::before{
+    content:"";
+    position:absolute;
+    top:-120px;
+    right:-80px;
+    width:220px;
+    height:220px;
+    background:rgba(59,130,246,0.20);
+    border-radius:50%;
+    filter:blur(45px);
 }
+
+.sidebar::after{
+    content:"";
+    position:absolute;
+    bottom:-120px;
+    left:-80px;
+    width:220px;
+    height:220px;
+    background:rgba(37,99,235,0.15);
+    border-radius:50%;
+    filter:blur(45px);
+}
+
+/* Logo */
+
+.logo-section{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:20px;
+    position:relative;
+    z-index:2;
+}
+
+.logo-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    background:linear-gradient(135deg,#2563eb,#60a5fa);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    box-shadow:0 8px 20px rgba(37,99,235,0.4);
+}
+
+.logo-section h2{
+    font-size:21px;
+    font-weight:700;
+    margin-bottom:3px;
+}
+
+.logo-section p{
+    font-size:12px;
+    color:#cbd5e1;
+}
+
+/* Menu */
 
 .sidebar ul{
     list-style:none;
-    padding:0;
+    position:relative;
+    z-index:2;
 }
 
 .sidebar ul li{
-    padding:13px 15px;
-    margin:8px 0;
-    border-radius:8px;
-    cursor:pointer;
     display:flex;
     align-items:center;
-    gap:12px;
-    transition:0.3s;
-    font-size:15px;
+    gap:14px;
+    padding:10px 12px;
+    margin-bottom:8px;
+    border-radius:14px;
+    cursor:pointer;
+    transition:all 0.35s ease;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.06);
+    position:relative;
+    overflow:hidden;
+    font-size:14px;
+    font-weight:500;
 }
 
-.sidebar ul li:hover{
-    background:#3b82f6;
-    transform:translateX(4px);
+/* Shine Hover */
+
+.sidebar ul li::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.14),
+        transparent
+    );
+    transition:0.6s;
 }
+
+.sidebar ul li:hover::before{
+    left:120%;
+}
+
+/* Icons */
 
 .sidebar ul li i{
-    width:18px;
+    min-width:20px;
     text-align:center;
     font-size:17px;
+    transition:0.3s;
 }
+
+/* Hover */
+
+.sidebar ul li:hover{
+    background:linear-gradient(90deg,#2563eb,#3b82f6);
+    transform:translateX(6px) scale(1.02);
+    box-shadow:0 10px 25px rgba(37,99,235,0.35);
+    border-color:transparent;
+}
+
+.sidebar ul li:hover i{
+    transform:scale(1.15);
+}
+
+/* Active Click */
+
+.sidebar ul li:active{
+    transform:scale(0.98);
+}
+
+/* Logout */
+
+.logout{
+    margin-top:10px;
+    background:rgba(239,68,68,0.08) !important;
+    border:1px solid rgba(239,68,68,0.15) !important;
+}
+
+.logout:hover{
+    background:linear-gradient(90deg,#dc2626,#ef4444) !important;
+    box-shadow:0 10px 25px rgba(239,68,68,0.35) !important;
+}
+
+/* Scrollbar */
+
+.sidebar::-webkit-scrollbar{
+    width:4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+    background:#3b82f6;
+    border-radius:10px;
+}
+
+/* Responsive */
+
+@media (max-width:900px){
+
+    .sidebar{
+        width:100%;
+        height:auto;
+        position:relative;
+        padding:20px;
+    }
+
+    .logo-section{
+        margin-bottom:25px;
+    }
+
+    .sidebar ul{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+    }
+
+    .sidebar ul li{
+        flex:1 1 calc(50% - 10px);
+        margin-bottom:0;
+    }
+}
+
 </style>
 
 <script>
+
 function logout(){
-    window.location.href="admin-login.html";
+    localStorage.clear();
+    history.replaceState(null, null, '../Home-page/home.html');
+    window.location.href="../Home-page/home.html";
 }
+
+function checkAuth(){
+    if(!localStorage.getItem("adminName")){
+        window.location.replace("admin-login.html");
+    }
+}
+window.addEventListener("pageshow", checkAuth);
+checkAuth();
+
 </script>

@@ -28,13 +28,7 @@ h1{
     gap:10px;
     flex-wrap:wrap;
     margin-bottom:15px;
-}
-
-input{
-    padding:8px;
-    border-radius:6px;
-    border:1px solid #ccc;
-    width:250px;
+    align-items:center;
 }
 
 button{
@@ -47,9 +41,33 @@ button{
     transition:0.3s;
 }
 
+.icon-btn{
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    margin-right:6px;
+    color:white;
+    font-size:12px;
+    width:32px;
+    height:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:0.3s;
+}
+
+.icon-btn:hover{
+    transform:scale(1.08);
+}
+
+.icon-btn.edit{background:#f59e0b;}
+.icon-btn.delete{background:#ef4444;}
+
 button:hover{
     background:#1e40af;
 }
+
+td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 
 .table-box{
     background:white;
@@ -91,16 +109,11 @@ tr:hover{
 
 <div class="action-row">
 <button onclick="window.location.href='add-bus.html'">Add Bus</button>
-<button onclick="deleteSelectedBus()">Delete Selected</button>
-
-<input type="text" id="searchInput" placeholder="Search bus or route...">
-<button onclick="searchBuses()">Search</button>
 </div>
 
 <div class="table-box">
 <table>
 <tr>
-<th>Select</th>
 <th>Bus Number</th>
 <th>Route</th>
 <th>Actions</th>
@@ -162,11 +175,15 @@ async function loadBuses(){
             const row = document.createElement("tr");
 
             row.innerHTML = `
-                <td><input type="checkbox" data-id="${bus.id}"></td>
                 <td>${bus.bus_number.split('-')[1] || bus.bus_number}</td>
                 <td>${routeName}</td>
                 <td>
-                    <button onclick="updateBus(${bus.id})">Edit</button>
+                    <button class="icon-btn edit" title="Edit" onclick="updateBus(${bus.id})">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button class="icon-btn delete" title="Delete" onclick="deleteBus(${bus.id})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
                 </td>
             `;
 
@@ -179,45 +196,16 @@ async function loadBuses(){
     }
 }
 
-// Delete
-function deleteSelectedBus(){
-
-    const selected = document.querySelectorAll('#busTable input[type="checkbox"]:checked');
-
-    if(selected.length === 0){
-        alert("Select bus first!");
-        return;
-    }
-
-    if(!confirm("Delete selected buses?")) return;
-
-    selected.forEach(async (box) => {
-        const id = box.getAttribute("data-id");
-
-        await fetch(`${API_URL}/delete_bus/${id}`,{
-            method:"DELETE"
-        });
-
-        loadBuses();
-    });
-}
-
-// Search
-function searchBuses(){
-    const q = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#busTable tr");
-
-    rows.forEach(row=>{
-        row.style.display =
-        row.innerText.toLowerCase().includes(q)
-        ? ""
-        : "none";
-    });
-}
-
 // Edit
 function updateBus(id){
     window.location.href = `update-bus.html?id=${id}`;
+}
+
+// Delete single bus
+async function deleteBus(id){
+    if(!confirm("Delete this bus?")) return;
+    await fetch(`${API_URL}/delete_bus/${id}`,{ method:"DELETE" });
+    loadBuses();
 }
 
 </script>

@@ -6,7 +6,7 @@
 
 <title>University Shuttle Tracking</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
@@ -17,67 +17,94 @@
     padding:0;
     box-sizing:border-box;
     font-family:'Poppins',sans-serif;
+    scroll-behavior:smooth;
 }
 
 body{
-    background:#f5f7fb;
-    color:#333;
+    background:#f8fbff;
+    color:#1e293b;
 }
 
 /* NAVBAR */
 
 header{
     width:100%;
-    padding:18px 70px;
+    padding:18px 80px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     position:fixed;
     top:0;
     left:0;
-    background:transparent;
+    z-index:1000;
     transition:0.3s;
-    z-index:100;
 }
 
 .logo{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap:10px;
 }
 
 .logo img{
-    width:55px;
+    width:58px;
 }
 
 .logo h1{
     color:white;
-    font-size:24px;
+    font-size:25px;
+    font-weight:700;
 }
 
-header nav a{
+nav{
+    display:flex;
+    align-items:center;
+    gap:30px;
+}
+
+nav a{
     color:white;
-    margin:0 15px;
     text-decoration:none;
     font-weight:500;
+    transition:0.3s;
+}
+
+nav a:hover{
+    color:#93c5fd;
+}
+
+.nav-btn{
+    display:flex;
+    gap:12px;
 }
 
 .nav-btn button{
-    margin-left:10px;
-    padding:9px 18px;
+    padding:10px 20px;
     border:none;
-    border-radius:6px;
+    border-radius:10px;
     cursor:pointer;
-    font-weight:500;
+    font-weight:600;
+    transition:0.3s;
 }
 
 .login{
     background:#2563eb;
     color:white;
+    box-shadow:0 10px 25px rgba(37,99,235,0.25);
+}
+
+.login:hover{
+    background:#1d4ed8;
+    transform:translateY(-2px);
 }
 
 .register{
     background:white;
+    color:#1e3a8a;
+}
+
+.register:hover{
+    transform:translateY(-2px);
 }
 
 /* HERO */
@@ -92,150 +119,184 @@ header nav a{
     padding:0 20px;
 
     background:
-    linear-gradient(rgba(0,0,0,0.45),rgba(0,0,0,0.45)),
+    linear-gradient(rgba(15,23,42,0.65),rgba(15,23,42,0.65)),
     url("../images/uni-bus1.jpeg") no-repeat center center;
 
     background-size:cover;
+
     color:white;
 }
 
 .hero h1{
-    font-size:48px;
-    margin-bottom:20px;
+    font-size:62px;
+    max-width:950px;
+    line-height:1.2;
+    margin-bottom:22px;
+    font-weight:700;
 }
 
 .hero p{
     font-size:20px;
-    max-width:700px;
-    margin-bottom:30px;
+    max-width:760px;
+    line-height:1.7;
+    color:#e2e8f0;
+    margin-bottom:35px;
 }
 
 .hero-buttons{
     display:flex;
-    gap:15px;
+    gap:18px;
 }
 
 .track{
     background:#f59e0b;
     color:white;
     border:none;
-    padding:12px 22px;
-    border-radius:6px;
+    padding:14px 30px;
+    border-radius:12px;
     cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+    transition:0.3s;
+    box-shadow:0 10px 25px rgba(245,158,11,0.3);
+}
+
+.track:hover{
+    background:#d97706;
+    transform:translateY(-3px);
 }
 
 .view{
     background:white;
     border:none;
-    padding:12px 22px;
-    border-radius:6px;
+    padding:14px 30px;
+    border-radius:12px;
     cursor:pointer;
+    font-size:15px;
+    font-weight:600;
+    color:#1e3a8a;
 }
 
 /* FEATURES */
 
 .features{
-    padding:80px 20px;
+    padding:100px 70px;
     text-align:center;
 }
 
 .features h2{
     color:#1e3a8a;
-    font-size:32px;
-    margin-bottom:45px;
+    font-size:42px;
+    margin-bottom:60px;
+    font-weight:700;
 }
 
 .feature-box{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:25px;
+    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:28px;
 }
 
 .card{
     background:white;
-    padding:35px;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.06);
-    transition:0.3s;
+    padding:40px 30px;
+    border-radius:22px;
+    box-shadow:0 18px 40px rgba(15,23,42,0.08);
+    transition:0.35s;
+    border:1px solid #eef2ff;
 }
 
 .card:hover{
-    transform:translateY(-6px);
+    transform:translateY(-8px);
+    box-shadow:0 22px 45px rgba(15,23,42,0.12);
 }
 
 .card i{
-    font-size:32px;
+    width:75px;
+    height:75px;
+    border-radius:20px;
+    background:#eff6ff;
     color:#2563eb;
-    margin-bottom:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    margin:auto;
+    margin-bottom:22px;
 }
 
 .card h3{
-    margin-bottom:10px;
+    margin-bottom:14px;
     color:#1e3a8a;
+    font-size:22px;
+}
+
+.card p{
+    color:#64748b;
+    line-height:1.7;
+    font-size:15px;
 }
 
 /* CONTACT */
 
 .contact{
-    padding:80px 20px;
-    background:#eef3ff;
+    padding:90px 20px;
+    background:linear-gradient(135deg,#e0ecff,#f4f8ff);
 }
 
 .contact h2{
     text-align:center;
     color:#1e3a8a;
-    font-size:32px;
-    margin-bottom:40px;
+    font-size:42px;
+    margin-bottom:50px;
+    font-weight:700;
 }
 
 .contact-box{
-    max-width:1100px;
+    max-width:900px;
     margin:auto;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:25px;
 }
 
-.left-contact,
-.right-contact{
+.contact-card{
     background:white;
-    padding:35px;
-    border-radius:12px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    padding:50px;
+    border-radius:26px;
+    box-shadow:0 18px 45px rgba(15,23,42,0.08);
 }
 
-.left-contact h3{
-    color:#1e3a8a;
-    margin-bottom:20px;
+.contact-item{
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+    margin-bottom:30px;
 }
 
-.left-contact p{
-    margin-bottom:18px;
-    font-size:16px;
+.contact-item:last-child{
+    margin-bottom:0;
 }
 
-.left-contact i{
+.contact-icon{
+    width:58px;
+    height:58px;
+    border-radius:16px;
+    background:#eff6ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
     color:#2563eb;
-    margin-right:10px;
+    font-size:22px;
+    flex-shrink:0;
 }
 
-.right-contact input,
-.right-contact textarea{
-    width:100%;
-    padding:12px;
-    margin-bottom:15px;
-    border:1px solid #ddd;
-    border-radius:6px;
+.contact-text h3{
+    color:#1e3a8a;
+    margin-bottom:6px;
+    font-size:18px;
 }
 
-.send-btn{
-    width:100%;
-    padding:12px;
-    background:#2563eb;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
+.contact-text p{
+    color:#64748b;
+    line-height:1.7;
 }
 
 /* FOOTER */
@@ -244,8 +305,37 @@ footer{
     background:#1e3a8a;
     color:white;
     text-align:center;
-    padding:25px;
+    padding:28px;
     font-size:14px;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+    header{
+        padding:18px 25px;
+    }
+
+    nav{
+        display:none;
+    }
+
+    .hero h1{
+        font-size:40px;
+    }
+
+    .hero p{
+        font-size:17px;
+    }
+
+    .features{
+        padding:70px 20px;
+    }
+
+    .contact-card{
+        padding:30px;
+    }
 }
 
 </style>
@@ -264,8 +354,8 @@ footer{
 
 <nav>
     <a href="#">Home</a>
-    <a href="#">Features</a>
-    <a href="#">Contact</a>
+    <a href="#features">Features</a>
+    <a href="#contact">Contact</a>
 </nav>
 
 <div class="nav-btn">
@@ -288,11 +378,13 @@ Register
 
 <section class="hero">
 
-<h1>University Shuttle Tracking System</h1>
+<h1>
+Smart University Shuttle Tracking System
+</h1>
 
 <p>
-Track university buses in real time.
-Check routes, pickup locations and schedules easily.
+Track university buses in real time, explore routes and stops,
+and stay updated with live shuttle movement across campus.
 </p>
 
 <div class="hero-buttons">
@@ -308,7 +400,7 @@ Get Started
 
 <!-- FEATURES -->
 
-<section class="features">
+<section class="features" id="features">
 
 <h2>System Features</h2>
 
@@ -317,25 +409,33 @@ Get Started
 <div class="card">
 <i class="fa fa-map-location-dot"></i>
 <h3>Live Tracking</h3>
-<p>Track bus location in real time.</p>
+<p>
+Track university buses in real time with accurate GPS updates.
+</p>
 </div>
 
 <div class="card">
 <i class="fa fa-route"></i>
 <h3>Route Details</h3>
-<p>Check all shuttle routes and stops.</p>
+<p>
+View complete shuttle routes and all pickup/drop-off stops easily.
+</p>
 </div>
 
 <div class="card">
-<i class="fa fa-clock"></i>
-<h3>Bus Schedule</h3>
-<p>See arrival and departure times.</p>
+<i class="fa fa-bullhorn"></i>
+<h3>Announcements</h3>
+<p>
+Receive latest shuttle updates and important university notices.
+</p>
 </div>
 
 <div class="card">
 <i class="fa fa-shield-halved"></i>
 <h3>Admin Control</h3>
-<p>Manage buses, routes and GPS system.</p>
+<p>
+Manage buses, routes, drivers and live GPS tracking efficiently.
+</p>
 </div>
 
 </div>
@@ -344,51 +444,73 @@ Get Started
 
 <!-- CONTACT -->
 
-<section class="contact">
+<section class="contact" id="contact">
 
-<h2>Contact Us</h2>
+<h2>Contact Information</h2>
 
 <div class="contact-box">
 
-<div class="left-contact">
+<div class="contact-card">
 
-<h3>Get In Touch</h3>
+<div class="contact-item">
 
-<p>
+<div class="contact-icon">
 <i class="fa fa-location-dot"></i>
-Old Shujaabad Road, Multan
-</p>
+</div>
 
+<div class="contact-text">
+<h3>Address</h3>
 <p>
-<i class="fa fa-envelope"></i>
-info@mnsuam.edu.pk
+Old Shujaabad Road, Multan, Punjab, Pakistan
 </p>
-
-<p>
-<i class="fa fa-phone"></i>
-061-9201681
-</p>
-
-<p>
-<i class="fa fa-clock"></i>
-Mon - Fri | 8 AM - 4 PM
-</p>
+</div>
 
 </div>
 
-<div class="right-contact">
+<div class="contact-item">
 
-<input type="text" placeholder="Your Name">
+<div class="contact-icon">
+<i class="fa fa-envelope"></i>
+</div>
 
-<input type="email" placeholder="Your Email">
+<div class="contact-text">
+<h3>Email</h3>
+<p>
+info@mnsuam.edu.pk
+</p>
+</div>
 
-<input type="text" placeholder="Subject">
+</div>
 
-<textarea rows="5" placeholder="Write Message"></textarea>
+<div class="contact-item">
 
-<button class="send-btn">
-Send Message
-</button>
+<div class="contact-icon">
+<i class="fa fa-phone"></i>
+</div>
+
+<div class="contact-text">
+<h3>Phone Number</h3>
+<p>
+061-9201681
+</p>
+</div>
+
+</div>
+
+<div class="contact-item">
+
+<div class="contact-icon">
+<i class="fa fa-clock"></i>
+</div>
+
+<div class="contact-text">
+<h3>Working Hours</h3>
+<p>
+Monday - Friday | 8:00 AM - 4:00 PM
+</p>
+</div>
+
+</div>
 
 </div>
 
@@ -399,7 +521,7 @@ Send Message
 <!-- FOOTER -->
 
 <footer>
-© 2026 University Shuttle Tracking System
+© 2026 University Shuttle Tracking System | All Rights Reserved
 </footer>
 
 <script>
@@ -411,10 +533,10 @@ let header = document.querySelector("header");
 if(window.scrollY > 50){
 
 header.style.background = "white";
-header.style.boxShadow = "0 3px 10px rgba(0,0,0,0.1)";
+header.style.boxShadow = "0 5px 18px rgba(0,0,0,0.08)";
 
 header.querySelectorAll("nav a").forEach(link=>{
-link.style.color="#333";
+link.style.color="#1e293b";
 });
 
 document.querySelector(".logo h1").style.color="#1e3a8a";

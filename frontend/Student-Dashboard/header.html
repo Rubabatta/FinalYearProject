@@ -1,63 +1,59 @@
-<div class="header">
+﻿<div class="student-header">
     <h2>🚍 Student Dashboard</h2>
-
-    <div class="header-right">
-        <i class="fa fa-bell"></i>
-
-        <div class="profile">
-            <img id="headerImg" src="https://i.imgur.com/6VBx3io.png">
+    <div class="student-header-right">
+        <div class="student-profile">
+            <img id="headerImg" src="https://i.imgur.com/6VBx3io.png" alt="Student">
         </div>
     </div>
 </div>
 
 <style>
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:linear-gradient(90deg,#2563eb,#1e3a8a);
-padding:14px 20px;
-border-radius:12px;
-color:white;
-margin-bottom:18px;
+.student-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    width:100%;
+    height:40px;
+    padding:0 18px;
+    background:linear-gradient(90deg,#2563eb,#1e3a8a);
+    color:white;
+    border-radius:10px;
+    z-index:50;
+    margin-bottom:18px;
 }
 
-.profile img{
-width:38px;
-height:38px;
-border-radius:50%;
-object-fit:cover;
-border:2px solid white;
+.student-header h2{
+    font-size:15px;
+    margin:0;
+    font-weight:600;
+}
+
+.student-header-right{
+    display:flex;
+    align-items:center;
+}
+
+.student-profile img{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    object-fit:cover;
+    border:2px solid rgba(255,255,255,0.9);
+}
+
+@media (max-width: 900px) {
+    .student-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        height: auto;
+        padding: 12px;
+    }
+
+    .student-header h2 {
+        font-size: 14px;
+    }
 }
 </style>
-
-<script>
-
-const API = "https://acceptable-solace-production-06f3.up.railway.app";
-
-function loadHeaderImage(){
-
-const student_id = localStorage.getItem("student_id");
-
-if(!student_id) return;
-
-fetch(`${API}/get_student/${student_id}`)
-.then(res=>res.json())
-.then(data=>{
-
-if(data.image){
-document.getElementById("headerImg").src =
-API + data.image + "?t=" + Date.now();
-}
-
-});
-
-}
-
-/* run always */
-document.addEventListener("DOMContentLoaded", loadHeaderImage);
-
-/* auto refresh every 2 sec (safe sync) */
-setInterval(loadHeaderImage, 2000);
-
-</script>

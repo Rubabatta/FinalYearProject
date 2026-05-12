@@ -2,67 +2,361 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Profile</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
 body{
-margin:0;
-font-family:Poppins;
-background:#f4f6fb;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
+    background:#f4f6fb;
 }
 
-.card{
-background:white;
-padding:30px;
-border-radius:15px;
-width:400px;
-box-shadow:0 10px 25px rgba(0,0,0,0.15);
-text-align:center;
+#sidebar-placeholder{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:250px;
+    z-index:1000;
 }
 
-.card h2{
-color:#1e3a8a;
-margin-bottom:20px;
+.main{
+    margin-left:250px;
+    padding:30px;
+    min-height:100vh;
+    background:#f4f6fb;
 }
 
-.info{
-text-align:left;
-margin-top:10px;
+.profile-shell{
+    max-width:980px;
+    margin:auto;
+    display:grid;
+    grid-template-columns:320px 1fr;
+    gap:24px;
 }
 
-.info p{
-margin:10px 0;
-font-size:14px;
-color:#333;
+.profile-card,
+.profile-details{
+    background:white;
+    border-radius:24px;
+    padding:30px;
+    box-shadow:0 18px 40px rgba(15,23,42,0.08);
 }
 
-.label{
-font-weight:600;
-color:#2563eb;
+.profile-card{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+}
+
+.avatar{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#2563eb,#60a5fa);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:42px;
+    margin-bottom:22px;
+    box-shadow:0 16px 30px rgba(37,99,235,0.18);
+}
+
+.profile-card h1{
+    color:#0f172a;
+    margin-bottom:8px;
+    font-size:24px;
+}
+
+.profile-card p{
+    color:#475569;
+    font-size:14px;
+    margin-bottom:24px;
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:#e0f2fe;
+    color:#2563eb;
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:13px;
+    margin-bottom:18px;
+}
+
+.badge i{font-size:14px;}
+
+.edit-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    background:#2563eb;
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.edit-btn:hover{
+    background:#1d4ed8;
+}
+
+.profile-details h2{
+    color:#1e3a8a;
+    margin-bottom:16px;
+}
+
+.detail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.detail-item{
+    background:#f8fafc;
+    padding:18px;
+    border-radius:16px;
+    border:1px solid #e2e8f0;
+}
+
+.detail-item h5{
+    margin-bottom:10px;
+    color:#334155;
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+}
+
+.detail-item p{
+    color:#0f172a;
+    font-size:16px;
+    line-height:1.5;
+}
+
+.detail-form{
+    margin-top:24px;
+    display:grid;
+    gap:18px;
+}
+
+.detail-form label{
+    font-size:13px;
+    color:#475569;
+    margin-bottom:6px;
+    display:block;
+}
+
+.detail-form input{
+    width:100%;
+    padding:14px 16px;
+    border:1px solid #cbd5e1;
+    border-radius:12px;
+    outline:none;
+    font-size:15px;
+    color:#0f172a;
+    background:#f8fafc;
+}
+
+.detail-form input:focus{
+    border-color:#2563eb;
+    background:white;
+    box-shadow:0 0 0 4px rgba(59,130,246,0.1);
+}
+
+.form-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:10px;
+}
+
+.btn-save,
+.btn-cancel{
+    border:none;
+    border-radius:12px;
+    padding:12px 20px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.btn-save{
+    background:#10b981;
+    color:white;
+}
+
+.btn-save:hover{
+    background:#059669;
+}
+
+.btn-cancel{
+    background:#e2e8f0;
+    color:#0f172a;
+}
+
+.btn-cancel:hover{
+    background:#cbd5e1;
+}
+
+@media(max-width:1000px){
+    .profile-shell{grid-template-columns:1fr;}
+    .main{margin-left:0;padding:20px;}
 }
 </style>
 </head>
 
 <body>
 
-<div class="card">
-<h2>Admin Profile</h2>
+<div id="sidebar-placeholder"></div>
 
-<div class="info">
-<p><span class="label">Name:</span> System Admin</p>
-<p><span class="label">Email:</span> admin@gmail.com</p>
-<p><span class="label">Phone:</span> 0300-0000000</p>
-<p><span class="label">Role:</span> Administrator</p>
-<p><span class="label">Status:</span> Active</p>
+<div class="main">
+    <div class="profile-shell">
+        <section class="profile-card">
+            <div class="avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h1>System Admin</h1>
+            <p>Administrator profile for managing buses, routes, drivers and system settings.</p>
+            <span class="badge"><i class="fa-solid fa-shield-halved"></i> Active Admin</span>
+            <button class="edit-btn" id="toggleEdit">Edit Profile</button>
+        </section>
+
+        <section class="profile-details">
+            <h2>Profile Information</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <h5>Name</h5>
+                    <p id="displayName">System Admin</p>
+                </div>
+                <div class="detail-item">
+                    <h5>Email</h5>
+                    <p id="displayEmail">admin@gmail.com</p>
+                </div>
+                <div class="detail-item">
+                    <h5>Phone</h5>
+                    <p id="displayPhone">0300-0000000</p>
+                </div>
+                <div class="detail-item">
+                    <h5>Role</h5>
+                    <p id="displayRole">Administrator</p>
+                </div>
+            </div>
+
+            <form class="detail-form" id="profileForm" style="display:none;">
+                <div>
+                    <label for="nameInput">Name</label>
+                    <input type="text" id="nameInput" placeholder="Enter name">
+                </div>
+                <div>
+                    <label for="emailInput">Email</label>
+                    <input type="email" id="emailInput" placeholder="Enter email">
+                </div>
+                <div>
+                    <label for="phoneInput">Phone</label>
+                    <input type="text" id="phoneInput" placeholder="Enter phone number">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-save" id="saveProfile">Save Changes</button>
+                    <button type="button" class="btn-cancel" id="cancelEdit">Cancel</button>
+                </div>
+            </form>
+        </section>
+    </div>
 </div>
 
-</div>
+<script>
+fetch('sidebar.html')
+.then(res => res.text())
+.then(html => document.getElementById('sidebar-placeholder').innerHTML = html);
+
+const adminData = {
+    name: 'System Admin',
+    email: 'admin@gmail.com',
+    phone: '0300-0000000',
+    role: 'Administrator'
+};
+
+const toggleEdit = document.getElementById('toggleEdit');
+const profileForm = document.getElementById('profileForm');
+const saveProfile = document.getElementById('saveProfile');
+const cancelEdit = document.getElementById('cancelEdit');
+
+const displayName = document.getElementById('displayName');
+const displayEmail = document.getElementById('displayEmail');
+const displayPhone = document.getElementById('displayPhone');
+const displayRole = document.getElementById('displayRole');
+
+const nameInput = document.getElementById('nameInput');
+const emailInput = document.getElementById('emailInput');
+const phoneInput = document.getElementById('phoneInput');
+
+function loadProfile(){
+    displayName.textContent = adminData.name;
+    displayEmail.textContent = adminData.email;
+    displayPhone.textContent = adminData.phone;
+    displayRole.textContent = adminData.role;
+    nameInput.value = adminData.name;
+    emailInput.value = adminData.email;
+    phoneInput.value = adminData.phone;
+}
+
+function openEdit(){
+    profileForm.style.display = 'grid';
+    toggleEdit.textContent = 'Close Edit';
+}
+
+function closeEdit(){
+    profileForm.style.display = 'none';
+    toggleEdit.textContent = 'Edit Profile';
+    loadProfile();
+}
+
+toggleEdit.addEventListener('click', () => {
+    if(profileForm.style.display === 'none' || profileForm.style.display === ''){
+        openEdit();
+    } else {
+        closeEdit();
+    }
+});
+
+saveProfile.addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const phone = phoneInput.value.trim();
+
+    if(!name || !email || !phone){
+        alert('Fill all profile fields before saving.');
+        return;
+    }
+
+    adminData.name = name;
+    adminData.email = email;
+    adminData.phone = phone;
+
+    loadProfile();
+    closeEdit();
+    alert('Profile updated successfully.');
+});
+
+cancelEdit.addEventListener('click', closeEdit);
+
+loadProfile();
+</script>
 
 </body>
 </html>

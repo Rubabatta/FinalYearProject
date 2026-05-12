@@ -6,59 +6,33 @@
 <title>Add Bus - Admin Dashboard</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{display:flex;background:#f4f6fb;}
-
-#sidebar-placeholder{
-    position:fixed;
-    left:0;
-    top:0;
-    height:100%;
+body{
+    background:
+    radial-gradient(circle at top left,#dbeafe,#eef2ff 40%),
+    radial-gradient(circle at bottom right,#bfdbfe,#eef2ff 45%);
+    min-height:100vh;
+    overflow-x:hidden;
 }
-
-.main{
-    margin-left:240px;
-    padding:40px;
-    width:100%;
-}
-
-h1{color:#1e3a8a;margin-bottom:20px;}
-
-.form-box{
-    background:white;
-    padding:30px;
-    width:450px;
-    border-radius:10px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
-}
-
-label{
-    display:block;
-    margin-top:15px;
-}
-
-input,select{
-    width:100%;
-    padding:10px;
-    margin-top:5px;
-    border:1px solid #ccc;
-    border-radius:6px;
-}
-
-button{
-    margin-top:20px;
-    padding:10px;
-    width:100%;
-    background:#3b82f6;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-button:hover{background:#1e40af;}
+#sidebar-placeholder{position:fixed;left:0;top:0;bottom:0;width:240px;z-index:100;}
+.main{margin-left:240px;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;}
+.add-card{width:100%;max-width:390px;padding:22px;border-radius:24px;background:rgba(255,255,255,0.95);backdrop-filter:blur(14px);box-shadow:0 18px 40px rgba(37,99,235,0.10),0 6px 16px rgba(15,23,42,0.08);}
+.form-top{text-align:center;margin-bottom:18px;}
+.form-icon{width:56px;height:56px;border-radius:16px;margin:auto;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2563eb,#1e40af);color:white;font-size:22px;margin-bottom:12px;}
+.form-top h1{color:#1e3a8a;font-size:22px;margin-bottom:4px;font-weight:700;}
+.form-top p{color:#64748b;font-size:12px;}
+.input-group{position:relative;margin-bottom:13px;}
+.input-group i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:13px;}
+.input-group input,
+.input-group select{width:100%;padding:12px 14px 12px 40px;border:none;outline:none;border-radius:12px;background:#f8fafc;font-size:13px;color:#0f172a;border:1.5px solid transparent;transition:0.3s;}
+.input-group input:focus,
+.input-group select:focus{background:white;border-color:#3b82f6;box-shadow:0 0 0 4px rgba(59,130,246,0.10);}
+button{width:100%;border:none;padding:13px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px;transition:0.3s;}
+button:hover{transform:translateY(-2px);}
+@media(max-width:768px){#sidebar-placeholder{position:relative;width:100%;height:auto;} .main{margin-left:0;padding:20px;} .add-card{max-width:100%;padding:24px;}}
 </style>
 </head>
 
@@ -68,19 +42,26 @@ button:hover{background:#1e40af;}
 
 <div class="main">
 
-<h1>Add New Bus</h1>
+<div class="add-card">
+<div class="form-top">
+    <div class="form-icon">
+        <i class="fa-solid fa-bus-simple"></i>
+    </div>
+    <h1>Add Bus</h1>
+    <p>Assign a bus to a route</p>
+</div>
 
-<div class="form-box">
+<div class="input-group">
+<i class="fa fa-hashtag"></i>
+<input type="text" id="busNumber" placeholder="Bus Number">
+</div>
 
-<label>Bus Number</label>
-<input type="text" id="busNumber">
+<div class="input-group">
+<i class="fa fa-road"></i>
+<select id="routeSelect"></select>
+</div>
 
-<label>Route</label>
-<select id="routeSelect">
-<option value="">Loading routes...</option>
-</select>
-
-<button onclick="addBus()">Add Bus</button>
+<button type="button" onclick="addBus()">Add Bus</button>
 
 </div>
 </div>
@@ -135,6 +116,28 @@ async function addBus(){
 
     if(!bus_number || !route_id){
         alert("Fill all fields");
+        return;
+    }
+
+    // Validation: Check if bus number or route already exists
+    try{
+        const busesRes = await fetch(`${API}/get_buses`);
+        const buses = await busesRes.json();
+        const existingBus = buses.find(b => b.bus_number == bus_number);
+        const existingRoute = buses.find(b => String(b.route_id) == String(route_id));
+
+        if(existingBus){
+            alert("This bus number is already assigned to a route.");
+            return;
+        }
+
+        if(existingRoute){
+            alert("This route already has a bus assigned.");
+            return;
+        }
+    }catch(err){
+        console.log("VALIDATION ERROR:", err);
+        alert("Unable to validate bus details.");
         return;
     }
 

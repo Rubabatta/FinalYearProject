@@ -20,6 +20,34 @@ body{display:flex;background:#f4f6fb;height:100vh;}
 .topbar h1{color:#1e3a8a;}
 .profile{background:white;padding:8px 15px;border-radius:30px;box-shadow:0 5px 15px rgba(0,0,0,0.08);}
 .bus-info{background:white;padding:20px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+
+@media (max-width: 900px) {
+    body {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        padding: 20px;
+    }
+
+    .main {
+        margin-left: 0;
+        padding: 20px;
+    }
+
+    .topbar {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .profile {
+        margin-top: 10px;
+    }
+}
 </style>
 </head>
 <body>
@@ -36,6 +64,7 @@ body{display:flex;background:#f4f6fb;height:100vh;}
 </div>
 
 <div class="main">
+<div id="header"></div>
 <div class="topbar">
 <h1>My Bus</h1>
 <div class="profile" id="studentName">Loading...</div>
@@ -47,6 +76,14 @@ body{display:flex;background:#f4f6fb;height:100vh;}
 </div>
 
 <script>
+function checkAuth(){
+    if(!localStorage.getItem("student_id")){
+        window.location.replace("../Home-page/login.html");
+    }
+}
+window.addEventListener("pageshow", checkAuth);
+checkAuth();
+
 // Student name
 document.getElementById("studentName").innerText = localStorage.getItem("studentName") || "Student";
 
@@ -71,9 +108,32 @@ busDiv.innerHTML = `
 
 // Logout
 document.getElementById("logoutBtn").addEventListener("click",function(){
-    localStorage.removeItem("studentName");
-    window.location.href="student-login.html";
+    localStorage.clear();
+    window.location.replace("../Home-page/home.html");
 });
+
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+fetch("header.html")
+.then(res => res.text())
+.then(data => {
+    document.getElementById("header").innerHTML = data;
+    refreshHeaderImage();
+});
+
+function refreshHeaderImage(){
+    const studentId = localStorage.getItem("student_id");
+    if(!studentId) return;
+
+    fetch(`${API_URL}/get_student/${studentId}`)
+    .then(res => res.json())
+    .then(data => {
+        const headerImg = document.getElementById("headerImg");
+        if(headerImg && data.image){
+            headerImg.src = API_URL + data.image + "?t=" + Date.now();
+        }
+    })
+    .catch(() => {});
+}
 </script>
 </body>
 </html>

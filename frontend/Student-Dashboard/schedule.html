@@ -97,7 +97,9 @@ margin-right:5px;
 
 <div class="main">
 
-<div class="header">
+<div id="header"></div>
+
+<div class="header page-header">
 <i class="fas fa-clock"></i>
 <h1>Shuttle Schedule</h1>
 </div>
@@ -148,13 +150,48 @@ margin-right:5px;
 </div>
 
 <script>
+function checkAuth(){
+    if(!localStorage.getItem("student_id")){
+        window.location.replace("../Home-page/login.html");
+    }
+}
+window.addEventListener("pageshow", checkAuth);
+checkAuth();
+
+function logout(){
+    localStorage.clear();
+    window.location.replace("../Home-page/home.html");
+}
+
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
 
 fetch("student-sidebar.html")
 .then(res => res.text())
 .then(data =>{
-document.getElementById("sidebar").innerHTML=data;
+    document.getElementById("sidebar").innerHTML=data;
 })
 
+fetch("header.html")
+.then(res => res.text())
+.then(data =>{
+    document.getElementById("header").innerHTML=data;
+    refreshHeaderImage();
+});
+
+function refreshHeaderImage(){
+    const studentId = localStorage.getItem("student_id");
+    if(!studentId) return;
+
+    fetch(`${API_URL}/get_student/${studentId}`)
+    .then(res => res.json())
+    .then(data => {
+        const headerImg = document.getElementById("headerImg");
+        if(headerImg && data.image){
+            headerImg.src = API_URL + data.image + "?t=" + Date.now();
+        }
+    })
+    .catch(() => {});
+}
 </script>
 
 </body>

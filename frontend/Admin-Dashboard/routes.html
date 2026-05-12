@@ -18,7 +18,13 @@ h1{color:#1e3a8a;margin-bottom:20px;}
 .action-row input{padding:8px;border-radius:6px;border:1px solid #ccc;width:200px;}
 button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;background:#3b82f6;color:white;transition:0.3s;}
 button:hover{background:#1e40af;}
+.icon-btn{border:none;border-radius:10px;cursor:pointer;margin-right:6px;color:white;font-size:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:0.3s;}
+.icon-btn:hover{transform:scale(1.08);}
+.icon-btn.edit{background:#f59e0b;}
+.icon-btn.delete{background:#ef4444;}
 .table-box{background:white;padding:25px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,0.08);}
+
+td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 table{width:100%;border-collapse:collapse;margin-top:10px;}
 table th{background:#3b82f6;color:white;padding:10px;text-align:left;}
 table td{padding:10px;border-bottom:1px solid #eee;}
@@ -40,9 +46,6 @@ table td{padding:10px;border-bottom:1px solid #eee;}
 <!-- Single Row: Add/Delete + Search -->
 <div class="action-row">
 <button onclick="window.location.href='add-route.html'">Add Route</button>
-<button onclick="deleteRoute()">Delete Route</button>
-<input type="text" id="searchInput" placeholder="Type route name...">
-<button onclick="searchRoutes()">Search</button>
 </div>
 
 <!-- Table -->
@@ -50,7 +53,6 @@ table td{padding:10px;border-bottom:1px solid #eee;}
 <table>
 <thead>
 <tr>
-<th>Select</th>
 <th>ID</th>
 <th>Start Point</th>
 <th>End Point</th>
@@ -80,15 +82,19 @@ async function loadRoutes(){
     data.forEach((route,index)=>{
         const row = document.createElement("tr");
         row.innerHTML=`
-        <td><input type="checkbox" value="${route.id}"></td>
         <td>${route.id}</td>
         <td>${route.start_point}</td>
         <td>${route.end_point}</td>
         <td>
-        <button class="manage-btn" onclick="manageStops(${route.id})">Manage Stops</button>
+            <button class="manage-btn" onclick="manageStops(${route.id})">Manage Stops</button>
         </td>
         <td>
-        <button class="update-btn" onclick="updateRoute(${route.id}, '${route.start_point}', '${route.end_point}')">Update</button>
+            <button class="icon-btn" title="Edit" onclick="updateRoute(${route.id}, '${route.start_point}', '${route.end_point}')">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="icon-btn" title="Delete" onclick="deleteRoute(${route.id})">
+                <i class="fa-solid fa-trash"></i>
+            </button>
         </td>
         `;
         table.appendChild(row);
@@ -101,11 +107,9 @@ function manageStops(routeId){
 }
 
 // Delete route
-function deleteRoute(){
-    const selected=document.querySelector("input[type='checkbox']:checked");
-    if(!selected){ alert("Select route first"); return; }
-    const routeId=selected.value;
-    fetch(`https://acceptable-solace-production-06f3.up.railway.app/delete_route/${routeId}`,{method:"DELETE"})
+function deleteRoute(id){
+    if(!confirm("Delete this route?")) return;
+    fetch(`https://acceptable-solace-production-06f3.up.railway.app/delete_route/${id}`,{method:"DELETE"})
     .then(res=>res.json())
     .then(data=>{
         alert(data.message);
@@ -131,16 +135,6 @@ function updateRoute(id, oldStart, oldEnd){
         loadRoutes();
     })
     .catch(err=>console.error(err));
-}
-
-// Search routes
-function searchRoutes(){
-    const query = document.getElementById("searchInput").value.toLowerCase();
-    const rows = document.querySelectorAll("#routesTable tr");
-    rows.forEach(row=>{
-        const text = row.innerText.toLowerCase();
-        row.style.display = text.includes(query) ? "" : "none";
-    });
 }
 
 // Load page

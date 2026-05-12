@@ -66,16 +66,12 @@ border:1px solid #ddd;
 }
 
 /* buttons */
-.btn-action{
-padding:5px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-margin-right:3px;
-font-size:14px;
-}
-.btn-update{background:#f59e0b;color:white;}
-.btn-delete{background:#ef4444;color:white;}
+.icon-btn{border:none;border-radius:10px;cursor:pointer;margin-right:6px;color:white;font-size:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:0.3s;}
+.icon-btn:hover{transform:scale(1.08);}
+.icon-btn.edit{background:#f59e0b;}
+.icon-btn.delete{background:#ef4444;}
+
+td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 </style>
 </head>
 
@@ -171,11 +167,11 @@ rows+=`
 <td>${student.contact || "-"}</td>
 
 <td>
-<button class="btn-action btn-update" onclick="updateStudent(${student.id})">
+<button class="icon-btn edit" onclick="updateStudent(${student.id})">
 <i class="fa fa-pencil"></i>
 </button>
 
-<button class="btn-action btn-delete" onclick="deleteStudent(${student.id})">
+<button class="icon-btn delete" onclick="deleteStudent(${student.id})">
 <i class="fa fa-trash"></i>
 </button>
 </td>
