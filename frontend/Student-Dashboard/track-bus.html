@@ -124,7 +124,8 @@ font-weight:bold;
 <b>Bus:</b> <span id="busNo">-</span><br>
 <b>Location:</b> <span id="location">Waiting...</span><br>
 <b>Status:</b> <span id="status" class="error">Not Connected</span><br>
-<b>Time:</b> <span id="time">-</span>
+<b>Time:</b> <span id="time">-</span><br>
+<b>Arrival Time:</b> <span id="arrivalTime">-</span>
 
 </div>
 
@@ -144,6 +145,30 @@ function checkAuth(){
 }
 window.addEventListener("pageshow", checkAuth);
 checkAuth();
+
+let studentStop = null;
+
+async function loadStudentData(){
+    const studentId = localStorage.getItem("student_id");
+    if(!studentId) return;
+    try{
+        const res = await fetch(`${API_URL}/get_student/${studentId}`);
+        const student = await res.json();
+        if(student.stop_id && student.route_id){
+            // Get stop details
+            const stopsRes = await fetch(`${API_URL}/get_stops/${student.route_id}`);
+            const stops = await stopsRes.json();
+            const stop = stops.find(s => s.id == student.stop_id);
+            if(stop){
+                studentStop = {lat: parseFloat(stop.latitude), lng: parseFloat(stop.longitude)};
+            }
+        }
+    }catch(err){
+        console.error("Error loading student data:", err);
+    }
+}
+
+loadStudentData();
 
 function logout(){
     localStorage.clear();
@@ -218,6 +243,7 @@ if(data.message){
 document.getElementById("location").innerText="No Live Location";
 document.getElementById("status").innerText="Offline";
 document.getElementById("status").className="error";
+document.getElementById("arrivalTime").innerText="-";
 return;
 }
 
@@ -234,15 +260,39 @@ document.getElementById("status").className = "live";
 marker.setLatLng([lat,lng]);
 map.panTo([lat,lng]);
 
+// Calculate arrival time
+if(studentStop){
+    const distance = getDistance(lat, lng, studentStop.lat, studentStop.lng);
+    const speedKmh = 30; // Assume 30 km/h
+    const timeHours = distance / speedKmh;
+    const timeMinutes = Math.round(timeHours * 60);
+    document.getElementById("arrivalTime").innerText = `${timeMinutes} minutes`;
+}else{
+    document.getElementById("arrivalTime").innerText = "No stop data";
+}
+
 })
 .catch(err=>{
 
 document.getElementById("location").innerText="Connection Failed";
 document.getElementById("status").innerText="❌ Server Error";
 document.getElementById("status").className="error";
+document.getElementById("arrivalTime").innerText="-";
 
 });
 
+}
+
+// Haversine distance in km
+function getDistance(lat1, lng1, lat2, lng2){
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
 }
 
 </script>

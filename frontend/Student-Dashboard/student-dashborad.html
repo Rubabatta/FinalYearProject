@@ -194,6 +194,7 @@ color:#444;
 <p><span>Location</span> <span id="location">--</span></p>
 <p><span>Current Stop</span> <span id="currentStop">--</span></p>
 <p><span>Next Stop</span> <span id="nextStop">--</span></p>
+<p><span>Arrival Time</span> <span id="arrivalTime">--</span></p>
 </div>
 
 <div class="announcement-box">
@@ -216,6 +217,30 @@ function checkAuth(){
 }
 window.addEventListener("pageshow", checkAuth);
 checkAuth();
+
+let studentStop = null;
+
+async function loadStudentData(){
+    const studentId = localStorage.getItem("student_id");
+    if(!studentId) return;
+    try{
+        const res = await fetch(`${API_URL}/get_student/${studentId}`);
+        const student = await res.json();
+        if(student.stop_id && student.route_id){
+            // Get stop details
+            const stopsRes = await fetch(`${API_URL}/get_stops/${student.route_id}`);
+            const stops = await stopsRes.json();
+            const stop = stops.find(s => s.id == student.stop_id);
+            if(stop){
+                studentStop = {lat: parseFloat(stop.latitude), lng: parseFloat(stop.longitude)};
+            }
+        }
+    }catch(err){
+        console.error("Error loading student data:", err);
+    }
+}
+
+loadStudentData();
 
 function logout(){
     localStorage.clear();
@@ -290,6 +315,7 @@ function resetMap(){
   document.getElementById("nextStop").textContent = "--";
   document.getElementById("location").textContent = "--";
   document.getElementById("status").textContent = "OFFLINE";
+  document.getElementById("arrivalTime").textContent = "--";
 }
 
 // BUS DATA
@@ -396,6 +422,18 @@ function calculateDistance(lat1, lng1, lat2, lng2){
   return 6371 * c * 1000;
 }
 
+// Haversine distance in km
+function getDistance(lat1, lng1, lat2, lng2){
+    const R = 6371; // Radius of the Earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
 function updateStopsFromLocation(location){
   if(!routeStops.length || !location || location.lat == null || location.lng == null){
     document.getElementById("currentStop").textContent = "--";
@@ -428,6 +466,7 @@ function updateStopsFromLocation(location){
 function handleNoLocation(){
   document.getElementById("location").textContent = "--";
   document.getElementById("status").textContent = "OFFLINE";
+  document.getElementById("arrivalTime").textContent = "--";
 
   if(lastLocation && Number.isFinite(lastLocation.lat) && Number.isFinite(lastLocation.lng)){
     marker.setLatLng([lastLocation.lat, lastLocation.lng]);
@@ -473,6 +512,17 @@ function updateLocation(){
       document.getElementById("status").textContent = online ? "ONLINE" : "OFFLINE";
 
       updateStopsFromLocation({ lat, lng });
+
+      // Calculate arrival time
+      if(studentStop){
+          const distance = getDistance(lat, lng, studentStop.lat, studentStop.lng);
+          const speedKmh = 30; // Assume 30 km/h
+          const timeHours = distance / speedKmh;
+          const timeMinutes = Math.round(timeHours * 60);
+          document.getElementById("arrivalTime").innerText = `${timeMinutes} minutes`;
+      }else{
+          document.getElementById("arrivalTime").innerText = "No stop data";
+      }
     })
     .catch(() => {
       handleNoLocation();

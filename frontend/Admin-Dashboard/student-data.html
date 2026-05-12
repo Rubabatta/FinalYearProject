@@ -106,6 +106,8 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 <th>Name</th>
 <th>Email</th>
 <th>Contact</th>
+<th>Route</th>
+<th>Stop</th>
 <th>Actions</th>
 </tr>
 </thead>
@@ -128,18 +130,30 @@ document.getElementById('sidebar-placeholder').innerHTML = html;
 
 /* data */
 let studentsData=[];
+let routesData = [];
+let stopsData = {};
 
 /* load */
-function loadStudents(){
+async function loadStudents(){
+    try{
+        // Load routes
+        const routesRes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes');
+        routesData = await routesRes.json();
 
-fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students')
-.then(res=>res.json())
-.then(data=>{
-studentsData=data;
-renderTable(data);
-})
-.catch(err=>console.log("API ERROR:",err));
+        // Load all stops for all routes
+        for(let route of routesData){
+            const stopsRes = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${route.id}`);
+            const stops = await stopsRes.json();
+            stopsData[route.id] = stops;
+        }
 
+        // Load students
+        const studentsRes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students');
+        studentsData = await studentsRes.json();
+        renderTable(studentsData);
+    }catch(err){
+        console.log("API ERROR:", err);
+    }
 }
 
 /* render */
@@ -154,6 +168,20 @@ let img = student.image
 ? `https://acceptable-solace-production-06f3.up.railway.app${student.image}?t=${Date.now()}`
 : "https://via.placeholder.com/45";
 
+// Get route name
+let routeName = "-";
+if(student.route_id){
+    const route = routesData.find(r => r.id == student.route_id);
+    if(route) routeName = `${route.start_point} → ${route.end_point}`;
+}
+
+// Get stop name
+let stopName = "-";
+if(student.stop_id && student.route_id && stopsData[student.route_id]){
+    const stop = stopsData[student.route_id].find(s => s.id == student.stop_id);
+    if(stop) stopName = stop.stop_name;
+}
+
 rows+=`
 <tr>
 <td>${student.id}</td>
@@ -165,6 +193,8 @@ rows+=`
 <td>${student.name}</td>
 <td>${student.email}</td>
 <td>${student.contact || "-"}</td>
+<td>${routeName}</td>
+<td>${stopName}</td>
 
 <td>
 <button class="icon-btn edit" onclick="updateStudent(${student.id})">

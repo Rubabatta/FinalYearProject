@@ -141,12 +141,16 @@ button:hover{
 
 <div class="form-row">
 <div class="input-group">
-<i class="fa fa-lock"></i>
-<input type="password" id="password" placeholder="Password (min 6 chars, include number & special char)" required>
+<i class="fa fa-route"></i>
+<select id="routeSelect" required>
+<option value="">Select Route</option>
+</select>
 </div>
 <div class="input-group">
-<i class="fa fa-lock"></i>
-<input type="password" id="confirm" placeholder="Confirm Password" required>
+<i class="fa fa-map-pin"></i>
+<select id="stopSelect" required>
+<option value="">Select Stop</option>
+</select>
 </div>
 </div>
 
@@ -163,6 +167,45 @@ Already have an account? <a href="../Home-page/login.html">Login</a>
 <script>
 const form = document.getElementById("signupForm");
 
+// Load routes on page load
+async function loadRoutes(){
+    try{
+        const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/get_routes");
+        const routes = await res.json();
+        const routeSelect = document.getElementById("routeSelect");
+        routes.forEach(route => {
+            const option = document.createElement("option");
+            option.value = route.id;
+            option.textContent = `${route.start_point} → ${route.end_point}`;
+            routeSelect.appendChild(option);
+        });
+    }catch(err){
+        console.error("Error loading routes:", err);
+    }
+}
+
+loadRoutes();
+
+// Load stops when route changes
+document.getElementById("routeSelect").addEventListener("change", async function(){
+    const routeId = this.value;
+    const stopSelect = document.getElementById("stopSelect");
+    stopSelect.innerHTML = '<option value="">Select Stop</option>';
+    if(!routeId) return;
+    try{
+        const res = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${routeId}`);
+        const stops = await res.json();
+        stops.forEach(stop => {
+            const option = document.createElement("option");
+            option.value = stop.id;
+            option.textContent = stop.stop_name;
+            stopSelect.appendChild(option);
+        });
+    }catch(err){
+        console.error("Error loading stops:", err);
+    }
+});
+
 form.addEventListener("submit", function(e){
     e.preventDefault();
     const firstName = document.getElementById("firstName").value.trim();
@@ -171,6 +214,8 @@ form.addEventListener("submit", function(e){
     const contact = document.getElementById("contact").value.trim();
     const password = document.getElementById("password").value.trim();
     const confirm = document.getElementById("confirm").value.trim();
+    const routeId = document.getElementById("routeSelect").value;
+    const stopId = document.getElementById("stopSelect").value;
     const message = document.getElementById("message");
 
     if(password !== confirm){
@@ -187,6 +232,12 @@ form.addEventListener("submit", function(e){
         return;
     }
 
+    if(!routeId || !stopId){
+        message.style.color="red";
+        message.innerText="❌ Please select route and stop";
+        return;
+    }
+
     fetch('https://acceptable-solace-production-06f3.up.railway.app/student_signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -195,7 +246,9 @@ form.addEventListener("submit", function(e){
             email: email,
             password: password,
             contact: contact,
-            fees: 0
+            fees: 0,
+            route_id: routeId,
+            stop_id: stopId
         })
     })
     .then(res => res.json())

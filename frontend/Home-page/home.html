@@ -76,6 +76,7 @@ nav a:hover{
 .nav-btn{
     display:flex;
     gap:12px;
+    z-index:1001;
 }
 
 .nav-btn button{
@@ -85,6 +86,7 @@ nav a:hover{
     cursor:pointer;
     font-weight:600;
     transition:0.3s;
+    pointer-events:auto;
 }
 
 .login{
@@ -101,10 +103,13 @@ nav a:hover{
 .register{
     background:white;
     color:#1e3a8a;
+    cursor:pointer;
+    box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 .register:hover{
     transform:translateY(-2px);
+    background:#f0f4ff;
 }
 
 /* HERO */
@@ -360,12 +365,12 @@ footer{
 
 <div class="nav-btn">
 
-<button class="login"
+<button type="button" class="login"
 onclick="window.location.href='login.html'">
 Login
 </button>
 
-<button class="register"
+<button type="button" class="register"
 onclick="window.location.href='student-signup.html'">
 Register
 </button>
