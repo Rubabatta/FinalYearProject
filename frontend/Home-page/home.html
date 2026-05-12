@@ -77,6 +77,7 @@ nav a:hover{
     display:flex;
     gap:12px;
     z-index:1001;
+    position:relative;
 }
 
 .nav-btn button{
@@ -86,7 +87,8 @@ nav a:hover{
     cursor:pointer;
     font-weight:600;
     transition:0.3s;
-    pointer-events:auto;
+    pointer-events:auto !important;
+    font-family:'Poppins',sans-serif;
 }
 
 .login{
@@ -101,15 +103,16 @@ nav a:hover{
 }
 
 .register{
-    background:white;
-    color:#1e3a8a;
-    cursor:pointer;
+    background:white !important;
+    color:#1e3a8a !important;
+    cursor:pointer !important;
     box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
 .register:hover{
     transform:translateY(-2px);
-    background:#f0f4ff;
+    background:#f0f4ff !important;
+    color:#1e3a8a !important;
 }
 
 /* HERO */
@@ -365,13 +368,11 @@ footer{
 
 <div class="nav-btn">
 
-<button type="button" class="login"
-onclick="window.location.href='login.html'">
+<button type="button" class="login" id="loginBtn">
 Login
 </button>
 
-<button type="button" class="register"
-onclick="window.location.href='student-signup.html'">
+<button type="button" class="register" id="registerBtn">
 Register
 </button>
 
@@ -531,6 +532,21 @@ Monday - Friday | 8:00 AM - 4:00 PM
 
 <script>
 
+// Button click handlers
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById("loginBtn").addEventListener("click", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = "login.html";
+  });
+
+  document.getElementById("registerBtn").addEventListener("click", function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    window.location.href = "student-signup.html";
+  });
+});
+
 window.addEventListener("scroll", function(){
 
 let header = document.querySelector("header");
@@ -546,6 +562,11 @@ link.style.color="#1e293b";
 
 document.querySelector(".logo h1").style.color="#1e3a8a";
 
+// Ensure buttons remain visible and clickable
+document.querySelectorAll(".nav-btn button").forEach(btn=>{
+btn.style.pointerEvents = "auto";
+});
+
 }
 
 else{
@@ -558,6 +579,11 @@ link.style.color="white";
 });
 
 document.querySelector(".logo h1").style.color="white";
+
+// Ensure buttons remain visible and clickable
+document.querySelectorAll(".nav-btn button").forEach(btn=>{
+btn.style.pointerEvents = "auto";
+});
 
 }
 

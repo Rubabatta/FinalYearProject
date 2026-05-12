@@ -136,23 +136,34 @@ let stopsData = {};
 /* load */
 async function loadStudents(){
     try{
+        // Load students first
+        const studentsRes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students');
+        studentsData = await studentsRes.json();
+        console.log("Students loaded:", studentsData);
+
         // Load routes
         const routesRes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes');
         routesData = await routesRes.json();
+        console.log("Routes loaded:", routesData);
 
         // Load all stops for all routes
         for(let route of routesData){
-            const stopsRes = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${route.id}`);
-            const stops = await stopsRes.json();
-            stopsData[route.id] = stops;
+            try{
+                const stopsRes = await fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_stops/${route.id}`);
+                const stops = await stopsRes.json();
+                stopsData[route.id] = stops;
+                console.log(`Stops for route ${route.id}:`, stops);
+            }catch(err){
+                console.error(`Error loading stops for route ${route.id}:`, err);
+                stopsData[route.id] = [];
+            }
         }
 
-        // Load students
-        const studentsRes = await fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students');
-        studentsData = await studentsRes.json();
+        console.log("All stops data:", stopsData);
         renderTable(studentsData);
     }catch(err){
         console.log("API ERROR:", err);
+        alert("Error loading students data");
     }
 }
 
@@ -170,16 +181,33 @@ let img = student.image
 
 // Get route name
 let routeName = "-";
-if(student.route_id){
-    const route = routesData.find(r => r.id == student.route_id);
-    if(route) routeName = `${route.start_point} → ${route.end_point}`;
+let routeId = Number(student.route_id) || student.route_id;
+if(routeId){
+    const route = routesData.find(r => Number(r.id) === routeId || r.id === student.route_id);
+    if(route) {
+        routeName = `${route.start_point} → ${route.end_point}`;
+        console.log(`Student ${student.id}: Route found -`, routeName);
+    } else {
+        console.log(`Student ${student.id}: Route NOT found. Looking for route_id: ${routeId}, Available: ${routesData.map(r => r.id).join(', ')}`);
+    }
 }
 
 // Get stop name
 let stopName = "-";
-if(student.stop_id && student.route_id && stopsData[student.route_id]){
-    const stop = stopsData[student.route_id].find(s => s.id == student.stop_id);
-    if(stop) stopName = stop.stop_name;
+let stopId = Number(student.stop_id) || student.stop_id;
+if(stopId && routeId){
+    const routeStops = stopsData[routeId] || stopsData[Number(routeId)];
+    if(routeStops && Array.isArray(routeStops)){
+        const stop = routeStops.find(s => Number(s.id) === stopId || s.id === student.stop_id);
+        if(stop) {
+            stopName = stop.stop_name;
+            console.log(`Student ${student.id}: Stop found -`, stopName);
+        } else {
+            console.log(`Student ${student.id}: Stop NOT found. Looking for stop_id: ${stopId}`);
+        }
+    } else {
+        console.log(`Student ${student.id}: No stops data for route ${routeId}`);
+    }
 }
 
 rows+=`

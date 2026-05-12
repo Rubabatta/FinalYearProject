@@ -115,6 +115,8 @@ def initialize_database():
 
     for statement in [
         "ALTER TABLE students ADD COLUMN image TEXT",
+        "ALTER TABLE students ADD COLUMN route_id INTEGER",
+        "ALTER TABLE students ADD COLUMN stop_id INTEGER",
         "ALTER TABLE stops ADD COLUMN latitude REAL",
         "ALTER TABLE stops ADD COLUMN longitude REAL",
         "ALTER TABLE drivers ADD COLUMN bus_id INTEGER",
@@ -335,6 +337,8 @@ def student_signup():
     password = data.get('password')
     contact = data.get('contact')
     fees = data.get('fees')
+    route_id = data.get('route_id')
+    stop_id = data.get('stop_id')
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -348,9 +352,9 @@ def student_signup():
 
     try:
         cursor.execute("""
-            INSERT INTO students (name,email,password,contact,fees)
-            VALUES (?,?,?,?,?)
-        """, (name,email,password,contact,fees))
+            INSERT INTO students (name,email,password,contact,fees,route_id,stop_id)
+            VALUES (?,?,?,?,?,?,?)
+        """, (name,email,password,contact,fees,route_id,stop_id))
 
         conn.commit()
 
@@ -489,7 +493,9 @@ def get_students():
         email,
         contact,
         fees,
-        image
+        image,
+        route_id,
+        stop_id
         FROM students
     """)
 
