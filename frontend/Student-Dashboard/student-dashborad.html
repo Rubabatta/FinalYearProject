@@ -222,18 +222,31 @@ let studentStop = null;
 
 async function loadStudentData(){
     const studentId = localStorage.getItem("student_id");
+    console.log("Loading student data for ID:", studentId);
     if(!studentId) return;
     try{
         const res = await fetch(`${API_URL}/get_student/${studentId}`);
         const student = await res.json();
+        console.log("Student data fetched:", student);
+        console.log("Student route_id:", student.route_id, "stop_id:", student.stop_id);
+        
         if(student.stop_id && student.route_id){
             // Get stop details
             const stopsRes = await fetch(`${API_URL}/get_stops/${student.route_id}`);
             const stops = await stopsRes.json();
+            console.log("Stops for route", student.route_id, ":", stops);
+            
             const stop = stops.find(s => s.id == student.stop_id);
+            console.log("Found stop:", stop);
+            
             if(stop){
                 studentStop = {lat: parseFloat(stop.latitude), lng: parseFloat(stop.longitude)};
+                console.log("Student stop set to:", studentStop);
+            }else{
+                console.log("Stop not found. Looking for stop_id:", student.stop_id, "in stops:", stops.map(s => s.id));
             }
+        }else{
+            console.log("No route_id or stop_id in student data");
         }
     }catch(err){
         console.error("Error loading student data:", err);
