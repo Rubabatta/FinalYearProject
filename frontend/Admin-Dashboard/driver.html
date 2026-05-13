@@ -389,7 +389,7 @@ td:last-child{
 <input type="text" id="name" placeholder="Name">
 <input type="email" id="email" placeholder="Email">
 <input type="password" id="password" placeholder="Password">
-<input type="text" id="contact" placeholder="Contact">
+<input type="text" id="contact" placeholder="Contact" pattern="[0-9]{11}" minlength="11" maxlength="11" inputmode="numeric">
 <select id="bus_id"></select>
 <p id="route_show"></p>
 <button type="button" onclick="save()">Save</button>

@@ -780,6 +780,34 @@ def get_stops(route_id):
 
     return jsonify([dict(s) for s in stops])
 
+@app.route('/get_route/<int:route_id>', methods=['GET'])
+def get_route(route_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM routes WHERE id=?", (route_id,))
+    route = cursor.fetchone()
+    conn.close()
+
+    if route:
+        return jsonify(dict(route))
+    else:
+        return jsonify({"message":"Route not found"}), 404
+
+@app.route('/get_stop/<int:stop_id>', methods=['GET'])
+def get_stop(stop_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM stops WHERE id=?", (stop_id,))
+    stop = cursor.fetchone()
+    conn.close()
+
+    if stop:
+        return jsonify(dict(stop))
+    else:
+        return jsonify({"message":"Stop not found"}), 404
+
 @app.route("/add_stop", methods=["POST"])
 def add_stop():
 
