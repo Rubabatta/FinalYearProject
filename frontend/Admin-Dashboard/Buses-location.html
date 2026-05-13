@@ -43,30 +43,125 @@ font-weight:600;
 }
 
 .bus-card{
-background:#1f2937;
-padding:12px;
+background:linear-gradient(145deg,#1e293b,#111827);
+
+padding:10px 12px;
 margin-bottom:10px;
-border-radius:10px;
+
+border-radius:14px;
+
 cursor:pointer;
+transition:0.3s;
+
+border:1px solid rgba(255,255,255,0.05);
+
+box-shadow:0 6px 16px rgba(0,0,0,0.18);
+
+position:relative;
+overflow:hidden;
+}
+
+/* SOFT BLUE GLOW */
+.bus-card::before{
+content:"";
+position:absolute;
+top:-30px;
+right:-30px;
+
+width:80px;
+height:80px;
+
+background:radial-gradient(
+circle,
+rgba(37,99,235,0.18),
+transparent 70%
+);
+}
+
+/* HOVER */
+.bus-card:hover{
+transform:translateY(-2px);
+
+box-shadow:
+0 10px 22px rgba(0,0,0,0.28);
+}
+
+/* BUS TITLE */
+.bus-id{
+font-size:13px;
+font-weight:600;
+color:#ffffff;
+
+margin-bottom:7px;
+
+display:flex;
+align-items:center;
+gap:6px;
+
+letter-spacing:0.3px;
+}
+
+/* ONLINE / OFFLINE */
+.online,
+.offline{
+
+font-size:10px;
+font-weight:600;
+
+padding:4px 9px;
+
+border-radius:999px;
+
+display:inline-block;
+
+margin-bottom:8px;
+
+letter-spacing:0.5px;
+}
+
+.online{
+background:rgba(34,197,94,0.15);
+color:#4ade80;
+
+border:1px solid rgba(74,222,128,0.18);
+}
+
+.offline{
+background:rgba(239,68,68,0.15);
+color:#f87171;
+
+border:1px solid rgba(248,113,113,0.18);
+}
+
+/* CURRENT / NEXT STOP */
+.small{
+font-size:11px;
+color:#e2e8f0;
+
+margin-top:5px;
+
+background:rgba(255,255,255,0.06);
+
+padding:6px 10px;
+
+border-radius:8px;
+
+font-weight:500;
+
+letter-spacing:0.2px;
+
+border:1px solid rgba(255,255,255,0.05);
+
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+
 transition:0.3s;
 }
 
-.bus-card:hover{
-background:#374151;
-}
-
-.bus-id{
-font-weight:bold;
-margin-bottom:4px;
-}
-
-.online{color:lime;}
-.offline{color:red;}
-
-.small{
-font-size:12px;
-color:#cbd5e1;
-margin-top:3px;
+/* SMALL HOVER */
+.bus-card:hover .small{
+background:rgba(255,255,255,0.10);
 }
 
 /* Marker Animation */
@@ -241,11 +336,19 @@ let lng=parseFloat(bus.longitude);
 
 if(isNaN(lat)||isNaN(lng)) return;
 
-let now=new Date().getTime();
-let lastUpdate=parseTimestamp(bus.last_updated);
-let diff=(isNaN(lastUpdate)) ? Infinity : (now-lastUpdate)/1000;
+let now = Date.now();
 
-let status=(diff < 300) ? "ONLINE" : "OFFLINE";
+let lastUpdate = parseTimestamp(bus.last_updated);
+
+if (!lastUpdate || isNaN(lastUpdate)) {
+    return;
+}
+
+let diff = Math.floor((now - lastUpdate) / 1000);
+
+console.log("Bus:", bus.bus_number, "Diff:", diff);
+
+let status=(diff < 30) ? "ONLINE" : "OFFLINE";
 
 if(status !== "ONLINE") return;
 
