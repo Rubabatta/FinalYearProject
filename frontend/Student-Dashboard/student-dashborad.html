@@ -288,6 +288,7 @@ height:320px;
 <p><span>Next Stop</span> <span id="nextStop">--</span></p>
 <p><span>Arrival Time</span> <span id="arrivalTime">--</span></p>
 </div>
+<div class="toast-container" id="toastContainer"></div>
 
 <div class="announcement-box">
 <h3>Announcement 📢</h3>
@@ -307,8 +308,9 @@ function checkAuth(){
     window.location.replace("../Home-page/login.html");
   }
 }
-window.addEventListener("pageshow", checkAuth);
+window.addEventListener("pageshow", () => { checkAuth(); requestNotificationPermission(); });
 checkAuth();
+requestNotificationPermission();
 
 let studentStop = null;
 
@@ -377,8 +379,10 @@ function refreshHeaderImage(){
     .then(res=>res.json())
     .then(data => {
       const headerImg = document.getElementById("headerImg");
-      if(headerImg && data.image){
-        headerImg.src = API_URL + data.image + "?t=" + Date.now();
+      if(headerImg){
+        const defaultImg = "https://i.imgur.com/6VBx3io.png";
+        const imgSrc = (data.image && data.image.trim() !== "") ? (API_URL + data.image + "?t=" + Date.now()) : defaultImg;
+        headerImg.src = imgSrc;
       }
     })
     .catch(() => {});
@@ -403,6 +407,56 @@ let selectedBusId = null;
 let routeStops = [];
 let lastLocation = null;
 let intervalId = null;
+let notificationStage = null;
+let notificationCount = 0;
+
+function setHeaderBadge(count){
+  const badge = document.getElementById("notificationBadge");
+  if(!badge) return;
+  if(count > 0){
+    badge.textContent = count;
+    badge.style.display = "inline-flex";
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function showToast(message){
+  const container = document.getElementById("toastContainer");
+  if(!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<div class="toast-close"><strong>Notification</strong><button aria-label="Close">×</button></div><small>${message}</small>`;
+
+  const closeButton = toast.querySelector("button");
+  closeButton.addEventListener("click", () => {
+    toast.classList.add("hide");
+    setTimeout(() => toast.remove(), 350);
+  });
+
+  container.appendChild(toast);
+
+  notificationCount += 1;
+  setHeaderBadge(notificationCount);
+
+  setTimeout(() => {
+    toast.classList.add("hide");
+    setTimeout(() => {
+      if(toast.parentNode) toast.parentNode.removeChild(toast);
+    }, 350);
+  }, 4500);
+}
+
+function clearNotifications(){
+  const container = document.getElementById("toastContainer");
+  if(container){
+    container.innerHTML = "";
+  }
+  notificationCount = 0;
+  setHeaderBadge(0);
+}
+
 
 // MAP INIT (FIXED ZOOM & RESET SAFE)
 let map = L.map('map').setView([24.8607, 67.0011], 13);
@@ -497,6 +551,40 @@ function formatAge(seconds){
   if(seconds < 3600) return `${Math.floor(seconds/60)}m ago`;
   return `${Math.floor(seconds/3600)}h ago`;
 }
+
+function checkArrivalNotification(timeMinutes){
+  if(timeMinutes === null || timeMinutes === undefined || isNaN(timeMinutes)){
+    return;
+  }
+
+  let stage = null;
+  let message = "";
+
+  if(timeMinutes <= 1){
+    stage = 0;
+    message = "Bus has reached your stop.";
+  } else if(timeMinutes <= 5){
+    stage = 1;
+    message = "Bus is 5 minutes away from your stop.";
+  } else if(timeMinutes <= 10){
+    stage = 2;
+    message = "Bus is 10 minutes away from your stop.";
+  }
+
+  if(stage !== notificationStage){
+    notificationStage = stage;
+    if(stage !== null){
+      showToast(message);
+    }
+  }
+}
+
+function requestNotificationPermission(){
+  if("Notification" in window && Notification.permission === "default"){
+    Notification.requestPermission();
+  }
+}
+
 
 function parseTimestamp(value){
   if(!value) return NaN;
@@ -623,8 +711,9 @@ function updateLocation(){
           const distance = getDistance(lat, lng, studentStop.lat, studentStop.lng);
           const speedKmh = 30; // Assume 30 km/h
           const timeHours = distance / speedKmh;
-          const timeMinutes = Math.round(timeHours * 60);
+          const timeMinutes = Math.max(0, Math.round(timeHours * 60));
           document.getElementById("arrivalTime").innerText = `${timeMinutes} minutes`;
+          checkArrivalNotification(timeMinutes);
       }else{
           document.getElementById("arrivalTime").innerText = "No stop data";
       }

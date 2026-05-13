@@ -167,8 +167,10 @@ function refreshHeaderImage(){
 
         const headerImg = document.getElementById("headerImg");
 
-        if(headerImg && data.image){
-            headerImg.src = API_URL + data.image + "?t=" + Date.now();
+        if(headerImg){
+            const defaultImg = "https://i.imgur.com/6VBx3io.png";
+            const imgSrc = (data.image && data.image.trim() !== "") ? (API_URL + data.image + "?t=" + Date.now()) : defaultImg;
+            headerImg.src = imgSrc;
         }
 
     })

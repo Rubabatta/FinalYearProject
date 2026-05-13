@@ -104,11 +104,76 @@ cursor:pointer;
 background:#ef4444 !important;
 }
 
+/* TOAST NOTIFICATIONS */
+.toast-container{
+    position:fixed;
+    top:80px;
+    right:20px;
+    z-index:9999;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.toast{
+    background:#1f2937;
+    color:#fff;
+    padding:14px 16px;
+    border-radius:8px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    border-left:4px solid #ef4444;
+    animation:slideIn 0.3s ease-out;
+    min-width:300px;
+}
+
+.toast-close{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:6px;
+}
+
+.toast button{
+    background:none;
+    border:none;
+    color:#fff;
+    font-size:18px;
+    cursor:pointer;
+}
+
+@keyframes slideIn{
+    from{
+        transform:translateX(400px);
+        opacity:0;
+    }
+    to{
+        transform:translateX(0);
+        opacity:1;
+    }
+}
+
+.toast.hide{
+    animation:slideOut 0.3s ease-out forwards;
+}
+
+@keyframes slideOut{
+    from{
+        transform:translateX(0);
+        opacity:1;
+    }
+    to{
+        transform:translateX(400px);
+        opacity:0;
+    }
+}
+
 </style>
 
 </head>
 
 <body>
+
+<div class="toast-container" id="toastContainer"></div>
 
 <div id="sidebar-placeholder"></div>
 
@@ -167,6 +232,107 @@ background:#ef4444 !important;
 </div>
 
 <script>
+
+// TOAST NOTIFICATION
+function showToast(message){
+    const container = document.getElementById("toastContainer");
+    if(!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerHTML = `<div class="toast-close"><strong>🚍 Bus Alert</strong><button aria-label="Close">×</button></div><small>${message}</small>`;
+
+    const closeButton = toast.querySelector("button");
+    closeButton.addEventListener("click", () => {
+        toast.classList.add("hide");
+        setTimeout(() => toast.remove(), 350);
+    });
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add("hide");
+        setTimeout(() => {
+            if(toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 350);
+    }, 4500);
+}
+
+// BUS STATUS TRACKING
+const busStatusMap = {}; // Track { busId: { status: "ONLINE/OFFLINE", lastNotified: timestamp } }
+const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+
+function parseTimestamp(timestamp){
+    if(!timestamp) return NaN;
+    const match = timestamp.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})$/);
+    if(match){
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const hour = parseInt(match[4], 10);
+        const minute = parseInt(match[5], 10);
+        const second = parseInt(match[6], 10);
+        return Date.UTC(year, month, day, hour, minute, second);
+    }
+    let parsed = Date.parse(timestamp);
+    if(isNaN(parsed)){
+        parsed = Date.parse(timestamp.replace(' ', 'T') + 'Z');
+    }
+    return parsed;
+}
+
+function checkBusStatus(){
+    fetch(`${API_URL}/get_buses`)
+    .then(res=>res.json())
+    .then(buses=>{
+        buses.forEach(bus=>{
+            fetch(`${API_URL}/get_location/${bus.id}`)
+            .then(res=>res.json())
+            .then(data=>{
+                const now = Date.now();
+                const lastUpdate = parseTimestamp(data.last_updated);
+                const diffSeconds = (now - lastUpdate) / 1000;
+                const isOnline = diffSeconds < 60; // ✅ 1 minute threshold
+                const currentStatus = isOnline ? "ONLINE" : "OFFLINE";
+                
+                console.log(`Bus ${bus.id}: diff=${Math.round(diffSeconds)}s, status=${currentStatus}`);
+                
+                if(!busStatusMap[bus.id]){
+                    busStatusMap[bus.id] = { status: null };
+                }
+                
+                const previousStatus = busStatusMap[bus.id].status;
+                
+                // Notify only when status changes from ONLINE to OFFLINE
+                if(previousStatus === "ONLINE" && currentStatus === "OFFLINE"){
+                    console.log(`Bus ${bus.id} went offline!`);
+                    showToast(`🔴 Bus ${bus.id} has gone offline`);
+                    busStatusMap[bus.id].lastNotified = now;
+                }
+                
+                busStatusMap[bus.id].status = currentStatus;
+            })
+            .catch(err=>{
+                console.error(`Bus ${bus.id} location fetch error:`, err);
+                // If we can't fetch location, consider it offline
+                if(!busStatusMap[bus.id]){
+                    busStatusMap[bus.id] = { status: null };
+                }
+                const previousStatus = busStatusMap[bus.id].status;
+                if(previousStatus === "ONLINE"){
+                    console.log(`Bus ${bus.id} disconnected!`);
+                    showToast(`🔴 Bus ${bus.id} disconnected`);
+                }
+                busStatusMap[bus.id].status = "OFFLINE";
+            });
+        });
+    })
+    .catch(err=>console.error("Error checking bus status:", err));
+}
+
+// Check bus status every 15 seconds for faster detection
+setInterval(checkBusStatus, 15000);
+checkBusStatus(); // Initial check
 
 // sidebar load
 fetch('sidebar.html')

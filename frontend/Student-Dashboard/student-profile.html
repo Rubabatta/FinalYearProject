@@ -276,7 +276,7 @@ function loadProfile(){
 
         document.getElementById("name").value=data.name;
         document.getElementById("email").value=data.email;
-        document.getElementById("contact").value=data.contact;
+        document.getElementById("contact").value=data.contact || "";
         document.getElementById("password").value=data.password;
 
         // Load Route information
@@ -299,12 +299,19 @@ function loadProfile(){
             .catch(err=>console.error("Stop load error:", err));
         }
 
-        if(data.image){
-            let img = API + data.image + "?t=" + Date.now();
-            document.getElementById("profileImg").src=img;
-
-            let headerImg=document.getElementById("headerImg");
-            if(headerImg) headerImg.src=img;
+        // Load Image with fallback
+        const defaultImg = "https://i.imgur.com/6VBx3io.png";
+        let imgSrc = defaultImg;
+        
+        if(data.image && data.image.trim() !== ""){
+            imgSrc = API + data.image + "?t=" + Date.now();
+        }
+        
+        document.getElementById("profileImg").src = imgSrc;
+        
+        let headerImg = document.getElementById("headerImg");
+        if(headerImg){
+            headerImg.src = imgSrc;
         }
     })
     .catch(err => console.error("Profile load error:", err));

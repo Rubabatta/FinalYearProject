@@ -6,6 +6,7 @@
 
 <title>Live Bus Tracking</title>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
 
@@ -128,6 +129,7 @@ font-weight:bold;
 <b>Arrival Time:</b> <span id="arrivalTime">-</span>
 
 </div>
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- MAP -->
 <div id="map"></div>
@@ -143,13 +145,98 @@ function checkAuth(){
         window.location.replace("../Home-page/login.html");
     }
 }
-window.addEventListener("pageshow", checkAuth);
+window.addEventListener("pageshow", () => { checkAuth(); requestNotificationPermission(); });
 checkAuth();
+requestNotificationPermission();
 
 // API URL MUST BE DEFINED FIRST
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
 
 let studentStop = null;
+let notificationStage = null;
+let notificationCount = 0;
+
+function setHeaderBadge(count){
+    const badge = document.getElementById("notificationBadge");
+    if(!badge) return;
+    if(count > 0){
+        badge.textContent = count;
+        badge.style.display = "inline-flex";
+    } else {
+        badge.style.display = "none";
+    }
+}
+
+function showToast(message){
+    const container = document.getElementById("toastContainer");
+    if(!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = "toast";
+    toast.innerHTML = `<div class="toast-close"><strong>Notification</strong><button aria-label="Close">×</button></div><small>${message}</small>`;
+
+    const closeButton = toast.querySelector("button");
+    closeButton.addEventListener("click", () => {
+        toast.classList.add("hide");
+        setTimeout(() => toast.remove(), 350);
+    });
+
+    container.appendChild(toast);
+    notificationCount += 1;
+    setHeaderBadge(notificationCount);
+
+    setTimeout(() => {
+        toast.classList.add("hide");
+        setTimeout(() => {
+            if(toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 350);
+    }, 4500);
+
+    if("Notification" in window && Notification.permission === "granted"){
+        new Notification("Bus Update", { body: message });
+    }
+}
+
+function resetNotification(){
+    const container = document.getElementById("toastContainer");
+    if(container){
+        container.innerHTML = "";
+    }
+    notificationStage = null;
+    notificationCount = 0;
+    setHeaderBadge(0);
+}
+
+function checkArrivalNotification(timeMinutes){
+    if(timeMinutes === null || timeMinutes === undefined || isNaN(timeMinutes)) return;
+
+    let stage = null;
+    let message = "";
+
+    if(timeMinutes <= 1){
+        stage = 0;
+        message = "Bus has reached your stop.";
+    } else if(timeMinutes <= 5){
+        stage = 1;
+        message = "Bus is 5 minutes away from your stop.";
+    } else if(timeMinutes <= 10){
+        stage = 2;
+        message = "Bus is 10 minutes away from your stop.";
+    }
+
+    if(stage !== notificationStage){
+        notificationStage = stage;
+        if(stage !== null){
+            showToast(message);
+        }
+    }
+}
+
+function requestNotificationPermission(){
+    if("Notification" in window && Notification.permission === "default"){
+        Notification.requestPermission();
+    }
+}
 
 async function loadStudentData(){
     const studentId = localStorage.getItem("student_id");
@@ -211,8 +298,10 @@ function refreshHeaderImage(){
     .then(res=>res.json())
     .then(data => {
       const headerImg = document.getElementById("headerImg");
-      if(headerImg && data.image){
-        headerImg.src = API_URL + data.image + "?t=" + Date.now();
+      if(headerImg){
+        const defaultImg = "https://i.imgur.com/6VBx3io.png";
+        const imgSrc = (data.image && data.image.trim() !== "") ? (API_URL + data.image + "?t=" + Date.now()) : defaultImg;
+        headerImg.src = imgSrc;
       }
     })
     .catch(() => {});
@@ -278,10 +367,12 @@ if(studentStop){
     const distance = getDistance(lat, lng, studentStop.lat, studentStop.lng);
     const speedKmh = 30; // Assume 30 km/h
     const timeHours = distance / speedKmh;
-    const timeMinutes = Math.round(timeHours * 60);
+    const timeMinutes = Math.max(0, Math.round(timeHours * 60));
     document.getElementById("arrivalTime").innerText = `${timeMinutes} minutes`;
+    checkArrivalNotification(timeMinutes);
 }else{
     document.getElementById("arrivalTime").innerText = "No stop data";
+    resetNotification();
 }
 
 })

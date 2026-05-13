@@ -175,9 +175,9 @@ let rows="";
 data.forEach(student=>{
 
 // SAFE IMAGE FIX
-let img = student.image
+let img = student.image && student.image.trim() !== ""
 ? `https://acceptable-solace-production-06f3.up.railway.app${student.image}?t=${Date.now()}`
-: "https://via.placeholder.com/45";
+: "https://i.imgur.com/6VBx3io.png";
 
 // Get route name
 let routeName = "-";
