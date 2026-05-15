@@ -23,6 +23,18 @@ h1{
     margin-bottom:20px;
 }
 
+.page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.page-header h1{
+    margin-bottom:0;
+}
+
 .action-row{
     display:flex;
     gap:10px;
@@ -103,11 +115,12 @@ tr:hover{
 
 <div id="sidebar-placeholder"></div>
 
+<div id="header-placeholder"></div>
+
 <div class="main">
 
+<div class="page-header">
 <h1>Buses Management</h1>
-
-<div class="action-row">
 <button onclick="window.location.href='add-bus.html'">Add Bus</button>
 </div>
 
@@ -131,6 +144,20 @@ fetch('sidebar.html')
 .then(res => res.text())
 .then(html => {
     document.getElementById('sidebar-placeholder').innerHTML = html;
+});
+
+// Header
+fetch('header.html')
+.then(res => res.text())
+.then(html => { 
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
 });
 
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";

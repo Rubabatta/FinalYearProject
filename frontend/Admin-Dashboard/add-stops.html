@@ -53,6 +53,8 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 
 <div id="sidebar-placeholder"></div>
 
+<div id="header-placeholder"></div>
+
 <div class="main">
 <div class="page-title">
     <h1>Add / Manage Stops</h1>
@@ -104,6 +106,19 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 fetch("sidebar.html")
 .then(res=>res.text())
 .then(data=>{ document.getElementById("sidebar-placeholder").innerHTML=data; });
+
+fetch('header.html')
+.then(res=>res.text())
+.then(data=>{
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = data;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
+});
 
 async function loadRoutes(){
 const res = await fetch("https://acceptable-solace-production-06f3.up.railway.app/get_routes");

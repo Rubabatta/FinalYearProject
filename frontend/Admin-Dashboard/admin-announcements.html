@@ -146,6 +146,8 @@ body{
 <!-- SIDEBAR -->
 <div id="sidebar"></div>
 
+<div id="header-placeholder"></div>
+
 <!-- MAIN CONTENT -->
 <div class="content">
 <h1><i class="fas fa-bullhorn"></i> Announcements</h1>
@@ -185,6 +187,20 @@ fetch("sidebar.html")
     document.getElementById("sidebar").innerHTML = data;
 })
 .catch(err => console.error("Sidebar fetch error:", err));
+
+fetch('header.html')
+.then(res => res.text())
+.then(html=>{
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
+})
+.catch(err => console.error('Header fetch error:', err));
 
 // ----------------- ANNOUNCEMENTS -----------------
 async function loadAnnouncements(){

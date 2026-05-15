@@ -39,6 +39,7 @@ button:hover{transform:translateY(-2px);}
 <body>
 
 <div id="sidebar-placeholder"></div>
+<div id="header-placeholder"></div>
 
 <div class="main">
 
@@ -71,6 +72,19 @@ button:hover{transform:translateY(-2px);}
 fetch("sidebar.html")
 .then(r=>r.text())
 .then(d=>document.getElementById("sidebar-placeholder").innerHTML=d);
+
+fetch('header.html')
+.then(r=>r.text())
+.then(d=>{
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = d;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
+});
 
 /* 🔥 IMPORTANT FIX: SINGLE API VARIABLE */
 const API = "https://acceptable-solace-production-06f3.up.railway.app";

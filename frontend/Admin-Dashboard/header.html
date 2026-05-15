@@ -1,0 +1,218 @@
+<div class="admin-header">
+    <div class="header-left">
+        <div class="brand-icon"><i class="fa-solid fa-th-large"></i></div>
+        <div class="brand-copy">
+            <p>Dashboard</p>
+            <small>Admin Dashboard</small>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="header-btn" type="button" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span class="header-badge">0</span>
+        </button>
+        <a href="admin_profile.html" class="profile-link" title="Profile">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </div>
+</div>
+<style>
+.admin-header{
+    position:fixed;
+    top:0;
+    left:var(--sidebar-offset,240px);
+    right:0;
+    height:50px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    background:rgba(255,255,255,0.94);
+    border-bottom:1px solid rgba(148,163,184,0.24);
+    box-shadow:0 10px 30px rgba(15,23,42,0.08);
+    backdrop-filter:blur(16px);
+    z-index:950;
+    gap:14px;
+}
+.admin-header .header-left,
+.admin-header .header-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+.admin-header .brand-icon{
+    width:36px;
+    height:36px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+    color:white;
+    font-size:16px;
+}
+.admin-header .brand-copy p{
+    font-size:14px;
+    font-weight:700;
+    color:#0f172a;
+    margin:0;
+}
+.admin-header .brand-copy small{
+    display:block;
+    font-size:11px;
+    color:#64748b;
+}
+.admin-header .header-btn,
+.admin-header .profile-link{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    border:none;
+    background:transparent;
+    color:#334155;
+    text-decoration:none;
+    cursor:pointer;
+    padding:8px 10px;
+    border-radius:12px;
+    transition:background 0.2s ease, color 0.2s ease;
+    font-size:13px;
+}
+.admin-header .header-btn:hover,
+.admin-header .profile-link:hover{
+    background:rgba(59,130,246,0.08);
+    color:#1e3a8a;
+}
+.admin-header .header-btn i,
+.admin-header .profile-link i{
+    font-size:16px;
+}
+.admin-header .header-badge{
+    min-width:18px;
+    height:18px;
+    border-radius:999px;
+    background:#ef4444;
+    color:white;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    padding:0 6px;
+}
+.admin-header + .main,
+.admin-header + .content{
+    padding-top:74px;
+}
+/* When header is inserted into a placeholder div */
+#header-placeholder + .main,
+#header-placeholder + .content{
+    padding-top:74px;
+}
+
+.main .page-heading,
+.content .page-heading{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 14px;
+    background:rgba(255,255,255,0.98);
+    border-radius:10px;
+    box-shadow:0 8px 20px rgba(2,6,23,0.06);
+    margin-bottom:14px;
+}
+.main .page-heading.center{justify-content:center}
+.main .page-heading .heading-title{font-size:15px;font-weight:700;color:#0f172a;margin:0}
+.main .page-heading .heading-sub{font-size:12px;color:#64748b;margin-left:8px}
+.main .page-heading .heading-actions,
+.content .page-heading .heading-actions{margin-left:auto}
+@media(max-width:900px){.main .page-heading,.content .page-heading{padding:10px 12px;margin:12px 8px 14px 8px}}
+
+.main table,
+.content table{
+    width:100%;
+    border-collapse:collapse;
+    border-radius:14px;
+    overflow:hidden;
+    background:#ffffff;
+}
+
+.main table th,
+.content table th,
+.main table td,
+.content table td{
+    padding:12px 14px;
+    font-size:13px;
+    color:#334155;
+    border-bottom:1px solid rgba(226,232,240,0.9);
+}
+
+.main table th,
+.content table th{
+    background:#1d4ed8;
+    color:#ffffff;
+    font-weight:700;
+    text-align:left;
+}
+
+.main table tr:hover,
+.content table tr:hover{
+    background:#f8fbff;
+}
+
+@media(max-width:900px){.main .page-heading,.content .page-heading{padding:10px 12px;margin:12px 8px 14px 8px}}
+
+@media(max-width:900px){
+    .admin-header{
+        left:0;
+        right:0;
+        width:100%;
+        padding:0 16px;
+    }
+    #header-placeholder + .main{
+        padding-top:74px;
+        margin-left:0;
+    }
+}
+</style>
+<script>
+// Header helper: ensure page content has top padding and wrap first heading into a styled page-heading box
+(function(){
+    function initHeaderHelper(){
+        try{
+            const headerPlaceholder = document.getElementById('header-placeholder');
+            const main = headerPlaceholder && headerPlaceholder.nextElementSibling && (headerPlaceholder.nextElementSibling.classList.contains('main') || headerPlaceholder.nextElementSibling.classList.contains('content'))
+                ? headerPlaceholder.nextElementSibling
+                : document.querySelector('.main, .content');
+
+            if(!main) return;
+
+            const currentTop = parseInt(getComputedStyle(main).paddingTop) || 0;
+            if(currentTop < 70){ main.style.paddingTop = '74px'; }
+
+            let heading = main.querySelector(':scope > h1, :scope > .title, :scope > h2');
+            if(!heading){
+                heading = main.querySelector('h1, .title, h2');
+            }
+            if(heading && !heading.closest('.page-heading')){
+                const wrapper = document.createElement('div');
+                wrapper.className = 'page-heading';
+                const align = getComputedStyle(heading).textAlign;
+                if(align === 'center') wrapper.classList.add('center');
+                heading.parentNode.insertBefore(wrapper, heading);
+                wrapper.appendChild(heading);
+                heading.classList.add('heading-title');
+                heading.style.margin = '0';
+                heading.style.fontSize = '15px';
+                heading.style.fontWeight = '700';
+            }
+        }catch(e){ console.error('Header helper error', e); }
+    }
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', initHeaderHelper);
+    } else {
+        initHeaderHelper();
+    }
+})();
+</script>

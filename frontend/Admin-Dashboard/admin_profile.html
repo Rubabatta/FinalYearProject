@@ -224,6 +224,8 @@ body{
 
 <div id="sidebar-placeholder"></div>
 
+<div id="header-placeholder"></div>
+
 <div class="main">
     <div class="profile-shell">
         <section class="profile-card">
@@ -283,6 +285,19 @@ body{
 fetch('sidebar.html')
 .then(res => res.text())
 .then(html => document.getElementById('sidebar-placeholder').innerHTML = html);
+
+fetch('header.html')
+.then(res => res.text())
+.then(html=>{
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
+});
 
 const adminData = {
     name: 'System Admin',

@@ -72,6 +72,19 @@ fetch('sidebar.html')
     document.getElementById('sidebar-placeholder').innerHTML = html;
 });
 
+fetch('header.html')
+.then(res => res.text())
+.then(html => {
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
+});
+
 // Add Route form submission
 document.getElementById("addRouteForm").addEventListener("submit", function(e){
     e.preventDefault();

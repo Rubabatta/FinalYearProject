@@ -226,6 +226,8 @@ flex:1;
 <div id="busList"></div>
 </div>
 
+<div id="header-placeholder"></div>
+
 <!-- MAIN -->
 <div class="main">
 
@@ -242,6 +244,11 @@ flex:1;
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
+
+// set header offset for wider sidebar
+document.documentElement.style.setProperty('--sidebar-offset','280px');
+fetch('header.html').then(res=>res.text()).then(html=>{ const ph = document.getElementById('header-placeholder'); ph.innerHTML = html; ph.querySelectorAll('script').forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.body.appendChild(ns); document.body.removeChild(ns); }); });
+
 
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
 

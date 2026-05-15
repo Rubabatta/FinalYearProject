@@ -24,41 +24,71 @@ background:#f4f6fb;
 .main{
 margin-left:240px;
 width:100%;
-padding:30px;
-}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:30px;
+padding:22px 30px 30px;
 }
 
 .cards{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
+gap:14px;
+align-items:stretch;
 }
 
 .card{
 background:white;
-padding:25px;
+padding:16px 18px;
 border-radius:12px;
-box-shadow:0 8px 20px rgba(0,0,0,0.08);
+box-shadow:0 8px 24px rgba(15,23,42,0.07);
 display:flex;
 justify-content:space-between;
 align-items:center;
+min-height:96px;
+border:1px solid rgba(226,232,240,0.9);
+position:relative;
+overflow:hidden;
+transition:transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card::before{
+content:"";
+position:absolute;
+left:0;
+top:0;
+bottom:0;
+width:4px;
+background:#3b82f6;
+}
+
+.card:hover{
+transform:translateY(-2px);
+box-shadow:0 12px 28px rgba(15,23,42,0.10);
+}
+
+.card h3{
+font-size:13px;
+font-weight:600;
+color:#64748b;
+margin-bottom:6px;
 }
 
 .card i{
-font-size:30px;
+width:40px;
+height:40px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
 color:#3b82f6;
+background:#eff6ff;
+flex-shrink:0;
 }
 
 .card p{
-font-size:24px;
-font-weight:600;
+font-size:22px;
+font-weight:700;
 color:#1e3a8a;
+line-height:1;
 }
 
 /* MODAL */
@@ -176,11 +206,9 @@ background:#ef4444 !important;
 <div class="toast-container" id="toastContainer"></div>
 
 <div id="sidebar-placeholder"></div>
+<div id="header-placeholder"></div>
 
 <div class="main">
-<div class="topbar">
-<h1>Dashboard</h1>
-</div>
 
 <div class="cards">
 
@@ -202,13 +230,12 @@ background:#ef4444 !important;
 
     <div class="card">
         <div>
-            <h3>Total Routes</h3>
-            <p id="totalRoutes">0</p>
+            <h3>Active Buses</h3>
+            <p id="activeBuses">0</p>
         </div>
-        <i class="fa fa-route"></i>
+        <i class="fa fa-signal"></i>
     </div>
 
-    <!-- ⭐ NEW DRIVER CARD -->
     <div class="card">
         <div>
             <h3>Total Drivers</h3>
@@ -302,15 +329,16 @@ function checkBusStatus(){
                 }
                 
                 const previousStatus = busStatusMap[bus.id].status;
-                
+
                 // Notify only when status changes from ONLINE to OFFLINE
                 if(previousStatus === "ONLINE" && currentStatus === "OFFLINE"){
                     console.log(`Bus ${bus.id} went offline!`);
                     showToast(`🔴 Bus ${bus.id} has gone offline`);
                     busStatusMap[bus.id].lastNotified = now;
                 }
-                
+
                 busStatusMap[bus.id].status = currentStatus;
+                updateActiveBusesCount();
             })
             .catch(err=>{
                 console.error(`Bus ${bus.id} location fetch error:`, err);
@@ -324,6 +352,7 @@ function checkBusStatus(){
                     showToast(`🔴 Bus ${bus.id} disconnected`);
                 }
                 busStatusMap[bus.id].status = "OFFLINE";
+                updateActiveBusesCount();
             });
         });
     })
@@ -341,6 +370,19 @@ fetch('sidebar.html')
     document.getElementById('sidebar-placeholder').innerHTML = html;
 });
 
+fetch('header.html')
+.then(res => res.text())
+.then(html => {
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
+});
+
 // stats
 fetch('https://acceptable-solace-production-06f3.up.railway.app/get_students')
 .then(res=>res.json())
@@ -354,14 +396,18 @@ fetch('https://acceptable-solace-production-06f3.up.railway.app/get_buses')
     document.getElementById("totalBuses").innerText=data.length;
 });
 
-fetch('https://acceptable-solace-production-06f3.up.railway.app/get_routes')
-.then(res=>res.json())
-.then(data=>{
-    document.getElementById("totalRoutes").innerText=data.length;
-});
 fetch('https://acceptable-solace-production-06f3.up.railway.app/get_drivers')
 .then(r=>r.json())
 .then(d=>document.getElementById("totalDrivers").innerText=d.length);
+
+function updateActiveBusesCount(){
+    const activeCount = Object.values(busStatusMap).filter(s => s.status === "ONLINE").length;
+    const activeEl = document.getElementById("activeBuses");
+    if(activeEl){
+        activeEl.innerText = activeCount;
+    }
+}
+
 
 // open modal
 function openChangePassword(){

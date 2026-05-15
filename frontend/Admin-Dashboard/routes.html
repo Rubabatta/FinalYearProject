@@ -13,6 +13,8 @@
 body{display:flex;background:#f4f6fb;}
 .main{margin-left:240px;width:100%;padding:30px;}
 h1{color:#1e3a8a;margin-bottom:20px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px;}
+.page-header h1{margin-bottom:0;}
 .action-row{display:flex;align-items:center;margin-bottom:15px;gap:10px;flex-wrap:wrap;}
 .action-row label{margin-right:5px;font-weight:500;}
 .action-row input{padding:8px;border-radius:6px;border:1px solid #ccc;width:200px;}
@@ -39,12 +41,12 @@ table td{padding:10px;border-bottom:1px solid #eee;}
 
 <div id="sidebar-placeholder"></div>
 
+<div id="header-placeholder"></div>
+
 <div class="main">
 
+<div class="page-header">
 <h1>Routes Management</h1>
-
-<!-- Single Row: Add/Delete + Search -->
-<div class="action-row">
 <button onclick="window.location.href='add-route.html'">Add Route</button>
 </div>
 
@@ -71,6 +73,10 @@ table td{padding:10px;border-bottom:1px solid #eee;}
 fetch('sidebar.html')
 .then(res=>res.text())
 .then(html=>{ document.getElementById('sidebar-placeholder').innerHTML=html; });
+
+fetch('header.html')
+.then(res=>res.text())
+.then(html=>{ const ph = document.getElementById('header-placeholder'); ph.innerHTML = html; ph.querySelectorAll('script').forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.body.appendChild(ns); document.body.removeChild(ns); }); });
 
 // Load routes with correct sequence
 async function loadRoutes(){

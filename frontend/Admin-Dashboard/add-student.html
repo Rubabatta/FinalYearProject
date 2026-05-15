@@ -198,6 +198,8 @@ button:hover{
 
 <div id="sidebar-placeholder"></div>
 
+<div id="header-placeholder"></div>
+
 <div class="main">
 
 <div class="add-card">
@@ -276,6 +278,19 @@ fetch('sidebar.html')
 .then(res => res.text())
 .then(html => {
     document.getElementById('sidebar-placeholder').innerHTML = html;
+});
+
+fetch('header.html')
+.then(res => res.text())
+.then(html => {
+    const ph = document.getElementById('header-placeholder');
+    ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
 });
 
 const form = document.getElementById("addStudentForm");
