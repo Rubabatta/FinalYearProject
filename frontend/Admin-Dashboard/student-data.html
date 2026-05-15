@@ -82,13 +82,14 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 <div class="main">
 
 <h1>Students Details</h1>
+<div id="summary">Loading student records...</div>
 
 <div class="table-box">
 
 <div class="top-bar">
 
 <div class="search-box">
-<input type="text" id="searchInput" placeholder="Search student by ID or Name...">
+<input type="text" id="searchInput" placeholder="Search by ID, Name, Email or Department...">
 <button onclick="searchStudent()">Search</button>
 </div>
 
@@ -105,6 +106,9 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 <th>Image</th>
 <th>Name</th>
 <th>Email</th>
+<th>Reg. No</th>
+<th>Department</th>
+<th>Program</th>
 <th>Contact</th>
 <th>Route</th>
 <th>Stop</th>
@@ -168,7 +172,7 @@ async function loadStudents(){
 }
 
 /* render */
-function renderTable(data){
+function renderTable(data, keyword=""){
 
 let rows="";
 
@@ -220,6 +224,9 @@ rows+=`
 
 <td>${student.name}</td>
 <td>${student.email}</td>
+<td>${student.studentID || "-"}</td>
+<td>${student.department || "-"}</td>
+<td>${student.program || "-"}</td>
 <td>${student.contact || "-"}</td>
 <td>${routeName}</td>
 <td>${stopName}</td>
@@ -240,6 +247,19 @@ rows+=`
 });
 
 document.getElementById("studentsTable").innerHTML=rows;
+
+const summaryEl = document.getElementById("summary");
+if(summaryEl){
+    const total = data.length;
+    const deptCount = keyword ? studentsData.filter(s => String(s.department||"").toLowerCase() === keyword).length : 0;
+    if(keyword && deptCount){
+        summaryEl.innerText = `Department "${keyword}" has ${deptCount} student${deptCount===1 ? '' : 's'}.`;
+    } else if(keyword){
+        summaryEl.innerText = `Showing ${total} student${total===1 ? '' : 's'} for "${keyword}".`;
+    } else {
+        summaryEl.innerText = `Showing all ${total} student${total===1 ? '' : 's'}.`;
+    }
+}
 }
 
 /* search */
@@ -255,10 +275,12 @@ return;
 let filtered=studentsData.filter(s=>
 (String(s.name||"").toLowerCase().includes(keyword) ||
 String(s.email||"").toLowerCase().includes(keyword) ||
+String(s.studentID||"").toLowerCase().includes(keyword) ||
+String(s.department||"").toLowerCase().includes(keyword) ||
 String(s.id||"").includes(keyword))
 );
 
-renderTable(filtered);
+renderTable(filtered, keyword);
 }
 
 /* enter search */

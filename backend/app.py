@@ -33,6 +33,8 @@ def initialize_database():
         password TEXT NOT NULL,
         center TEXT,
         studentID TEXT UNIQUE,
+        department TEXT,
+        program TEXT,
         contact TEXT,
         fees REAL,
         image TEXT
@@ -117,6 +119,8 @@ def initialize_database():
         "ALTER TABLE students ADD COLUMN image TEXT",
         "ALTER TABLE students ADD COLUMN route_id INTEGER",
         "ALTER TABLE students ADD COLUMN stop_id INTEGER",
+        "ALTER TABLE students ADD COLUMN department TEXT",
+        "ALTER TABLE students ADD COLUMN program TEXT",
         "ALTER TABLE stops ADD COLUMN latitude REAL",
         "ALTER TABLE stops ADD COLUMN longitude REAL",
         "ALTER TABLE drivers ADD COLUMN bus_id INTEGER",
@@ -289,14 +293,14 @@ def auto_populate_if_empty():
 
         # Sample Students
         students_data = [
-            ("Ali Ahmed", "ali@example.com", "123", "Main Campus", "STU001", "03001234567", 5000.0),
-            ("Fatima Khan", "fatima@example.com", "123", "City Branch", "STU002", "03009876543", 4500.0),
-            ("Omar Hassan", "omar@example.com", "123", "Main Campus", "STU003", "03005556677", 5000.0),
-            ("Ayesha Malik", "ayesha@example.com", "123", "City Branch", "STU004", "03004443322", 4500.0),
-            ("Hassan Raza", "hassan@example.com", "123", "Main Campus", "STU005", "03001112233", 5000.0)
+            ("Ali Ahmed", "ali@example.com", "123", "Main Campus", "STU001", "Computer Science", "BSCS", "03001234567", 5000.0),
+            ("Fatima Khan", "fatima@example.com", "123", "City Branch", "STU002", "Business Administration", "BBA", "03009876543", 4500.0),
+            ("Omar Hassan", "omar@example.com", "123", "Main Campus", "STU003", "Information Technology", "BSIT", "03005556677", 5000.0),
+            ("Ayesha Malik", "ayesha@example.com", "123", "City Branch", "STU004", "Electrical Engineering", "BSEE", "03004443322", 4500.0),
+            ("Hassan Raza", "hassan@example.com", "123", "Main Campus", "STU005", "Civil Engineering", "BSCE", "03001112233", 5000.0)
         ]
-        for name, email, password, center, studentID, contact, fees in students_data:
-            cursor.execute("INSERT OR IGNORE INTO students (name, email, password, center, studentID, contact, fees) VALUES (?, ?, ?, ?, ?, ?, ?)", (name, email, password, center, studentID, contact, fees))
+        for name, email, password, center, studentID, department, program, contact, fees in students_data:
+            cursor.execute("INSERT OR IGNORE INTO students (name, email, password, center, studentID, department, program, contact, fees) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, email, password, center, studentID, department, program, contact, fees))
 
         # Sample Announcements
         announcements_data = [
@@ -335,8 +339,11 @@ def student_signup():
     name = data.get('name')
     email = data.get('email')
     password = data.get('password')
+    studentID = data.get('studentID')
+    department = data.get('department')
+    program = data.get('program')
     contact = data.get('contact')
-    fees = data.get('fees')
+    fees = data.get('fees', 0)
     route_id = data.get('route_id')
     stop_id = data.get('stop_id')
 
@@ -352,16 +359,16 @@ def student_signup():
 
     try:
         cursor.execute("""
-            INSERT INTO students (name,email,password,contact,fees,route_id,stop_id)
-            VALUES (?,?,?,?,?,?,?)
-        """, (name,email,password,contact,fees,route_id,stop_id))
+            INSERT INTO students (name,email,password,studentID,department,program,contact,fees,route_id,stop_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?)
+        """, (name,email,password,studentID,department,program,contact,fees,route_id,stop_id))
 
         conn.commit()
 
         return jsonify({"message":"Student registered successfully"}), 201
 
     except sqlite3.IntegrityError:
-        return jsonify({"message":"Email already exists"}), 400
+        return jsonify({"message":"Email or registration number already exists"}), 400
 
     finally:
         conn.close()
@@ -491,6 +498,9 @@ def get_students():
         id,
         name,
         email,
+        studentID,
+        department,
+        program,
         contact,
         fees,
         image,
@@ -532,6 +542,9 @@ def update_student(id):
     email = data.get('email')
     contact = data.get('contact')
     password = data.get('password')
+    department = data.get('department')
+    program = data.get('program')
+    studentID = data.get('studentID')
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -539,15 +552,15 @@ def update_student(id):
     if password:
         cursor.execute("""
             UPDATE students
-            SET name=?, email=?, contact=?, password=?
+            SET name=?, email=?, contact=?, password=?, department=?, program=?, studentID=?
             WHERE id=?
-        """, (name, email, contact, password, id))
+        """, (name, email, contact, password, department, program, studentID, id))
     else:
         cursor.execute("""
             UPDATE students
-            SET name=?, email=?, contact=?
+            SET name=?, email=?, contact=?, department=?, program=?, studentID=?
             WHERE id=?
-        """, (name, email, contact, id))
+        """, (name, email, contact, department, program, studentID, id))
 
     conn.commit()
     conn.close()
@@ -1563,14 +1576,14 @@ def populate_db():
 
         # Sample Students
         students_data = [
-            ("Ali Ahmed", "ali@example.com", "123", "Main Campus", "STU001", "03001234567", 5000.0),
-            ("Fatima Khan", "fatima@example.com", "123", "City Branch", "STU002", "03009876543", 4500.0),
-            ("Omar Hassan", "omar@example.com", "123", "Main Campus", "STU003", "03005556677", 5000.0),
-            ("Ayesha Malik", "ayesha@example.com", "123", "City Branch", "STU004", "03004443322", 4500.0),
-            ("Hassan Raza", "hassan@example.com", "123", "Main Campus", "STU005", "03001112233", 5000.0)
+            ("Ali Ahmed", "ali@example.com", "123", "Main Campus", "STU001", "Computer Science", "BSCS", "03001234567", 5000.0),
+            ("Fatima Khan", "fatima@example.com", "123", "City Branch", "STU002", "Business Administration", "BBA", "03009876543", 4500.0),
+            ("Omar Hassan", "omar@example.com", "123", "Main Campus", "STU003", "Information Technology", "BSIT", "03005556677", 5000.0),
+            ("Ayesha Malik", "ayesha@example.com", "123", "City Branch", "STU004", "Electrical Engineering", "BSEE", "03004443322", 4500.0),
+            ("Hassan Raza", "hassan@example.com", "123", "Main Campus", "STU005", "Civil Engineering", "BSCE", "03001112233", 5000.0)
         ]
-        for name, email, password, center, studentID, contact, fees in students_data:
-            cursor.execute("INSERT OR IGNORE INTO students (name, email, password, center, studentID, contact, fees) VALUES (?, ?, ?, ?, ?, ?, ?)", (name, email, password, center, studentID, contact, fees))
+        for name, email, password, center, studentID, department, program, contact, fees in students_data:
+            cursor.execute("INSERT OR IGNORE INTO students (name, email, password, center, studentID, department, program, contact, fees) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, email, password, center, studentID, department, program, contact, fees))
 
         # Sample Announcements
         announcements_data = [

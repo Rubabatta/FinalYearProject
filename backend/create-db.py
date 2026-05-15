@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS students (
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     contact TEXT,
+    studentID TEXT UNIQUE,
+    department TEXT,
+    program TEXT,
     fees REAL,
     image TEXT
 )
@@ -133,6 +136,12 @@ columns = [col[1] for col in cursor.fetchall()]
 
 if "image" not in columns:
     cursor.execute("ALTER TABLE students ADD COLUMN image TEXT;")
+if "studentID" not in columns:
+    cursor.execute("ALTER TABLE students ADD COLUMN studentID TEXT;")
+if "department" not in columns:
+    cursor.execute("ALTER TABLE students ADD COLUMN department TEXT;")
+if "program" not in columns:
+    cursor.execute("ALTER TABLE students ADD COLUMN program TEXT;")
 
 # -----------------------------
 # Sample Data (Add if not exists)
@@ -219,15 +228,15 @@ for route_id, stop_name, lat, lng, order in stops_data:
 
 # Sample Students
 students_data = [
-    ("Ali Ahmed", "ali@example.com", "123", "Main Campus", "STU001", "03001234567", 5000.0),
-    ("Fatima Khan", "fatima@example.com", "123", "City Branch", "STU002", "03009876543", 4500.0),
-    ("Omar Hassan", "omar@example.com", "123", "Main Campus", "STU003", "03005556677", 5000.0),
-    ("Ayesha Malik", "ayesha@example.com", "123", "City Branch", "STU004", "03004443322", 4500.0),
-    ("Hassan Raza", "hassan@example.com", "123", "Main Campus", "STU005", "03001112233", 5000.0)
+    ("Ali Ahmed", "ali@example.com", "123", "Main Campus", "STU001", "Computer Science", "BSCS", "03001234567", 5000.0),
+    ("Fatima Khan", "fatima@example.com", "123", "City Branch", "STU002", "Business Administration", "BBA", "03009876543", 4500.0),
+    ("Omar Hassan", "omar@example.com", "123", "Main Campus", "STU003", "Information Technology", "BSIT", "03005556677", 5000.0),
+    ("Ayesha Malik", "ayesha@example.com", "123", "City Branch", "STU004", "Electrical Engineering", "BSEE", "03004443322", 4500.0),
+    ("Hassan Raza", "hassan@example.com", "123", "Main Campus", "STU005", "Civil Engineering", "BSCE", "03001112233", 5000.0)
 ]
 
-for name, email, password, center, studentID, contact, fees in students_data:
-    cursor.execute("INSERT OR IGNORE INTO students (name, email, password, center, studentID, contact, fees) VALUES (?, ?, ?, ?, ?, ?, ?)", (name, email, password, center, studentID, contact, fees))
+for name, email, password, center, studentID, department, program, contact, fees in students_data:
+    cursor.execute("INSERT OR IGNORE INTO students (name, email, password, center, studentID, department, program, contact, fees) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (name, email, password, center, studentID, department, program, contact, fees))
 
 # Sample Announcements
 announcements_data = [

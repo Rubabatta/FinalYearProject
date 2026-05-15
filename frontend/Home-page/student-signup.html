@@ -141,6 +141,21 @@ button:hover{
 
 <div class="form-row">
 <div class="input-group">
+<i class="fa fa-id-card"></i>
+<input type="text" id="studentID" placeholder="Registration Number" required>
+</div>
+<div class="input-group">
+<i class="fa fa-building-columns"></i>
+<input type="text" id="department" placeholder="Department" required>
+</div>
+<div class="input-group">
+<i class="fa fa-graduation-cap"></i>
+<input type="text" id="program" placeholder="Program" required>
+</div>
+</div>
+
+<div class="form-row">
+<div class="input-group">
 <i class="fa fa-route"></i>
 <select id="routeSelect" required>
 <option value="">Select Route</option>
@@ -222,6 +237,9 @@ form.addEventListener("submit", function(e){
     const firstName = document.getElementById("firstName").value.trim();
     const lastName = document.getElementById("lastName").value.trim();
     const email = document.getElementById("email").value.trim();
+    const studentID = document.getElementById("studentID").value.trim();
+    const department = document.getElementById("department").value.trim();
+    const program = document.getElementById("program").value.trim();
     const contact = document.getElementById("contact").value.trim();
     const password = document.getElementById("password").value.trim();
     const confirm = document.getElementById("confirm").value.trim();
@@ -256,6 +274,9 @@ form.addEventListener("submit", function(e){
             name: firstName + " " + lastName,
             email: email,
             password: password,
+            studentID: studentID,
+            department: department,
+            program: program,
             contact: contact,
             fees: 0,
             route_id: routeId,
