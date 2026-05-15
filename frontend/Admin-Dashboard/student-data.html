@@ -229,14 +229,14 @@ transform:translateY(-2px);
 <div class="main">
 
 <h1>Students Details</h1>
-<div id="summary">Loading student records...</div>
+<div id="summary"></div>
 
 <div class="table-box">
 
 <div class="top-bar">
 
 <div class="search-box">
-<input type="text" id="searchInput" placeholder="Search by Reg. No, Name, Department or Route...">
+<input type="text" id="searchInput" placeholder="Search by Reg. No, Name, Department, Section, Program or Route...">
 <button onclick="searchStudent()">Search</button>
 </div>
 
@@ -252,6 +252,7 @@ transform:translateY(-2px);
 <th>Reg. No</th>
 <th>Name</th>
 <th>Department</th>
+<th>Section</th>
 <th>Route</th>
 <th>Actions</th>
 </tr>
@@ -369,8 +370,7 @@ rows+=`
 <tr>
 <td>${student.studentID || "-"}</td>
 <td>${student.name || "-"}</td>
-<td>${student.department || "-"}</td>
-<td>${routeName}</td>
+<td>${student.department || "-"}</td><td>${student.section || "-"}</td><td>${routeName}</td>
 <td>
 <button class="icon-btn edit" title="View Details" onclick="viewStudent(${student.id})">
 <i class="fa fa-eye"></i>
@@ -385,14 +385,11 @@ document.getElementById("studentsTable").innerHTML=rows;
 
 const summaryEl = document.getElementById("summary");
 if(summaryEl){
-    const total = data.length;
-    const deptCount = keyword ? studentsData.filter(s => String(s.department||"").toLowerCase() === keyword).length : 0;
-    if(keyword && deptCount){
-        summaryEl.innerText = `Department "${keyword}" has ${deptCount} student${deptCount===1 ? '' : 's'}.`;
-    } else if(keyword){
-        summaryEl.innerText = `Showing ${total} student${total===1 ? '' : 's'} for "${keyword}".`;
+    if(keyword){
+        const total = data.length;
+        summaryEl.innerText = `Found ${total} student${total===1 ? '' : 's'} for "${keyword}".`;
     } else {
-        summaryEl.innerText = `Showing all ${total} student${total===1 ? '' : 's'}.`;
+        summaryEl.innerText = "";
     }
 }
 }
@@ -422,12 +419,36 @@ function searchStudent(){
         return;
     }
 
+    // Check for exact department match
+    const deptMatch = studentsData.filter(s => String(s.department||"").toLowerCase() === keyword);
+    if(deptMatch.length > 0){
+        renderTable(deptMatch, keyword);
+        return;
+    }
+
+    // Check for exact program match
+    const progMatch = studentsData.filter(s => String(s.program||"").toLowerCase() === keyword);
+    if(progMatch.length > 0){
+        renderTable(progMatch, keyword);
+        return;
+    }
+
+    // Check for exact section match
+    const sectMatch = studentsData.filter(s => String(s.section||"").toLowerCase() === keyword);
+    if(sectMatch.length > 0){
+        renderTable(sectMatch, keyword);
+        return;
+    }
+
+    // Fallback to general search
     let filtered=studentsData.filter(s=>{
         const routeName = getRouteName(s).toLowerCase();
         return (
             String(s.name||"").toLowerCase().includes(keyword) ||
             String(s.studentID||"").toLowerCase().includes(keyword) ||
             String(s.department||"").toLowerCase().includes(keyword) ||
+            String(s.section||"").toLowerCase().includes(keyword) ||
+            String(s.program||"").toLowerCase().includes(keyword) ||
             routeName.includes(keyword)
         );
     });
@@ -454,41 +475,49 @@ loadStudents();
 
 /* update */
 function viewStudent(id){
-    const student = studentsData.find(s => Number(s.id) === Number(id) || s.id === id);
-    if(!student) return;
-    const img = student.image && student.image.trim() !== ""
-        ? `https://acceptable-solace-production-06f3.up.railway.app${student.image}?t=${Date.now()}`
-        : "https://i.imgur.com/6VBx3io.png";
-    const routeName = getRouteName(student);
-    const stopName = getStopName(student);
+    fetch(`https://acceptable-solace-production-06f3.up.railway.app/get_student/${id}`)
+    .then(res => res.json())
+    .then(student => {
+        if(!student) return;
+        const img = student.image && student.image.trim() !== ""
+            ? `https://acceptable-solace-production-06f3.up.railway.app${student.image}?t=${Date.now()}`
+            : "https://i.imgur.com/6VBx3io.png";
+        const routeName = getRouteName(student);
+        const stopName = getStopName(student);
 
-    document.getElementById('modalBody').innerHTML = `
-        <div class="profile-grid">
-            <div class="profile-card">
-                <img src="${img}" alt="Student Photo">
+        document.getElementById('modalBody').innerHTML = `
+            <div class="profile-grid">
+                <div class="profile-card">
+                    <img src="${img}" alt="Student Photo">
+                </div>
+                <div class="profile-info">
+                    <p><strong>Reg. No:</strong> ${student.studentID || "-"}</p>
+                    <p><strong>Name:</strong> ${student.name || "-"}</p>
+                    <p><strong>Email:</strong> ${student.email || "-"}</p>
+                    <p><strong>Department:</strong> ${student.department || "-"}</p>
+                    <p><strong>Program:</strong> ${student.program || "-"}</p>
+                    <p><strong>Section:</strong> ${student.section || "-"}</p>
+                    <p><strong>Contact:</strong> ${student.contact || "-"}</p>
+                    <p><strong>Route:</strong> ${routeName}</p>
+                    <p><strong>Stop:</strong> ${stopName}</p>
+                </div>
             </div>
-            <div class="profile-info">
-                <p><strong>Reg. No:</strong> ${student.studentID || "-"}</p>
-                <p><strong>Name:</strong> ${student.name || "-"}</p>
-                <p><strong>Email:</strong> ${student.email || "-"}</p>
-                <p><strong>Department:</strong> ${student.department || "-"}</p>
-                <p><strong>Program:</strong> ${student.program || "-"}</p>
-                <p><strong>Contact:</strong> ${student.contact || "-"}</p>
-                <p><strong>Route:</strong> ${routeName}</p>
-                <p><strong>Stop:</strong> ${stopName}</p>
-            </div>
-        </div>
-    `;
-    const editBtn = document.getElementById('editProfileBtn');
-    const deleteBtn = document.getElementById('deleteProfileBtn');
-    editBtn.onclick = () => window.location.href = `update-student.html?id=${id}`;
-    deleteBtn.onclick = () => {
-        if(confirm('Delete this student record?')){
-            deleteStudent(id);
-            closeModal();
-        }
-    };
-    document.getElementById('detailModal').style.display = 'flex';
+        `;
+        const editBtn = document.getElementById('editProfileBtn');
+        const deleteBtn = document.getElementById('deleteProfileBtn');
+        editBtn.onclick = () => window.location.href = `update-student.html?id=${id}`;
+        deleteBtn.onclick = () => {
+            if(confirm('Delete this student record?')){
+                deleteStudent(id);
+                closeModal();
+            }
+        };
+        document.getElementById('detailModal').style.display = 'flex';
+    })
+    .catch(err => {
+        console.error("Error fetching student:", err);
+        alert("Error loading student details");
+    });
 }
 
 function closeModal(){

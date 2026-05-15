@@ -72,6 +72,11 @@ button:hover{transform:translateY(-2px);}
 </div>
 
 <div class="input-group">
+<i class="fa fa-users"></i>
+<input type="text" id="section" placeholder="Section">
+</div>
+
+<div class="input-group">
 <i class="fa fa-phone"></i>
 <input type="text" id="contact" placeholder="Contact" pattern="[0-9]{11}" minlength="11" maxlength="11" inputmode="numeric">
 </div>
@@ -105,6 +110,7 @@ document.getElementById("email").value=data.email;
 document.getElementById("studentID").value=data.studentID || "";
 document.getElementById("department").value=data.department || "";
 document.getElementById("program").value=data.program || "";
+document.getElementById("section").value=data.section || "";
 document.getElementById("contact").value=data.contact;
 document.getElementById("password").value=data.password;
 
@@ -121,6 +127,7 @@ email:document.getElementById("email").value,
 studentID:document.getElementById("studentID").value,
 department:document.getElementById("department").value,
 program:document.getElementById("program").value,
+section:document.getElementById("section").value,
 contact:document.getElementById("contact").value,
 password:document.getElementById("password").value
 
