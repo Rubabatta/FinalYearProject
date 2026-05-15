@@ -7,6 +7,7 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
 
 <style>
 *{
@@ -18,32 +19,138 @@ font-family:'Poppins',sans-serif;
 
 body{
 display:flex;
-background:#f4f6fb;
+background:#eef3f8;
+}
+
+:root{
+--dashboard-sidebar-width:210px;
+}
+
+body.admin-dashboard .sidebar{
+width:var(--dashboard-sidebar-width);
+padding:18px 14px;
+box-shadow:6px 0 24px rgba(0,0,0,0.14);
+transform:translateX(0);
+transition:transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+body.admin-dashboard .logo-section{
+gap:10px;
+margin-bottom:16px;
+}
+
+body.admin-dashboard .logo-icon{
+width:42px;
+height:42px;
+border-radius:12px;
+font-size:18px;
+}
+
+body.admin-dashboard .logo-section h2{
+font-size:17px;
+}
+
+body.admin-dashboard .logo-section p{
+font-size:10px;
+line-height:1.35;
+}
+
+body.admin-dashboard .sidebar ul li{
+gap:10px;
+padding:8px 10px;
+margin-bottom:7px;
+border-radius:10px;
+font-size:12px;
+}
+
+body.admin-dashboard .sidebar ul li i{
+min-width:17px;
+font-size:14px;
+}
+
+body.admin-dashboard .sidebar ul li:hover{
+transform:translateX(4px);
+}
+
+body.admin-dashboard.sidebar-collapsed .sidebar{
+transform:translateX(calc(-1 * var(--dashboard-sidebar-width) - 16px));
+box-shadow:none;
+}
+
+.sidebar-toggle{
+position:fixed;
+top:12px;
+left:12px;
+z-index:1200;
+width:38px;
+height:38px;
+border:none;
+border-radius:10px;
+background:#ffffff;
+color:#0f172a;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:16px;
+cursor:pointer;
+box-shadow:0 8px 22px rgba(15,23,42,0.14);
+border:1px solid #e2e8f0;
+transition:background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sidebar-toggle:hover{
+background:#f8fafc;
+transform:translateY(-1px);
+box-shadow:0 12px 26px rgba(15,23,42,0.16);
+}
+
+body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle{
+left:222px;
+}
+
+.sidebar-backdrop{
+position:fixed;
+inset:0;
+background:rgba(15,23,42,0.24);
+z-index:900;
+opacity:0;
+pointer-events:none;
+transition:opacity 0.2s ease;
+}
+
+body.admin-dashboard:not(.sidebar-collapsed) .sidebar-backdrop{
+opacity:1;
+pointer-events:auto;
 }
 
 .main{
-margin-left:240px;
+margin-left:var(--dashboard-sidebar-width);
 width:100%;
-padding:22px 30px 30px;
+padding:16px 20px 24px;
+transition:margin-left 0.25s ease;
+}
+
+body.admin-dashboard.sidebar-collapsed .main{
+margin-left:0;
 }
 
 .cards{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-gap:14px;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:12px;
 align-items:stretch;
 }
 
 .card{
-background:white;
-padding:16px 18px;
-border-radius:12px;
-box-shadow:0 8px 24px rgba(15,23,42,0.07);
+background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+padding:12px 14px;
+border-radius:10px;
+box-shadow:0 8px 22px rgba(15,23,42,0.055);
 display:flex;
 justify-content:space-between;
 align-items:center;
-min-height:96px;
-border:1px solid rgba(226,232,240,0.9);
+min-height:78px;
+border:1px solid rgba(226,232,240,0.95);
 position:relative;
 overflow:hidden;
 transition:transform 0.2s ease, box-shadow 0.2s ease;
@@ -54,41 +161,279 @@ content:"";
 position:absolute;
 left:0;
 top:0;
-bottom:0;
-width:4px;
+right:0;
+height:3px;
 background:#3b82f6;
 }
 
+.card:nth-child(2)::before{background:#0f766e;}
+.card:nth-child(3)::before{background:#16a34a;}
+.card:nth-child(4)::before{background:#7c3aed;}
+
 .card:hover{
 transform:translateY(-2px);
-box-shadow:0 12px 28px rgba(15,23,42,0.10);
+box-shadow:0 10px 22px rgba(15,23,42,0.09);
 }
 
 .card h3{
-font-size:13px;
+font-size:12px;
 font-weight:600;
-color:#64748b;
-margin-bottom:6px;
+color:#475569;
+margin-bottom:7px;
+letter-spacing:0;
 }
 
 .card i{
-width:40px;
-height:40px;
-border-radius:10px;
+width:36px;
+height:36px;
+border-radius:8px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:18px;
+font-size:16px;
 color:#3b82f6;
 background:#eff6ff;
 flex-shrink:0;
+box-shadow:inset 0 0 0 1px rgba(59,130,246,0.10);
 }
 
+.card:nth-child(2) i{color:#0f766e;background:#ccfbf1;box-shadow:inset 0 0 0 1px rgba(15,118,110,0.12);}
+.card:nth-child(3) i{color:#16a34a;background:#dcfce7;box-shadow:inset 0 0 0 1px rgba(22,163,74,0.12);}
+.card:nth-child(4) i{color:#7c3aed;background:#f3e8ff;box-shadow:inset 0 0 0 1px rgba(124,58,237,0.12);}
+
 .card p{
-font-size:22px;
+font-size:20px;
 font-weight:700;
-color:#1e3a8a;
+color:#0f172a;
 line-height:1;
+}
+
+.dashboard-layout{
+display:grid;
+grid-template-columns:minmax(0,1fr) 245px;
+gap:14px;
+margin-top:16px;
+align-items:stretch;
+}
+
+.map-panel,
+.status-panel{
+background:rgba(255,255,255,0.98);
+border:1px solid rgba(203,213,225,0.86);
+border-radius:12px;
+box-shadow:0 12px 30px rgba(15,23,42,0.075);
+overflow:hidden;
+}
+
+.panel-header{
+min-height:46px;
+padding:11px 12px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+border-bottom:1px solid rgba(226,232,240,0.95);
+background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+}
+
+.panel-header h2{
+font-size:13px;
+font-weight:700;
+color:#0f172a;
+display:flex;
+align-items:center;
+gap:7px;
+}
+
+.panel-header h2::before{
+content:"";
+width:7px;
+height:7px;
+border-radius:999px;
+background:#16a34a;
+box-shadow:0 0 0 4px rgba(22,163,74,0.12);
+}
+
+.panel-header span{
+font-size:11px;
+font-weight:600;
+color:#64748b;
+}
+
+#adminMap{
+height:494px;
+width:100%;
+}
+
+.status-panel{
+display:flex;
+flex-direction:column;
+min-height:494px;
+}
+
+.map-panel{
+position:relative;
+}
+
+.map-status-pill{
+position:absolute;
+top:10px;
+right:10px;
+z-index:500;
+font-size:10px;
+font-weight:700;
+color:#334155;
+background:rgba(255,255,255,0.92);
+border:1px solid rgba(226,232,240,0.95);
+border-radius:999px;
+padding:5px 9px;
+box-shadow:0 6px 16px rgba(15,23,42,0.10);
+backdrop-filter:blur(8px);
+}
+
+.status-summary{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:8px;
+padding:10px;
+border-bottom:1px solid rgba(226,232,240,0.95);
+background:#fbfdff;
+}
+
+.status-chip{
+border:1px solid rgba(226,232,240,0.95);
+border-radius:10px;
+padding:8px 9px;
+background:#ffffff;
+box-shadow:0 5px 14px rgba(15,23,42,0.035);
+}
+
+.status-chip:nth-child(1){border-color:rgba(22,163,74,0.22);background:#f0fdf4;}
+.status-chip:nth-child(2){border-color:rgba(239,68,68,0.20);background:#fff7f7;}
+.status-chip:nth-child(3){border-color:rgba(245,158,11,0.24);background:#fffbeb;}
+.status-chip:nth-child(4){border-color:rgba(37,99,235,0.22);background:#eff6ff;}
+
+.status-chip strong{
+display:block;
+font-size:16px;
+line-height:1;
+color:#0f172a;
+}
+
+.status-chip span{
+display:block;
+font-size:9px;
+font-weight:600;
+color:#64748b;
+margin-top:5px;
+}
+
+.bus-status-list{
+padding:10px;
+display:flex;
+flex-direction:column;
+gap:8px;
+overflow:auto;
+max-height:384px;
+}
+
+.bus-status-item{
+border:1px solid rgba(226,232,240,0.95);
+border-left:3px solid #cbd5e1;
+border-radius:10px;
+padding:9px 10px;
+background:#ffffff;
+cursor:pointer;
+transition:background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bus-status-item.bus-online{border-left-color:#16a34a;}
+.bus-status-item.bus-offline{border-left-color:#ef4444;}
+.bus-status-item.bus-disconnected{border-left-color:#f59e0b;}
+.bus-status-item.bus-stopped{border-left-color:#2563eb;}
+
+.bus-status-item:hover{
+background:#fbfdff;
+border-color:#cbd5e1;
+box-shadow:0 8px 18px rgba(15,23,42,0.075);
+}
+
+.bus-status-top{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:8px;
+margin-bottom:7px;
+}
+
+.bus-name{
+font-size:11.5px;
+font-weight:700;
+color:#0f172a;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.bus-name i{
+color:#2563eb;
+margin-right:4px;
+}
+
+.status-badge{
+font-size:9px;
+font-weight:700;
+padding:3px 6px;
+border-radius:999px;
+white-space:nowrap;
+}
+
+.status-online{color:#15803d;background:#dcfce7;}
+.status-offline{color:#b91c1c;background:#fee2e2;}
+.status-disconnected{color:#92400e;background:#fef3c7;}
+.status-stopped{color:#1d4ed8;background:#dbeafe;}
+
+.bus-meta{
+font-size:10px;
+color:#64748b;
+line-height:1.6;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.empty-state{
+font-size:12px;
+color:#64748b;
+padding:16px 12px;
+text-align:center;
+}
+
+@media(max-width:768px){
+.main{
+margin-left:0;
+padding:18px;
+}
+
+body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle{
+left:12px;
+}
+
+.cards{
+grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+}
+
+.dashboard-layout{
+grid-template-columns:1fr;
+}
+
+#adminMap{
+height:340px;
+}
+
+.bus-status-list{
+max-height:none;
+}
 }
 
 /* MODAL */
@@ -201,9 +546,13 @@ background:#ef4444 !important;
 
 </head>
 
-<body>
+<body class="admin-dashboard sidebar-collapsed">
 
 <div class="toast-container" id="toastContainer"></div>
+<button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+    <i class="fa-solid fa-ellipsis-vertical"></i>
+</button>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
 <div id="sidebar-placeholder"></div>
 <div id="header-placeholder"></div>
@@ -245,6 +594,29 @@ background:#ef4444 !important;
     </div>
 
 </div>
+
+<div class="dashboard-layout">
+    <section class="map-panel">
+        <span class="map-status-pill" id="mapStatus">Syncing...</span>
+        <div id="adminMap"></div>
+    </section>
+
+    <aside class="status-panel">
+        <div class="panel-header">
+            <h2>Bus Monitor</h2>
+            <span id="monitorUpdated">--</span>
+        </div>
+        <div class="status-summary">
+            <div class="status-chip"><strong id="monitorActive">0</strong><span>Active</span></div>
+            <div class="status-chip"><strong id="monitorOffline">0</strong><span>Offline</span></div>
+            <div class="status-chip"><strong id="monitorDisconnected">0</strong><span>Disconnected</span></div>
+            <div class="status-chip"><strong id="monitorStopped">0</strong><span>At Stop</span></div>
+        </div>
+        <div class="bus-status-list" id="busMonitorList">
+            <div class="empty-state">Loading bus status...</div>
+        </div>
+    </aside>
+</div>
 </div>
 
 <!-- PASSWORD MODAL -->
@@ -257,6 +629,8 @@ background:#ef4444 !important;
         <button class="close-btn" onclick="closeModal()">Cancel</button>
     </div>
 </div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
 
@@ -286,8 +660,46 @@ function showToast(message){
 }
 
 // BUS STATUS TRACKING
-const busStatusMap = {}; // Track { busId: { status: "ONLINE/OFFLINE", lastNotified: timestamp } }
+const busStatusMap = {};
 const API_URL = "https://acceptable-solace-production-06f3.up.railway.app";
+const ONLINE_THRESHOLD_SECONDS = 60;
+const STOP_DISTANCE_KM = 0.12;
+let adminMap;
+let adminMarkers = {};
+let stopsCache = {};
+
+function setSidebarState(collapsed){
+    document.body.classList.toggle("sidebar-collapsed", collapsed);
+    document.documentElement.style.setProperty('--sidebar-offset', collapsed ? '0px' : '210px');
+    setTimeout(()=>{
+        if(adminMap) adminMap.invalidateSize();
+    }, 260);
+}
+
+setSidebarState(true);
+
+document.getElementById("sidebarToggle").addEventListener("click", ()=>{
+    setSidebarState(!document.body.classList.contains("sidebar-collapsed"));
+});
+
+document.getElementById("sidebarBackdrop").addEventListener("click", ()=>{
+    setSidebarState(true);
+});
+
+document.addEventListener("keydown", event=>{
+    if(event.key === "Escape"){
+        setSidebarState(true);
+    }
+});
+
+function initAdminMap(){
+    if(adminMap || typeof L === "undefined") return;
+    adminMap = L.map('adminMap').setView([30.1575,71.5249], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom:19
+    }).addTo(adminMap);
+    setTimeout(()=>adminMap.invalidateSize(), 150);
+}
 
 function parseTimestamp(timestamp){
     if(!timestamp) return NaN;
@@ -308,55 +720,225 @@ function parseTimestamp(timestamp){
     return parsed;
 }
 
-function checkBusStatus(){
-    fetch(`${API_URL}/get_buses`)
-    .then(res=>res.json())
-    .then(buses=>{
-        buses.forEach(bus=>{
-            fetch(`${API_URL}/get_location/${bus.id}`)
+function calculateDistance(lat1, lon1, lat2, lon2){
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+}
+
+function formatAge(seconds){
+    if(!Number.isFinite(seconds) || seconds < 0) return "--";
+    if(seconds < 60) return `${Math.floor(seconds)} sec`;
+    if(seconds < 3600) return `${Math.floor(seconds / 60)} min`;
+    return `${Math.floor(seconds / 3600)} hr ${Math.floor((seconds % 3600) / 60)} min`;
+}
+
+function getStatusLabel(status){
+    if(status === "ONLINE") return "Active";
+    if(status === "STOPPED") return "At Stop";
+    if(status === "DISCONNECTED") return "Disconnected";
+    return "Offline";
+}
+
+function getLatestLocations(locations){
+    const latest = {};
+    locations.forEach(item=>{
+        const id = item.bus_id;
+        const time = parseTimestamp(item.last_updated);
+        if(!id || isNaN(time)) return;
+        if(!latest[id] || time > latest[id].time){
+            latest[id] = { data:item, time };
+        }
+    });
+    return latest;
+}
+
+function fetchStops(routeId){
+    if(!routeId) return Promise.resolve([]);
+    if(!stopsCache[routeId]){
+        stopsCache[routeId] = fetch(`${API_URL}/get_stops/${routeId}`)
             .then(res=>res.json())
-            .then(data=>{
-                const now = Date.now();
-                const lastUpdate = parseTimestamp(data.last_updated);
-                const diffSeconds = (now - lastUpdate) / 1000;
-                const isOnline = diffSeconds < 60; // ✅ 1 minute threshold
-                const currentStatus = isOnline ? "ONLINE" : "OFFLINE";
-                
-                console.log(`Bus ${bus.id}: diff=${Math.round(diffSeconds)}s, status=${currentStatus}`);
-                
-                if(!busStatusMap[bus.id]){
-                    busStatusMap[bus.id] = { status: null };
-                }
-                
-                const previousStatus = busStatusMap[bus.id].status;
+            .then(stops=>Array.isArray(stops) ? stops : [])
+            .catch(()=>[]);
+    }
+    return stopsCache[routeId];
+}
 
-                // Notify only when status changes from ONLINE to OFFLINE
-                if(previousStatus === "ONLINE" && currentStatus === "OFFLINE"){
-                    console.log(`Bus ${bus.id} went offline!`);
-                    showToast(`🔴 Bus ${bus.id} has gone offline`);
-                    busStatusMap[bus.id].lastNotified = now;
-                }
+function findStopInfo(stops, lat, lng){
+    let nearest = null;
+    let nearestIndex = -1;
+    const validStops = stops
+        .slice()
+        .sort((a,b)=>(Number(a.stop_order)||0)-(Number(b.stop_order)||0))
+        .filter(stop=>Number.isFinite(Number(stop.latitude)) && Number.isFinite(Number(stop.longitude)));
 
-                busStatusMap[bus.id].status = currentStatus;
-                updateActiveBusesCount();
-            })
-            .catch(err=>{
-                console.error(`Bus ${bus.id} location fetch error:`, err);
-                // If we can't fetch location, consider it offline
-                if(!busStatusMap[bus.id]){
-                    busStatusMap[bus.id] = { status: null };
+    validStops.forEach((stop,index)=>{
+        const distance = calculateDistance(lat, lng, Number(stop.latitude), Number(stop.longitude));
+        if(!nearest || distance < nearest.distance){
+            nearest = {...stop, distance};
+            nearestIndex = index;
+        }
+    });
+
+    const nextStop = nearestIndex >= 0 && nearestIndex < validStops.length - 1 ? validStops[nearestIndex + 1] : null;
+    return {
+        currentStop: nearest,
+        nextStop,
+        isStopped: !!nearest && nearest.distance <= STOP_DISTANCE_KM
+    };
+}
+
+function markerIcon(status){
+    const color = status === "ONLINE" ? "#16a34a" : status === "STOPPED" ? "#2563eb" : status === "DISCONNECTED" ? "#f59e0b" : "#ef4444";
+    return L.divIcon({
+        className:"",
+        html:`<div style="width:14px;height:14px;border-radius:50%;background:${color};border:3px solid white;box-shadow:0 4px 12px rgba(15,23,42,0.35);"></div>`,
+        iconSize:[20,20],
+        iconAnchor:[10,10]
+    });
+}
+
+function renderMarker(item){
+    if(!adminMap || !Number.isFinite(item.lat) || !Number.isFinite(item.lng)) return;
+    const popup = `${item.busNumber}<br>${getStatusLabel(item.status)}<br>${item.currentStop || "No stop data"}`;
+    if(adminMarkers[item.id]){
+        adminMarkers[item.id].setLatLng([item.lat,item.lng]).setIcon(markerIcon(item.status)).bindPopup(popup);
+    }else{
+        adminMarkers[item.id] = L.marker([item.lat,item.lng],{icon:markerIcon(item.status)})
+            .addTo(adminMap)
+            .bindPopup(popup);
+    }
+}
+
+function renderMonitor(items){
+    const list = document.getElementById("busMonitorList");
+    if(!list) return;
+
+    if(items.length === 0){
+        list.innerHTML = '<div class="empty-state">No buses found.</div>';
+        return;
+    }
+
+    list.innerHTML = "";
+    items
+        .sort((a,b)=>a.statusOrder-b.statusOrder || String(a.busNumber).localeCompare(String(b.busNumber)))
+        .forEach(item=>{
+            const div = document.createElement("div");
+            const cssStatus = item.status === "ONLINE" ? "online" : item.status === "STOPPED" ? "stopped" : item.status === "DISCONNECTED" ? "disconnected" : "offline";
+            div.className = `bus-status-item bus-${cssStatus}`;
+            div.innerHTML = `
+                <div class="bus-status-top">
+                    <div class="bus-name"><i class="fa fa-bus"></i> ${item.busNumber}</div>
+                    <span class="status-badge status-${cssStatus}">${getStatusLabel(item.status)}</span>
+                </div>
+                <div class="bus-meta">${item.ageLabel}: ${item.ageText}</div>
+                <div class="bus-meta">Current: ${item.currentStop || "-"}</div>
+                <div class="bus-meta">Next: ${item.nextStop || "-"}</div>
+            `;
+            div.onclick = () => {
+                if(adminMap && Number.isFinite(item.lat) && Number.isFinite(item.lng)){
+                    adminMap.setView([item.lat,item.lng],16);
+                    if(adminMarkers[item.id]) adminMarkers[item.id].openPopup();
                 }
-                const previousStatus = busStatusMap[bus.id].status;
-                if(previousStatus === "ONLINE"){
-                    console.log(`Bus ${bus.id} disconnected!`);
-                    showToast(`🔴 Bus ${bus.id} disconnected`);
-                }
-                busStatusMap[bus.id].status = "OFFLINE";
-                updateActiveBusesCount();
-            });
+            };
+            list.appendChild(div);
         });
-    })
-    .catch(err=>console.error("Error checking bus status:", err));
+}
+
+function updateMonitorCounts(items){
+    const active = items.filter(item=>item.status === "ONLINE" || item.status === "STOPPED").length;
+    const offline = items.filter(item=>item.status === "OFFLINE").length;
+    const disconnected = items.filter(item=>item.status === "DISCONNECTED").length;
+    const stopped = items.filter(item=>item.status === "STOPPED").length;
+
+    document.getElementById("monitorActive").innerText = active;
+    document.getElementById("monitorOffline").innerText = offline;
+    document.getElementById("monitorDisconnected").innerText = disconnected;
+    document.getElementById("monitorStopped").innerText = stopped;
+    document.getElementById("activeBuses").innerText = active;
+    document.getElementById("mapStatus").innerText = `${items.length} buses tracked`;
+    document.getElementById("monitorUpdated").innerText = new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+}
+
+async function checkBusStatus(){
+    initAdminMap();
+    try{
+        const [buses, locations] = await Promise.all([
+            fetch(`${API_URL}/get_buses`).then(res=>res.json()),
+            fetch(`${API_URL}/get_all_locations`).then(res=>res.json()).catch(()=>[])
+        ]);
+
+        const latest = getLatestLocations(Array.isArray(locations) ? locations : []);
+        const items = await Promise.all((Array.isArray(buses) ? buses : []).map(async bus=>{
+            const location = latest[bus.id]?.data;
+            const previousStatus = busStatusMap[bus.id]?.status || null;
+            const now = Date.now();
+            let status = "DISCONNECTED";
+            let ageSeconds = NaN;
+            let lat = NaN;
+            let lng = NaN;
+            let currentStop = "";
+            let nextStop = "";
+
+            if(location){
+                lat = Number(location.latitude);
+                lng = Number(location.longitude);
+                const lastUpdate = parseTimestamp(location.last_updated);
+                ageSeconds = (now - lastUpdate) / 1000;
+                status = ageSeconds < ONLINE_THRESHOLD_SECONDS ? "ONLINE" : "OFFLINE";
+
+                if(Number.isFinite(lat) && Number.isFinite(lng) && bus.route_id){
+                    const stopInfo = findStopInfo(await fetchStops(bus.route_id), lat, lng);
+                    currentStop = stopInfo.currentStop?.stop_name || "";
+                    nextStop = stopInfo.nextStop?.stop_name || (currentStop ? "End" : "");
+                    if(status === "ONLINE" && stopInfo.isStopped){
+                        status = "STOPPED";
+                    }
+                }
+            }
+
+            if(previousStatus && previousStatus !== status){
+                if(status === "OFFLINE") showToast(`Bus ${bus.bus_number || bus.id} offline for ${formatAge(ageSeconds)}`);
+                if(status === "DISCONNECTED") showToast(`Bus ${bus.bus_number || bus.id} disconnected`);
+                if(status === "STOPPED") showToast(`Bus ${bus.bus_number || bus.id} stopped at ${currentStop || "a stop"}`);
+            }
+
+            busStatusMap[bus.id] = { status };
+
+            return {
+                id:bus.id,
+                busNumber:bus.bus_number || `Bus ${bus.id}`,
+                status,
+                statusOrder:status === "STOPPED" ? 0 : status === "ONLINE" ? 1 : status === "OFFLINE" ? 2 : 3,
+                ageLabel:status === "OFFLINE" ? "Offline for" : status === "DISCONNECTED" ? "Signal" : "Last update",
+                ageText:status === "DISCONNECTED" ? "No location signal" : formatAge(ageSeconds),
+                currentStop,
+                nextStop,
+                lat,
+                lng
+            };
+        }));
+
+        Object.keys(adminMarkers).forEach(id=>{
+            if(!items.some(item=>String(item.id) === String(id))){
+                adminMap.removeLayer(adminMarkers[id]);
+                delete adminMarkers[id];
+            }
+        });
+        items.forEach(renderMarker);
+        renderMonitor(items);
+        updateMonitorCounts(items);
+        if(adminMap) setTimeout(()=>adminMap.invalidateSize(), 100);
+    }catch(err){
+        console.error("Error checking bus status:", err);
+        document.getElementById("mapStatus").innerText = "Sync failed";
+        document.getElementById("busMonitorList").innerHTML = '<div class="empty-state">Unable to load bus status.</div>';
+    }
 }
 
 // Check bus status every 15 seconds for faster detection
@@ -401,7 +983,7 @@ fetch('https://acceptable-solace-production-06f3.up.railway.app/get_drivers')
 .then(d=>document.getElementById("totalDrivers").innerText=d.length);
 
 function updateActiveBusesCount(){
-    const activeCount = Object.values(busStatusMap).filter(s => s.status === "ONLINE").length;
+    const activeCount = Object.values(busStatusMap).filter(s => s.status === "ONLINE" || s.status === "STOPPED").length;
     const activeEl = document.getElementById("activeBuses");
     if(activeEl){
         activeEl.innerText = activeCount;
