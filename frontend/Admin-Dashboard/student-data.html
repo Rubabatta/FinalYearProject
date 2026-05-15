@@ -72,6 +72,153 @@ border:1px solid #ddd;
 .icon-btn.delete{background:#ef4444;}
 
 td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+
+/* modal */
+/* ===== MODAL BACKDROP ===== */
+.modal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(15,23,42,0.7);
+backdrop-filter:blur(6px);
+z-index:1000;
+align-items:center;
+justify-content:center;
+padding:20px;
+}
+
+/* ===== MODAL BOX ===== */
+.modal-content{
+background:#ffffff;
+border-radius:18px;
+max-width:750px;
+width:100%;
+padding:25px;
+
+box-shadow:0 25px 60px rgba(0,0,0,0.25);
+position:relative;
+
+animation:pop 0.25s ease-in-out;
+}
+
+@keyframes pop{
+from{transform:scale(0.9); opacity:0;}
+to{transform:scale(1); opacity:1;}
+}
+
+/* CLOSE BUTTON */
+.close-btn{
+position:absolute;
+top:12px;
+right:16px;
+font-size:26px;
+color:#64748b;
+cursor:pointer;
+transition:0.2s;
+}
+.close-btn:hover{
+color:#ef4444;
+}
+
+/* TITLE */
+.modal-header h2{
+font-size:20px;
+color:#1e3a8a;
+margin-bottom:18px;
+border-bottom:1px solid #e2e8f0;
+padding-bottom:10px;
+}
+
+/* ===== PROFILE LAYOUT ===== */
+.profile-grid{
+display:flex;
+gap:20px;
+align-items:flex-start;
+}
+
+/* IMAGE */
+.profile-card img{
+width:130px;
+height:130px;
+border-radius:16px;
+object-fit:cover;
+border:2px solid #e2e8f0;
+box-shadow:0 8px 18px rgba(0,0,0,0.08);
+}
+
+/* INFO BOX */
+.profile-info{
+flex:1;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+/* EACH TEXT BOX */
+.profile-info p{
+background:#f8fafc;
+padding:10px 12px;
+border-radius:10px;
+border:1px solid #eef2ff;
+
+font-size:13px;
+color:#334155;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+transition:0.2s;
+}
+
+.profile-info p:hover{
+background:#eef2ff;
+transform:translateY(-1px);
+}
+
+/* LABEL */
+.profile-info p strong{
+color:#1e3a8a;
+font-weight:600;
+}
+
+/* ===== FOOTER BUTTONS ===== */
+.modal-footer{
+margin-top:20px;
+display:flex;
+justify-content:flex-end;
+gap:10px;
+}
+
+.modal-footer button{
+padding:10px 16px;
+border-radius:10px;
+border:none;
+cursor:pointer;
+font-weight:600;
+transition:0.2s;
+}
+
+/* BUTTON STYLES */
+.add-btn{
+background:#10b981;
+color:white;
+}
+
+.add-btn:hover{
+background:#059669;
+transform:translateY(-2px);
+}
+
+.danger-btn{
+background:#ef4444;
+color:white;
+}
+
+.danger-btn:hover{
+background:#dc2626;
+transform:translateY(-2px);
+}
 </style>
 </head>
 
@@ -89,7 +236,7 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 <div class="top-bar">
 
 <div class="search-box">
-<input type="text" id="searchInput" placeholder="Search by ID, Name, Email or Department...">
+<input type="text" id="searchInput" placeholder="Search by Reg. No, Name, Department or Route...">
 <button onclick="searchStudent()">Search</button>
 </div>
 
@@ -102,24 +249,28 @@ td:last-child{display:flex;align-items:center;gap:6px;white-space:nowrap;}
 <table>
 <thead>
 <tr>
-<th>ID</th>
-<th>Image</th>
-<th>Name</th>
-<th>Email</th>
 <th>Reg. No</th>
+<th>Name</th>
 <th>Department</th>
-<th>Program</th>
-<th>Contact</th>
 <th>Route</th>
-<th>Stop</th>
 <th>Actions</th>
 </tr>
 </thead>
-
 <tbody id="studentsTable"></tbody>
-
 </table>
 
+</div>
+</div>
+
+<div id="detailModal" class="modal" onclick="if(event.target===this) closeModal();">
+<div class="modal-content">
+<span class="close-btn" onclick="closeModal()">&times;</span>
+<div class="modal-header"><h2>Student Profile</h2></div>
+<div class="modal-body" id="modalBody"></div>
+<div class="modal-footer">
+<button type="button" class="danger-btn" id="deleteProfileBtn">Delete Student</button>
+<button type="button" class="add-btn" id="editProfileBtn">Edit Student</button>
+</div>
 </div>
 </div>
 
@@ -216,31 +367,15 @@ if(stopId && routeId){
 
 rows+=`
 <tr>
-<td>${student.id}</td>
-
-<td>
-<img src="${img}">
-</td>
-
-<td>${student.name}</td>
-<td>${student.email}</td>
 <td>${student.studentID || "-"}</td>
+<td>${student.name || "-"}</td>
 <td>${student.department || "-"}</td>
-<td>${student.program || "-"}</td>
-<td>${student.contact || "-"}</td>
 <td>${routeName}</td>
-<td>${stopName}</td>
-
 <td>
-<button class="icon-btn edit" onclick="updateStudent(${student.id})">
-<i class="fa fa-pencil"></i>
-</button>
-
-<button class="icon-btn delete" onclick="deleteStudent(${student.id})">
-<i class="fa fa-trash"></i>
+<button class="icon-btn edit" title="View Details" onclick="viewStudent(${student.id})">
+<i class="fa fa-eye"></i>
 </button>
 </td>
-
 </tr>
 `;
 
@@ -263,24 +398,41 @@ if(summaryEl){
 }
 
 /* search */
-function searchStudent(){
-
-let keyword=document.getElementById("searchInput").value.toLowerCase().trim();
-
-if(keyword===""){
-renderTable(studentsData);
-return;
+function getRouteName(student){
+    const routeId = Number(student.route_id) || student.route_id;
+    if(!routeId) return "-";
+    const route = routesData.find(r => Number(r.id) === routeId || r.id === student.route_id);
+    return route ? `${route.start_point} → ${route.end_point}` : "-";
 }
 
-let filtered=studentsData.filter(s=>
-(String(s.name||"").toLowerCase().includes(keyword) ||
-String(s.email||"").toLowerCase().includes(keyword) ||
-String(s.studentID||"").toLowerCase().includes(keyword) ||
-String(s.department||"").toLowerCase().includes(keyword) ||
-String(s.id||"").includes(keyword))
-);
+function getStopName(student){
+    const routeId = Number(student.route_id) || student.route_id;
+    const stopId = Number(student.stop_id) || student.stop_id;
+    if(!routeId || !stopId) return "-";
+    const routeStops = stopsData[routeId] || stopsData[Number(routeId)];
+    if(!Array.isArray(routeStops)) return "-";
+    const stop = routeStops.find(s => Number(s.id) === stopId || s.id === student.stop_id);
+    return stop ? stop.stop_name : "-";
+}
 
-renderTable(filtered, keyword);
+function searchStudent(){
+    let keyword=document.getElementById("searchInput").value.toLowerCase().trim();
+    if(keyword===""){
+        renderTable(studentsData);
+        return;
+    }
+
+    let filtered=studentsData.filter(s=>{
+        const routeName = getRouteName(s).toLowerCase();
+        return (
+            String(s.name||"").toLowerCase().includes(keyword) ||
+            String(s.studentID||"").toLowerCase().includes(keyword) ||
+            String(s.department||"").toLowerCase().includes(keyword) ||
+            routeName.includes(keyword)
+        );
+    });
+
+    renderTable(filtered, keyword);
 }
 
 /* enter search */
@@ -301,8 +453,46 @@ loadStudents();
 }
 
 /* update */
-function updateStudent(id){
-window.location.href=`update-student.html?id=${id}`;
+function viewStudent(id){
+    const student = studentsData.find(s => Number(s.id) === Number(id) || s.id === id);
+    if(!student) return;
+    const img = student.image && student.image.trim() !== ""
+        ? `https://acceptable-solace-production-06f3.up.railway.app${student.image}?t=${Date.now()}`
+        : "https://i.imgur.com/6VBx3io.png";
+    const routeName = getRouteName(student);
+    const stopName = getStopName(student);
+
+    document.getElementById('modalBody').innerHTML = `
+        <div class="profile-grid">
+            <div class="profile-card">
+                <img src="${img}" alt="Student Photo">
+            </div>
+            <div class="profile-info">
+                <p><strong>Reg. No:</strong> ${student.studentID || "-"}</p>
+                <p><strong>Name:</strong> ${student.name || "-"}</p>
+                <p><strong>Email:</strong> ${student.email || "-"}</p>
+                <p><strong>Department:</strong> ${student.department || "-"}</p>
+                <p><strong>Program:</strong> ${student.program || "-"}</p>
+                <p><strong>Contact:</strong> ${student.contact || "-"}</p>
+                <p><strong>Route:</strong> ${routeName}</p>
+                <p><strong>Stop:</strong> ${stopName}</p>
+            </div>
+        </div>
+    `;
+    const editBtn = document.getElementById('editProfileBtn');
+    const deleteBtn = document.getElementById('deleteProfileBtn');
+    editBtn.onclick = () => window.location.href = `update-student.html?id=${id}`;
+    deleteBtn.onclick = () => {
+        if(confirm('Delete this student record?')){
+            deleteStudent(id);
+            closeModal();
+        }
+    };
+    document.getElementById('detailModal').style.display = 'flex';
+}
+
+function closeModal(){
+    document.getElementById('detailModal').style.display = 'none';
 }
 
 document.addEventListener("DOMContentLoaded",loadStudents);
