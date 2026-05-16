@@ -19,7 +19,9 @@ font-family:'Poppins',sans-serif;
 
 body{
 display:flex;
-background:#eef3f8;
+min-height:100vh;
+background:#f5f7fb;
+color:#0f172a;
 }
 
 :root{
@@ -111,7 +113,7 @@ left:222px;
 .sidebar-backdrop{
 position:fixed;
 inset:0;
-background:rgba(15,23,42,0.24);
+background:transparent;
 z-index:900;
 opacity:0;
 pointer-events:none;
@@ -126,8 +128,96 @@ pointer-events:auto;
 .main{
 margin-left:var(--dashboard-sidebar-width);
 width:100%;
-padding:16px 20px 24px;
+padding:18px 24px 28px;
 transition:margin-left 0.25s ease;
+}
+
+.dashboard-overview{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:18px;
+margin-bottom:16px;
+padding:18px 20px;
+background:#ffffff;
+border:1px solid #e5e7eb;
+border-radius:12px;
+box-shadow:0 8px 24px rgba(15,23,42,0.045);
+}
+
+.overview-copy{
+min-width:0;
+}
+
+.overview-label{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:11px;
+font-weight:700;
+color:#2563eb;
+text-transform:uppercase;
+letter-spacing:0;
+margin-bottom:6px;
+}
+
+.overview-label i{
+width:22px;
+height:22px;
+border-radius:7px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#eff6ff;
+}
+
+.overview-copy h1{
+font-size:24px;
+line-height:1.2;
+font-weight:700;
+color:#0f172a;
+}
+
+.overview-copy p{
+margin-top:5px;
+font-size:12.5px;
+font-weight:500;
+color:#64748b;
+}
+
+.overview-actions{
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
+.overview-action{
+height:38px;
+display:inline-flex;
+align-items:center;
+gap:8px;
+padding:0 12px;
+border:1px solid #e2e8f0;
+border-radius:9px;
+background:#f8fafc;
+color:#334155;
+font-size:12px;
+font-weight:700;
+text-decoration:none;
+cursor:pointer;
+transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.overview-action:hover{
+background:#eff6ff;
+border-color:#bfdbfe;
+color:#1d4ed8;
+}
+
+.overview-action i{
+color:#2563eb;
 }
 
 body.admin-dashboard.sidebar-collapsed .main{
@@ -136,33 +226,35 @@ margin-left:0;
 
 .cards{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:12px;
+grid-template-columns:repeat(4,minmax(170px,1fr));
+gap:14px;
 align-items:stretch;
 }
 
 .card{
-background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
-padding:12px 14px;
-border-radius:10px;
-box-shadow:0 8px 22px rgba(15,23,42,0.055);
+background:#ffffff;
+padding:16px;
+border-radius:12px;
+box-shadow:0 8px 22px rgba(15,23,42,0.04);
 display:flex;
 justify-content:space-between;
-align-items:center;
-min-height:78px;
-border:1px solid rgba(226,232,240,0.95);
+align-items:flex-start;
+gap:14px;
+min-height:108px;
+border:1px solid #e5e7eb;
 position:relative;
 overflow:hidden;
-transition:transform 0.2s ease, box-shadow 0.2s ease;
+transition:box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .card::before{
 content:"";
 position:absolute;
-left:0;
+left:16px;
 top:0;
-right:0;
+width:38px;
 height:3px;
+border-radius:0 0 999px 999px;
 background:#3b82f6;
 }
 
@@ -171,22 +263,22 @@ background:#3b82f6;
 .card:nth-child(4)::before{background:#7c3aed;}
 
 .card:hover{
-transform:translateY(-2px);
-box-shadow:0 10px 22px rgba(15,23,42,0.09);
+border-color:#cbd5e1;
+box-shadow:0 12px 28px rgba(15,23,42,0.075);
 }
 
 .card h3{
 font-size:12px;
 font-weight:600;
 color:#475569;
-margin-bottom:7px;
+margin-bottom:10px;
 letter-spacing:0;
 }
 
 .card i{
-width:36px;
-height:36px;
-border-radius:8px;
+width:40px;
+height:40px;
+border-radius:10px;
 display:flex;
 align-items:center;
 justify-content:center;
@@ -202,16 +294,25 @@ box-shadow:inset 0 0 0 1px rgba(59,130,246,0.10);
 .card:nth-child(4) i{color:#7c3aed;background:#f3e8ff;box-shadow:inset 0 0 0 1px rgba(124,58,237,0.12);}
 
 .card p{
-font-size:20px;
+font-size:28px;
 font-weight:700;
 color:#0f172a;
-line-height:1;
+line-height:0.95;
+letter-spacing:0;
+}
+
+.card small{
+display:block;
+margin-top:10px;
+font-size:10.5px;
+font-weight:600;
+color:#64748b;
 }
 
 .dashboard-layout{
 display:grid;
-grid-template-columns:minmax(0,1fr) 245px;
-gap:14px;
+grid-template-columns:minmax(0,1fr) 310px;
+gap:16px;
 margin-top:16px;
 align-items:stretch;
 }
@@ -219,9 +320,9 @@ align-items:stretch;
 .map-panel,
 .status-panel{
 background:rgba(255,255,255,0.98);
-border:1px solid rgba(203,213,225,0.86);
+border:1px solid #e5e7eb;
 border-radius:12px;
-box-shadow:0 12px 30px rgba(15,23,42,0.075);
+box-shadow:0 8px 24px rgba(15,23,42,0.05);
 overflow:hidden;
 }
 
@@ -233,7 +334,7 @@ align-items:center;
 justify-content:space-between;
 gap:12px;
 border-bottom:1px solid rgba(226,232,240,0.95);
-background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+background:#ffffff;
 }
 
 .panel-header h2{
@@ -261,14 +362,14 @@ color:#64748b;
 }
 
 #adminMap{
-height:494px;
+height:500px;
 width:100%;
 }
 
 .status-panel{
 display:flex;
 flex-direction:column;
-min-height:494px;
+min-height:546px;
 }
 
 .map-panel{
@@ -277,7 +378,7 @@ position:relative;
 
 .map-status-pill{
 position:absolute;
-top:10px;
+top:64px;
 right:10px;
 z-index:500;
 font-size:10px;
@@ -334,7 +435,7 @@ display:flex;
 flex-direction:column;
 gap:8px;
 overflow:auto;
-max-height:384px;
+max-height:436px;
 }
 
 .bus-status-item{
@@ -409,10 +510,38 @@ padding:16px 12px;
 text-align:center;
 }
 
+@media(max-width:1180px){
+.cards{
+grid-template-columns:repeat(2,minmax(170px,1fr));
+}
+
+.dashboard-layout{
+grid-template-columns:1fr;
+}
+
+.status-panel{
+min-height:auto;
+}
+}
+
 @media(max-width:768px){
 .main{
 margin-left:0;
 padding:18px;
+}
+
+.dashboard-overview{
+align-items:flex-start;
+flex-direction:column;
+}
+
+.overview-actions{
+justify-content:flex-start;
+width:100%;
+}
+
+.overview-copy h1{
+font-size:21px;
 }
 
 body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle{
@@ -559,12 +688,27 @@ background:#ef4444 !important;
 
 <div class="main">
 
+<section class="dashboard-overview">
+    <div class="overview-copy">
+        <div class="overview-label"><i class="fa-solid fa-chart-simple"></i> Admin Overview</div>
+        <h1>Shuttle Operations Dashboard</h1>
+        <p>Monitor buses, drivers, students, and live route activity from one workspace.</p>
+    </div>
+    <div class="overview-actions">
+        <a class="overview-action" href="./student-data.html"><i class="fa-solid fa-user-graduate"></i> Students</a>
+        <a class="overview-action" href="./buses.html"><i class="fa-solid fa-bus"></i> Buses</a>
+        <a class="overview-action" href="./routes.html"><i class="fa-solid fa-route"></i> Routes</a>
+        <a class="overview-action" href="./driver.html"><i class="fa-solid fa-id-card"></i> Drivers</a>
+    </div>
+</section>
+
 <div class="cards">
 
     <div class="card">
         <div>
             <h3>Total Students</h3>
             <p id="totalStudents">0</p>
+            <small>Registered students</small>
         </div>
         <i class="fa fa-user-graduate"></i>
     </div>
@@ -573,6 +717,7 @@ background:#ef4444 !important;
         <div>
             <h3>Total Buses</h3>
             <p id="totalBuses">0</p>
+            <small>Fleet vehicles</small>
         </div>
         <i class="fa fa-bus"></i>
     </div>
@@ -581,6 +726,7 @@ background:#ef4444 !important;
         <div>
             <h3>Active Buses</h3>
             <p id="activeBuses">0</p>
+            <small>Currently online</small>
         </div>
         <i class="fa fa-signal"></i>
     </div>
@@ -589,6 +735,7 @@ background:#ef4444 !important;
         <div>
             <h3>Total Drivers</h3>
             <p id="totalDrivers">0</p>
+            <small>Driver records</small>
         </div>
         <i class="fa fa-id-card"></i>
     </div>
@@ -597,6 +744,10 @@ background:#ef4444 !important;
 
 <div class="dashboard-layout">
     <section class="map-panel">
+        <div class="panel-header">
+            <h2>Live Fleet Map</h2>
+            <span>Real-time tracking</span>
+        </div>
         <span class="map-status-pill" id="mapStatus">Syncing...</span>
         <div id="adminMap"></div>
     </section>
@@ -957,12 +1108,6 @@ fetch('header.html')
 .then(html => {
     const ph = document.getElementById('header-placeholder');
     ph.innerHTML = html;
-    ph.querySelectorAll('script').forEach(s=>{
-        const ns = document.createElement('script');
-        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
-        document.body.appendChild(ns);
-        document.body.removeChild(ns);
-    });
 });
 
 // stats

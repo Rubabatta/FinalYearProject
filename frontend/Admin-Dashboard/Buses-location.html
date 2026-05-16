@@ -17,7 +17,7 @@ background:#f4f6fb;
 
 /* SIDEBAR */
 .sidebar{
-width:280px;
+width:210px;
 background:#111827;
 color:white;
 padding:15px;
@@ -245,8 +245,8 @@ flex:1;
 
 <script>
 
-// set header offset for wider sidebar
-document.documentElement.style.setProperty('--sidebar-offset','280px');
+// set header offset for admin sidebar
+document.documentElement.style.setProperty('--sidebar-offset','210px');
 fetch('header.html').then(res=>res.text()).then(html=>{ const ph = document.getElementById('header-placeholder'); ph.innerHTML = html; ph.querySelectorAll('script').forEach(s=>{ const ns = document.createElement('script'); if(s.src) ns.src = s.src; else ns.textContent = s.textContent; document.body.appendChild(ns); document.body.removeChild(ns); }); });
 
 
