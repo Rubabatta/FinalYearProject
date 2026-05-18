@@ -12,8 +12,8 @@
             <span class="header-badge">0</span>
         </button>
         <a href="admin_profile.html" class="profile-link" title="Profile">
-            <i class="fa-solid fa-user"></i>
-            <span>Profile</span>
+            <span class="header-avatar" id="headerAvatar"><i class="fa-solid fa-user"></i><img id="headerAvatarImg" alt="Admin"></span>
+            <span id="headerProfileName">Profile</span>
         </a>
     </div>
 </div>
@@ -86,6 +86,30 @@
 .admin-header .header-btn i,
 .admin-header .profile-link i{
     font-size:16px;
+}
+.admin-header .header-avatar{
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:#eff6ff;
+    color:#2563eb;
+    flex-shrink:0;
+}
+.admin-header .header-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
+}
+.admin-header .header-avatar.has-image i{
+    display:none;
+}
+.admin-header .header-avatar.has-image img{
+    display:block;
 }
 .admin-header .header-badge{
     min-width:18px;
@@ -213,6 +237,25 @@
         document.addEventListener('DOMContentLoaded', initHeaderHelper);
     } else {
         initHeaderHelper();
+    }
+
+    try{
+        const profile = JSON.parse(localStorage.getItem('adminProfileData') || '{}');
+        const profileName = document.getElementById('headerProfileName');
+        const avatar = document.getElementById('headerAvatar');
+        const avatarImg = document.getElementById('headerAvatarImg');
+        const name = profile.name || localStorage.getItem('adminName');
+
+        if(profileName && name){
+            profileName.textContent = name.split(' ')[0] || 'Profile';
+        }
+
+        if(avatar && avatarImg && profile.photo){
+            avatarImg.src = profile.photo;
+            avatar.classList.add('has-image');
+        }
+    }catch(e){
+        console.error('Header profile sync error', e);
     }
 })();
 </script>

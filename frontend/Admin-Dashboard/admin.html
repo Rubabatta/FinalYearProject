@@ -1119,6 +1119,12 @@ fetch('header.html')
 .then(html => {
     const ph = document.getElementById('header-placeholder');
     ph.innerHTML = html;
+    ph.querySelectorAll('script').forEach(s=>{
+        const ns = document.createElement('script');
+        if(s.src) ns.src = s.src; else ns.textContent = s.textContent;
+        document.body.appendChild(ns);
+        document.body.removeChild(ns);
+    });
 });
 
 // stats
