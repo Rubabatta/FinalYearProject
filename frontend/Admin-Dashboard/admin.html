@@ -46,10 +46,16 @@ margin-bottom:16px;
 }
 
 body.admin-dashboard .logo-icon{
-width:42px;
-height:42px;
-border-radius:12px;
-font-size:18px;
+width:46px;
+height:46px;
+border-radius:14px;
+font-size:20px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#2563eb,#60a5fa);
+color:#ffffff;
+box-shadow:0 18px 36px rgba(37,99,235,0.22);
 }
 
 body.admin-dashboard .logo-section h2{
@@ -85,33 +91,59 @@ box-shadow:none;
 
 .sidebar-toggle{
 position:fixed;
-top:12px;
+top:16px;
 left:12px;
 z-index:1200;
-width:38px;
-height:38px;
+width:44px;
+height:44px;
 border:none;
-border-radius:10px;
+border-radius:14px;
 background:#ffffff;
 color:#0f172a;
 display:flex;
+flex-direction:column;
 align-items:center;
 justify-content:center;
-font-size:16px;
-cursor:pointer;
-box-shadow:0 8px 22px rgba(15,23,42,0.14);
+gap:5px;
+padding:8px;
+box-shadow:0 10px 24px rgba(15,23,42,0.14);
 border:1px solid #e2e8f0;
-transition:background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+transition:left 0.25s ease, background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sidebar-toggle:hover{
 background:#f8fafc;
 transform:translateY(-1px);
-box-shadow:0 12px 26px rgba(15,23,42,0.16);
+box-shadow:0 14px 30px rgba(15,23,42,0.16);
+}
+
+.sidebar-toggle .toggle-bar{
+display:block;
+width:20px;
+height:2.5px;
+border-radius:999px;
+background:#0f172a;
+transition:transform 0.25s ease, opacity 0.25s ease, width 0.25s ease;
+}
+
+.sidebar-toggle .toggle-bar:nth-child(2){
+width:14px;
 }
 
 body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle{
 left:222px;
+}
+
+body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle .toggle-bar:nth-child(1){
+transform: translateY(6px) rotate(45deg);
+}
+
+body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle .toggle-bar:nth-child(2){
+opacity:0;
+}
+
+body.admin-dashboard:not(.sidebar-collapsed) .sidebar-toggle .toggle-bar:nth-child(3){
+transform: translateY(-6px) rotate(-45deg);
 }
 
 .sidebar-backdrop{
@@ -166,13 +198,16 @@ margin-bottom:10px;
 }
 
 .overview-label i{
-width:22px;
-height:22px;
-border-radius:7px;
+width:26px;
+height:26px;
+border-radius:10px;
 display:flex;
 align-items:center;
 justify-content:center;
 background:#eff6ff;
+color:#2563eb;
+font-size:12px;
+box-shadow:inset 0 0 0 1px rgba(37,99,235,0.10);
 }
 
 .overview-copy h1{
@@ -222,7 +257,15 @@ transform:translateY(-1px);
 }
 
 .overview-action i{
+width:28px;
+height:28px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:10px;
+background:rgba(59,130,246,0.14);
 color:#2563eb;
+font-size:12px;
 }
 
 body.admin-dashboard.sidebar-collapsed .main{
@@ -281,13 +324,13 @@ letter-spacing:0.01em;
 }
 
 .card i{
-width:48px;
-height:48px;
-border-radius:14px;
+width:50px;
+height:50px;
+border-radius:16px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:18px;
+font-size:20px;
 color:#1d4ed8;
 background:rgba(59,130,246,0.14);
 flex-shrink:0;
@@ -492,7 +535,8 @@ text-overflow:ellipsis;
 
 .bus-name i{
 color:#2563eb;
-margin-right:6px;
+margin-right:8px;
+font-size:14px;
 }
 
 .status-badge{
@@ -690,7 +734,9 @@ background:#ef4444 !important;
 
 <div class="toast-container" id="toastContainer"></div>
 <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
-    <i class="fa-solid fa-ellipsis-vertical"></i>
+    <span class="toggle-bar"></span>
+    <span class="toggle-bar"></span>
+    <span class="toggle-bar"></span>
 </button>
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
@@ -701,7 +747,7 @@ background:#ef4444 !important;
 
 <section class="dashboard-overview">
     <div class="overview-copy">
-        <div class="overview-label"><i class="fa-solid fa-chart-simple"></i> Admin Overview</div>
+        <div class="overview-label"><i class="fa-solid fa-chart-line"></i> Admin Overview</div>
         <h1>Shuttle Operations Dashboard</h1>
         <p>Monitor buses, drivers, students, and live route activity from one workspace.</p>
     </div>
@@ -721,7 +767,7 @@ background:#ef4444 !important;
             <p id="totalStudents">0</p>
             <small>Registered students</small>
         </div>
-        <i class="fa fa-user-graduate"></i>
+        <i class="fa-solid fa-user-graduate"></i>
     </div>
 
     <div class="card">
@@ -730,7 +776,7 @@ background:#ef4444 !important;
             <p id="totalBuses">0</p>
             <small>Fleet vehicles</small>
         </div>
-        <i class="fa fa-bus"></i>
+        <i class="fa-solid fa-bus"></i>
     </div>
 
     <div class="card">
@@ -739,7 +785,7 @@ background:#ef4444 !important;
             <p id="activeBuses">0</p>
             <small>Currently online</small>
         </div>
-        <i class="fa fa-signal"></i>
+        <i class="fa-solid fa-signal"></i>
     </div>
 
     <div class="card">
@@ -748,7 +794,7 @@ background:#ef4444 !important;
             <p id="totalDrivers">0</p>
             <small>Driver records</small>
         </div>
-        <i class="fa fa-id-card"></i>
+        <i class="fa-solid fa-id-card"></i>
     </div>
 
 </div>
@@ -995,7 +1041,7 @@ function renderMonitor(items){
             div.className = `bus-status-item bus-${cssStatus}`;
             div.innerHTML = `
                 <div class="bus-status-top">
-                    <div class="bus-name"><i class="fa fa-bus"></i> ${item.busNumber}</div>
+                    <div class="bus-name"><i class="fa-solid fa-bus"></i> ${item.busNumber}</div>
                     <span class="status-badge status-${cssStatus}">${getStatusLabel(item.status)}</span>
                 </div>
                 <div class="bus-meta">${item.ageLabel}: ${item.ageText}</div>
